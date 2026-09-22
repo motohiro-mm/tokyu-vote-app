@@ -82,9 +82,9 @@ jobs:
 
       # SQLite なので DB サーバーの services 定義は不要。
       # storage/ 配下にファイルが作られるだけ。
+      # db:test:prepare は schema.rb を要求するが、rails_helper の
+      # maintain_test_schema! が test DB の用意と更新を行うため不要
       - name: Run tests
         env:
           RAILS_ENV: test
-        run: |
-          bin/rails db:test:prepare
-          bin/rspec
+        run: bin/rspec

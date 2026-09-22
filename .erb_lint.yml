@@ -3,6 +3,12 @@
 # https://github.com/Shopify/erb_lint
 EnableDefaultLinters: true
 
+# gem に同梱された ERB は対象外。CI は vendor/bundle に gem を展開するため
+# 指定しないと依存 gem のテンプレートまで検査してしまう
+exclude:
+  - 'vendor/**/*'
+  - 'tmp/**/*'
+
 linters:
   # ERB 内の式が HTML コンテキストとして安全か検査する（XSS 対策）
   ErbSafety:
