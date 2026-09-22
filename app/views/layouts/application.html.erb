@@ -24,6 +24,13 @@
   </head>
 
   <body>
+    <%# 本番と見分けがつかないと投票の取り違えが起きるため、staging 環境では必ず出す %>
+    <% if staging? %>
+      <div class="bg-red-600 text-white text-center py-1 text-sm">
+        staging 環境です。ここでの投票は集計されません。
+      </div>
+    <% end %>
+
     <main class="container mx-auto mt-28 px-5 flex">
       <%= yield %>
     </main>
