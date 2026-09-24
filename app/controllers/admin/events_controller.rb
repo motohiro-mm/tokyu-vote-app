@@ -19,12 +19,15 @@ class Admin::EventsController < Admin::BaseController
     end
   end
 
-  def show; end
+  def show
+    @rankings = rankings
+  end
 
   def update
     if @event.update(status_param)
       redirect_to admin_event_path(@event), notice: "ステータスを変更しました。"
     else
+      @rankings = rankings
       render :show, status: :unprocessable_entity
     end
   end
@@ -33,6 +36,19 @@ class Admin::EventsController < Admin::BaseController
 
   def set_event
     @event = Event.find(params[:id])
+  end
+
+  # 管理者は締切前でも結果を確認できる。部門ごとに単品王と合算王を並べる
+  def rankings
+    entry_rankings = Category.for_entries.order(:id).flat_map do |category|
+      [
+        [ "#{category.label}（単品王）", Ranking.singles(@event, category) ],
+        [ "#{category.label}（合算王）", Ranking.totals(@event, category) ]
+      ]
+    end
+
+    # LT王は登壇者を users と紐づけていないため合算王を出せない
+    entry_rankings << [ "#{Category.find_by_name!(:talk).label}（単品王）", Ranking.talks(@event) ]
   end
 
   def event_params
