@@ -1,0 +1,15 @@
+<% content_for :title, "エントリーする" %>
+<h1 class="text-xl font-bold">エントリーする</h1>
+
+<ul class="mt-6 space-y-3">
+  <% @categories.each do |category| %>
+    <li>
+      <%= link_to new_event_entry_path(@event, category: category.category_name),
+                  class: "block rounded border border-stone-200 bg-white px-5 py-4 hover:bg-stone-100" do %>
+        <span class="font-bold"><%= category.label %>に登録する</span>
+      <% end %>
+    </li>
+  <% end %>
+</ul>
+
+<%= link_to "戻る", event_path(@event), class: "mt-6 inline-block text-sm underline" %>
