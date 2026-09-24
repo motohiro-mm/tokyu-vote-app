@@ -1,0 +1,72 @@
+ja:
+  activerecord:
+    models:
+      user: ユーザー
+      event: イベント
+      category: 部門
+      entry: エントリー
+      talk: LT
+      vote: 投票
+      talk_vote: LT王への投票
+    attributes:
+      event:
+        title: タイトル
+        status: ステータス
+      entry:
+        user: 登録者
+        event: イベント
+        category: 部門
+        title: 作品名
+        description: 説明
+        image: 画像
+      talk:
+        event: イベント
+        user_name: 登壇者名
+        title: LTタイトル
+        status: ステータス
+      vote:
+        user: 投票者
+        entry: エントリー
+        comment: コメント
+      talk_vote:
+        user: 投票者
+        talk: LT
+        comment: コメント
+    errors:
+      models:
+        entry:
+          attributes:
+            category:
+              not_allowed_for_entry: にLT王は指定できません
+            image:
+              invalid_content_type: は JPEG / PNG / GIF のみ登録できます
+        talk:
+          attributes:
+            status:
+              not_allowed_after_voting_started: は投票開始後には変更できません
+        vote:
+          attributes:
+            base:
+              vote_limit_exceeded: 1つの部門に投票できるのは3票までです
+              already_voted: 同じエントリーには投票できません
+        talk_vote:
+          attributes:
+            base:
+              vote_limit_exceeded: LT王に投票できるのは3票までです
+              already_voted: 同じLTには投票できません
+  enums:
+    event:
+      status:
+        preparing: 準備中
+        open: 公開中
+        counting: 集計中
+        closed: 結果公開
+    category:
+      category_name:
+        food: 飯王
+        drink: 酒王
+        lt: LT王
+    talk:
+      status:
+        scheduled: 発表予定
+        canceled: キャンセル
