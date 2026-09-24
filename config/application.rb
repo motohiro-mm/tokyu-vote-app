@@ -38,5 +38,12 @@ module TokyuVoteApp
 
     # Don't generate system test files.
     config.generators.system_tests = nil
+
+    config.time_zone = "Asia/Tokyo"
+
+    # 画面もエラーメッセージも日本語のため。
+    # Rails 同梱の訳は en しかないので、ja に無いキーは en へ落とす
+    config.i18n.default_locale = :ja
+    config.i18n.fallbacks = [ :en ]
   end
 end
