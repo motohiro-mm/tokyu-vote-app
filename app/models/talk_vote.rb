@@ -5,9 +5,8 @@ class TalkVote < ApplicationRecord
 
   delegate :event, to: :talk
 
-  scope :cast_by, ->(user, event) {
-    joins(:talk).where(user_id: user, talks: { event_id: event })
-  }
+  scope :in_event, ->(event) { joins(:talk).where(talks: { event_id: event }) }
+  scope :cast_by, ->(user, event) { in_event(event).where(user_id: user) }
 
   def self.remaining_for(user, event)
     MAX_VOTES_PER_CATEGORY - cast_by(user, event).count

@@ -5,9 +5,10 @@ class Vote < ApplicationRecord
 
   delegate :event, :category, to: :entry
 
-  scope :cast_by, ->(user, event, category) {
-    joins(:entry).where(user_id: user, entries: { event_id: event, category_id: category })
+  scope :in_category, ->(event, category) {
+    joins(:entry).where(entries: { event_id: event, category_id: category })
   }
+  scope :cast_by, ->(user, event, category) { in_category(event, category).where(user_id: user) }
 
   def self.remaining_for(user, event, category)
     MAX_VOTES_PER_CATEGORY - cast_by(user, event, category).count
