@@ -8,8 +8,14 @@ RSpec.describe Category do
     expect { described_class.find_by_name!("beer") }.to raise_error(ActiveRecord::RecordNotFound)
   end
 
-  it "投票対象のモデルは部門によって違う" do
-    expect(create(:category, category_name: :food).votable_model).to eq Entry
-    expect(create(:category, category_name: :lt).votable_model).to eq Talk
+  it "部門はLT王を含む3つ" do
+    expect(described_class.category_names.keys).to eq %w[food drink talk]
+  end
+
+  it "for_entries はLT王を外す" do
+    food = create(:category, category_name: :food)
+    create(:category, category_name: :talk)
+
+    expect(described_class.for_entries).to contain_exactly(food)
   end
 end

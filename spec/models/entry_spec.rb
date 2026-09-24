@@ -2,7 +2,7 @@ require "rails_helper"
 
 RSpec.describe Entry do
   it "LT王の部門では登録できない" do
-    entry = build(:entry, category: create(:category, category_name: :lt))
+    entry = build(:entry, category: create(:category, category_name: :talk))
 
     expect(entry).to be_invalid
     expect(entry.errors[:category]).to include("にLT王は指定できません")
