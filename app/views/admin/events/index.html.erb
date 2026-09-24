@@ -1,0 +1,21 @@
+<% content_for :title, "イベント管理" %>
+<div class="flex items-baseline justify-between gap-4">
+  <h1 class="text-xl font-bold">イベント管理</h1>
+  <%= link_to "新規作成", new_admin_event_path, class: "rounded bg-stone-900 px-4 py-2 text-sm text-white" %>
+</div>
+
+<% if @events.empty? %>
+  <p class="mt-6 text-stone-600">イベントがありません。</p>
+<% else %>
+  <ul class="mt-6 space-y-3">
+    <% @events.each do |event| %>
+      <li>
+        <%= link_to admin_event_path(event),
+                    class: "flex items-center justify-between rounded border border-stone-200 bg-white px-5 py-4 hover:bg-stone-100" do %>
+          <span class="font-bold"><%= event.title %></span>
+          <span class="text-sm text-stone-500"><%= event.status_label %></span>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+<% end %>
