@@ -18,7 +18,16 @@ gem "stimulus-rails"
 gem "tailwindcss-rails"
 
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
-# gem "bcrypt", "~> 3.1.7"
+gem "bcrypt", "~> 3.1.7"
+
+# GitHub OAuth による認証
+gem "omniauth"
+gem "omniauth-github"
+# OmniAuth の CVE-2015-9284（GET によるログイン CSRF）対策
+gem "omniauth-rails_csrf_protection"
+
+# OGP / メタタグ
+gem "meta-tags"
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]
@@ -44,6 +53,10 @@ group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
 
+  # テストフレームワーク
+  gem "rspec-rails"
+  gem "factory_bot_rails"
+
   # Audits gems for known security defects (use config/bundler-audit.yml to ignore issues)
   gem "bundler-audit", require: false
 
@@ -57,4 +70,7 @@ end
 group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
+
+  # ERB のフォーマット・Lint
+  gem "erb_lint", require: false
 end

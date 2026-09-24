@@ -1,0 +1,35 @@
+---
+# ERB のスタイルチェック。既定のリンター一式を有効にする。
+# https://github.com/Shopify/erb_lint
+EnableDefaultLinters: true
+
+# gem に同梱された ERB は対象外。CI は vendor/bundle に gem を展開するため
+# 指定しないと依存 gem のテンプレートまで検査してしまう
+exclude:
+  - 'vendor/**/*'
+  - 'tmp/**/*'
+
+linters:
+  # ERB 内の式が HTML コンテキストとして安全か検査する（XSS 対策）
+  ErbSafety:
+    enabled: true
+  # ERB 内の Ruby コードを RuboCop で検査する
+  Rubocop:
+    enabled: true
+    rubocop_config:
+      inherit_gem:
+        rubocop-rails-omakase: rubocop.yml
+      # ERB の断片を単独のRubyファイルとして見るため、
+      # ファイル全体を前提にするルールは無効化する
+      Layout/InitialIndentation:
+        Enabled: false
+      Layout/TrailingEmptyLines:
+        Enabled: false
+      Layout/TrailingWhitespace:
+        Enabled: false
+      Naming/FileName:
+        Enabled: false
+      Style/FrozenStringLiteralComment:
+        Enabled: false
+      Lint/UselessAssignment:
+        Enabled: false
