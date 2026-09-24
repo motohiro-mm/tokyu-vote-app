@@ -2,6 +2,8 @@ require "rails_helper"
 
 RSpec.describe ApplicationController, type: :controller do
   controller do
+    skip_before_action :require_login
+
     def index
       render plain: "ok"
     end
