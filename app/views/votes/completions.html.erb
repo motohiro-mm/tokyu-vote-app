@@ -1,0 +1,17 @@
+<% content_for :title, "投票が完了しました" %>
+<h1 class="text-xl font-bold">投票が完了しました</h1>
+<p class="mt-2 text-stone-600">ご投票ありがとうございます。</p>
+
+<div class="mt-6 space-y-3">
+  <% if @remaining_votes.positive? %>
+    <%= link_to "続けて#{@category.label}に投票する（残り #{@remaining_votes} 票）",
+                event_entries_path(@event, category: @category.category_name),
+                class: "block rounded border border-stone-200 bg-white px-5 py-4 hover:bg-stone-100" %>
+  <% else %>
+    <p class="rounded bg-stone-100 px-4 py-3 text-sm text-stone-600">
+      <%= @category.label %>の3票分すべての投票が完了しました。
+    </p>
+  <% end %>
+  <%= link_to "TOPへ戻る", event_path(@event),
+              class: "block rounded border border-stone-200 bg-white px-5 py-4 hover:bg-stone-100" %>
+</div>

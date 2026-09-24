@@ -1,14 +1,36 @@
 Rails.application.routes.draw do
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+  root "home#index"
 
-  # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
-  # Can be used by load balancers and uptime monitors to verify that the app is live.
+  get "/login", to: "sessions#new"
+  delete "/logout", to: "sessions#destroy"
+
+  get "/terms", to: "pages#terms"
+  get "/privacy", to: "pages#privacy"
+
+  resources :events, only: [ :show ] do
+    # resources より先に宣言しないと、categories や completions が :id として吸われる
+    get "entries/categories", to: "entries#categories"
+    get "entries/completions", to: "entries#completions"
+    get "votes/categories", to: "votes#categories"
+    get "votes/completions", to: "votes#completions"
+    get "talk_votes/completions", to: "talk_votes#completions"
+
+    resources :entries, only: [ :index, :show, :new, :create ]
+    resources :votes, only: [ :create ]
+    resources :talks, only: [ :index, :show ]
+    resources :talk_votes, only: [ :create ]
+  end
+
+  namespace :admin do
+    resources :events, only: [ :index, :new, :create, :show, :update ]
+  end
+
+  # GitHub OAuth を入れるまでの代用。本番に出ないよう development と test でだけ有効にする
+  if Rails.env.local?
+    namespace :dev do
+      resources :sessions, only: [ :create ]
+    end
+  end
+
   get "up" => "rails/health#show", as: :rails_health_check
-
-  # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
-  # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
-  # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
-
-  # Defines the root path route ("/")
-  # root "posts#index"
 end

@@ -1,0 +1,39 @@
+<% content_for :title, "投票先を選ぶ" %>
+<h1 class="text-xl font-bold">投票先を選ぶ</h1>
+<p class="mt-2 text-sm text-stone-500"><%= @category.label %></p>
+
+<div class="mt-4 rounded border border-stone-200 bg-white px-5 py-4">
+  <p>投票できる数: <span class="font-bold"><%= @remaining_votes %></span> 票</p>
+
+  <% if @voted_talks.present? %>
+    <p class="mt-3 text-sm text-stone-600">あなたが投票したのは以下のLTです</p>
+    <ul class="mt-1 text-sm">
+      <% @voted_talks.each do |talk| %>
+        <li class="py-1"><%= talk.user_name %> さんの「<%= talk.title %>」</li>
+      <% end %>
+    </ul>
+  <% end %>
+</div>
+
+<% if @talks.empty? %>
+  <p class="mt-6 text-stone-600">LTが登録されていません。</p>
+<% else %>
+  <ul class="mt-6 space-y-3">
+    <% @talks.each do |talk| %>
+      <li class="flex items-center gap-4 rounded border border-stone-200 bg-white px-5 py-4">
+        <div class="min-w-0 flex-1">
+          <p class="font-bold break-words"><%= talk.title %></p>
+          <p class="text-sm text-stone-500"><%= talk.user_name %></p>
+        </div>
+        <% if @voted_talk_ids.include?(talk.id) %>
+          <span class="shrink-0 rounded bg-emerald-100 px-4 py-2 text-sm text-emerald-800">投票済み</span>
+        <% else %>
+          <%= link_to "選択する", event_talk_path(@event, talk),
+                      class: "shrink-0 rounded bg-stone-900 px-4 py-2 text-sm text-white" %>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+<% end %>
+
+<%= link_to "戻る", event_votes_categories_path(@event), class: "mt-6 inline-block text-sm underline" %>

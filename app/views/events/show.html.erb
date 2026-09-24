@@ -1,0 +1,21 @@
+<% content_for :title, @event.title %>
+<h1 class="text-xl font-bold"><%= @event.title %></h1>
+<p class="mt-3 text-stone-600">
+  このアプリでは飯王と酒王への参加登録と、
+  各部門（飯王・酒王・LT王）にそれぞれ最大3票まで投票できます。
+</p>
+
+<% if @event.closed? %>
+  <h2 class="mt-8 font-bold">投票結果</h2>
+  <p class="mt-2 rounded bg-stone-100 px-4 py-3 text-sm text-stone-600">
+    結果発表の画面はまだ実装されていません。
+  </p>
+<% else %>
+  <h2 class="mt-8 font-bold">エントリーする</h2>
+  <%= link_to "飯王・酒王に登録する", event_entries_categories_path(@event),
+              class: "mt-2 block rounded border border-stone-200 bg-white px-5 py-4 hover:bg-stone-100" %>
+
+  <h2 class="mt-6 font-bold">投票する</h2>
+  <%= link_to "部門を選んで投票する", event_votes_categories_path(@event),
+              class: "mt-2 block rounded border border-stone-200 bg-white px-5 py-4 hover:bg-stone-100" %>
+<% end %>

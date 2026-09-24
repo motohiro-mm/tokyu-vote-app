@@ -1,0 +1,21 @@
+<% content_for :title, "イベントを作成" %>
+<h1 class="text-xl font-bold">イベントを作成</h1>
+
+<%= form_with model: [ :admin, @event ], class: "mt-6 space-y-4" do |f| %>
+  <% if @event.errors.any? %>
+    <ul class="rounded bg-red-50 px-4 py-3 text-sm text-red-800">
+      <% @event.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+    </ul>
+  <% end %>
+
+  <div>
+    <%= f.label :title, class: "block text-sm font-bold" %>
+    <%= f.text_field :title, class: "mt-1 w-full rounded border border-stone-300 px-3 py-2" %>
+  </div>
+
+  <%= f.submit "作成する", class: "rounded bg-stone-900 px-4 py-2 text-sm text-white" %>
+<% end %>
+
+<%= link_to "一覧に戻る", admin_events_path, class: "mt-6 inline-block text-sm underline" %>

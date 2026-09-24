@@ -54,6 +54,11 @@ ja:
             base:
               vote_limit_exceeded: LT王に投票できるのは3票までです
               already_voted: 同じLTには投票できません
+  categories:
+    descriptions:
+      food: 持ち寄った料理に投票する
+      drink: 持ち寄ったお酒に投票する
+      talk: 当日のLTに投票する
   enums:
     event:
       status:
@@ -65,7 +70,7 @@ ja:
       category_name:
         food: 飯王
         drink: 酒王
-        lt: LT王
+        talk: LT王
     talk:
       status:
         scheduled: 発表予定
