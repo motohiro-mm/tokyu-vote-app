@@ -5,4 +5,12 @@ class Event < ApplicationRecord
   has_many :talks, dependent: :destroy
 
   validates :title, presence: true
+
+  def self.status_label(status)
+    I18n.t("enums.event.status.#{status}")
+  end
+
+  def status_label
+    self.class.status_label(status)
+  end
 end
