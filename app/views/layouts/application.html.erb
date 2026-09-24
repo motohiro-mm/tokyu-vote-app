@@ -1,29 +1,25 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
   <head>
-    <title><%= content_for(:title) || "Tokyu Vote App" %></title>
+    <title><%= content_for(:title) || "TokyuRubyVote" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="Tokyu Vote App">
+    <meta name="application-name" content="TokyuRubyVote">
     <meta name="mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
     <%= yield :head %>
 
-    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
-    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
-
     <link rel="icon" href="/icon.png" type="image/png">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icon.png">
 
-    <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
+  <body class="bg-stone-50 text-stone-900 min-h-screen">
     <%# 本番と見分けがつかないと投票の取り違えが起きるため、staging 環境では必ず出す %>
     <% if staging? %>
       <div class="bg-red-600 text-white text-center py-1 text-sm">
@@ -31,8 +27,17 @@
       </div>
     <% end %>
 
-    <main class="container mx-auto mt-28 px-5 flex">
+    <%= render "shared/header" %>
+
+    <main class="mx-auto w-full max-w-3xl px-5 py-8">
+      <%= render "shared/flash" %>
       <%= yield %>
     </main>
+
+    <footer class="mx-auto w-full max-w-3xl px-5 py-8 text-sm text-stone-500">
+      <%= link_to "利用規約", terms_path, class: "underline" %>
+      <span class="mx-1">/</span>
+      <%= link_to "プライバシーポリシー", privacy_path, class: "underline" %>
+    </footer>
   </body>
 </html>
