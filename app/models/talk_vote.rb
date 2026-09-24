@@ -1,10 +1,17 @@
-# LT王への投票。部門が LT ひとつしかないため、票数の上限はイベント単位で数える。
 class TalkVote < ApplicationRecord
   include Votable
 
   belongs_to :talk
 
   delegate :event, to: :talk
+
+  scope :cast_by, ->(user, event) {
+    joins(:talk).where(user_id: user, talks: { event_id: event })
+  }
+
+  def self.remaining_for(user, event)
+    MAX_VOTES_PER_CATEGORY - cast_by(user, event).count
+  end
 
   private
 
@@ -13,10 +20,7 @@ class TalkVote < ApplicationRecord
   end
 
   def votes_in_same_category
-    TalkVote.joins(:talk).where(
-      user_id: user_id,
-      talks: { event_id: talk.event_id }
-    )
+    TalkVote.cast_by(user_id, talk.event_id)
   end
 
   def votes_for_same_target

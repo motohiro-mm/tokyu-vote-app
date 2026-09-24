@@ -4,9 +4,22 @@ class EntriesController < ApplicationController
   before_action :set_category, except: :categories
   before_action :require_open_event, only: [ :new, :create ]
 
-  # 飯王・酒王のどちらに登録するかを選ぶ
   def categories
     @categories = Category.for_entries.order(:id)
+  end
+
+  def index
+    @entries = @event.entries.where(category: @category).includes(:user).with_attached_image.order(:id)
+    @voted_entries = Vote.cast_by(current_user, @event, @category).includes(entry: :user).map(&:entry)
+    @voted_entry_ids = @voted_entries.map(&:id)
+    @remaining_votes = Vote.remaining_for(current_user, @event, @category)
+  end
+
+  def show
+    @entry = @event.entries.where(category: @category).find(params[:id])
+    @vote = Vote.new(entry: @entry)
+    @voted = current_user.votes.exists?(entry: @entry)
+    @remaining_votes = Vote.remaining_for(current_user, @event, @category)
   end
 
   def new

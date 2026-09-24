@@ -1,0 +1,29 @@
+<% content_for :title, "投票する" %>
+<h1 class="text-xl font-bold">投票する</h1>
+
+<div class="mt-4 rounded border border-stone-200 bg-white p-5">
+  <p class="text-lg font-bold break-words">「<%= @talk.title %>」</p>
+  <p class="mt-1 text-stone-600"><%= @talk.user_name %></p>
+</div>
+
+<div class="mt-6 rounded border border-stone-200 bg-white p-5">
+  <% if @voted %>
+    <p class="text-sm text-emerald-800">このLTには投票済みです。</p>
+  <% elsif !@event.open? %>
+    <p class="text-sm text-stone-500">投票を受け付けていません。</p>
+  <% elsif @remaining_votes <= 0 %>
+    <p class="text-sm text-stone-500">LT王の票を使い切りました。</p>
+  <% else %>
+    <%= form_with model: @talk_vote, url: event_talk_votes_path(@event) do |f| %>
+      <%= f.hidden_field :talk_id, value: @talk.id %>
+      <%= f.label :comment, "コメントを記入する【任意】", class: "block text-sm font-bold" %>
+      <span class="text-xs text-stone-500">300文字まで</span>
+      <%= f.text_area :comment, rows: 5,
+                      class: "mt-2 w-full rounded border border-stone-300 px-3 py-2" %>
+      <%= f.submit "投票する（残り #{@remaining_votes} 票）",
+                   class: "mt-3 rounded bg-stone-900 px-4 py-2 text-sm text-white" %>
+    <% end %>
+  <% end %>
+</div>
+
+<%= link_to "戻る", event_talks_path(@event), class: "mt-6 inline-block text-sm underline" %>
