@@ -14,6 +14,24 @@ class Vote < ApplicationRecord
     MAX_VOTES_PER_CATEGORY - cast_by(user, event, category).count
   end
 
+  # 単品王。エントリー1件あたりの得票数で競う
+  def self.ranking_by_entry(event, category)
+    counts = in_category(event, category).group(:entry_id).count
+
+    ranked(Entry.where(id: counts.keys).includes(:user).map { |entry|
+      { id: entry.id, name: entry.user.name, title: entry.title, vote_count: counts.fetch(entry.id) }
+    })
+  end
+
+  # 合算王。同じ人が同じ部門に複数エントリーした分を合算して競う
+  def self.ranking_by_user(event, category)
+    counts = in_category(event, category).group("entries.user_id").count
+
+    ranked(User.where(id: counts.keys).map { |user|
+      { id: user.id, name: user.name, title: nil, vote_count: counts.fetch(user.id) }
+    })
+  end
+
   private
 
   def vote_target

@@ -42,13 +42,13 @@ class Admin::EventsController < Admin::BaseController
   def rankings
     entry_rankings = Category.for_entries.order(:id).flat_map do |category|
       [
-        [ "#{category.label}（単品王）", Ranking.singles(@event, category) ],
-        [ "#{category.label}（合算王）", Ranking.totals(@event, category) ]
+        [ "#{category.label}（単品王）", Vote.ranking_by_entry(@event, category) ],
+        [ "#{category.label}（合算王）", Vote.ranking_by_user(@event, category) ]
       ]
     end
 
     # LT王は登壇者を users と紐づけていないため合算王を出せない
-    entry_rankings << [ "#{Category.find_by_name!(:talk).label}（単品王）", Ranking.talks(@event) ]
+    entry_rankings << [ "#{Category.find_by_name!(:talk).label}（単品王）", TalkVote.ranking(@event) ]
   end
 
   def event_params
