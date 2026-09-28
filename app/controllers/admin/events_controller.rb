@@ -38,7 +38,6 @@ class Admin::EventsController < Admin::BaseController
     @event = Event.find(params[:id])
   end
 
-  # 部門ごとに単品王と合算王を並べる
   def rankings
     entry_rankings = Category.for_entries.order(:id).flat_map do |category|
       [

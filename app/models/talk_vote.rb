@@ -12,7 +12,6 @@ class TalkVote < ApplicationRecord
     MAX_VOTES_PER_CATEGORY - cast_by(user, event).count
   end
 
-  # LT王。登壇者は複数回登壇しないため単品王のみ
   def self.ranking(event)
     counts = in_event(event).group(:talk_id).count
 

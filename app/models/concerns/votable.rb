@@ -6,10 +6,8 @@ module Votable
   # 1ユーザーが1イベント × 1部門に投じられる票数の上限
   MAX_VOTES_PER_CATEGORY = 3
 
-  # 表彰するのは3位まで
   TOP_RANKS = 3
 
-  # 結果画面に出す順位表の1行。順位は保存せず、票から都度組み立てる
   RankingRow = Data.define(:rank, :name, :title, :vote_count)
 
   included do
