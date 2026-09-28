@@ -19,6 +19,7 @@ Rails.application.routes.draw do
     resources :votes, only: [ :create ]
     resources :talks, only: [ :index, :show ]
     resources :talk_votes, only: [ :create ]
+    resources :results, only: [ :index ]
   end
 
   namespace :admin do
