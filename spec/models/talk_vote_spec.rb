@@ -4,6 +4,11 @@ RSpec.describe TalkVote do
   let(:event) { create(:event, status: :open) }
   let(:user) { create(:user) }
 
+  # 1ユーザーが投じられるのは3票までなので、票数の分だけ投票者を作る
+  def vote_for_talk(talk, count)
+    count.times { create(:talk_vote, user: create(:user), talk: talk) }
+  end
+
   it "同じLTには2票目を投じられない" do
     talk = create(:talk, event: event)
     create(:talk_vote, user: user, talk: talk)
@@ -49,5 +54,24 @@ RSpec.describe TalkVote do
     duplicate = build(:talk_vote, user: user, talk: talk)
 
     expect { duplicate.save(validate: false) }.to raise_error(ActiveRecord::RecordNotUnique)
+  end
+
+  describe ".ranking" do
+    it "LT単位の得票数を多い順に返す" do
+      talk = create(:talk, event: event, user_name: "登壇者A", title: "Ruby の話")
+      vote_for_talk(talk, 2)
+      vote_for_talk(create(:talk, event: event), 1)
+
+      rows = described_class.ranking(event)
+
+      expect(rows.map(&:rank)).to eq [ 1, 2 ]
+      expect(rows.first).to have_attributes(name: "登壇者A", title: "Ruby の話", vote_count: 2)
+    end
+
+    it "他のイベントの票は数えない" do
+      vote_for_talk(create(:talk, event: create(:event)), 2)
+
+      expect(described_class.ranking(event)).to be_empty
+    end
   end
 end

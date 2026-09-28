@@ -6,12 +6,38 @@ module Votable
   # 1ユーザーが1イベント × 1部門に投じられる票数の上限
   MAX_VOTES_PER_CATEGORY = 3
 
+  TOP_RANKS = 3
+
+  RankingRow = Data.define(:rank, :name, :title, :vote_count)
+
   included do
     belongs_to :user
 
     validates :comment, length: { maximum: 300 }
     validate :vote_limit_not_exceeded, on: :create
     validate :not_voted_for_same_target, on: :create
+  end
+
+  class_methods do
+    private
+
+    # 同票は同じ順位にし、次の順位はその分だけ飛ばす（1位が2件なら次は3位）。
+    # 3位が同票で並んだときは4件以上になっても全件載せる
+    def ranked(sources)
+      rank = 0
+      previous_count = nil
+
+      # 同票の並び順が実行のたびに変わらないよう、得票数の次は id で並べる
+      sources.sort_by { |source| [ -source[:vote_count], source[:id] ] }
+             .each_with_index
+             .filter_map do |source, index|
+        rank = index + 1 unless source[:vote_count] == previous_count
+        previous_count = source[:vote_count]
+        next if rank > TOP_RANKS
+
+        RankingRow.new(rank: rank, name: source[:name], title: source[:title], vote_count: source[:vote_count])
+      end
+    end
   end
 
   private

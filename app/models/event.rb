@@ -13,4 +13,9 @@ class Event < ApplicationRecord
   def status_label
     self.class.status_label(status)
   end
+
+  # 途中経過が見えると投票が偏りかねないので、管理者にも受付を締め切るまで集計を見せない
+  def counting_started?
+    counting? || closed?
+  end
 end
