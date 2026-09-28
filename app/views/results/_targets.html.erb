@@ -1,0 +1,30 @@
+<%# 静的書き出しでは画像の置き場所が変わるため、画像の URL は呼び出し側から image_src で受け取る %>
+<% if targets.empty? %>
+  <p class="mt-2 text-sm text-stone-500">エントリーはありませんでした。</p>
+<% else %>
+  <ul class="mt-2 space-y-3">
+    <% targets.each do |target| %>
+      <li class="rounded border border-stone-200 bg-white p-5">
+        <div class="flex items-center gap-4">
+          <% if target.image %>
+            <%= image_tag image_src.call(target.image), alt: target.title, class: "h-16 w-16 shrink-0 rounded object-cover" %>
+          <% end %>
+          <div class="min-w-0 flex-1">
+            <p class="font-bold break-words"><%= target.title %></p>
+            <p class="text-sm text-stone-500"><%= target.name %></p>
+          </div>
+        </div>
+
+        <% if target.comments.empty? %>
+          <p class="mt-3 text-sm text-stone-500">コメントはありません。</p>
+        <% else %>
+          <ul class="mt-3 space-y-2">
+            <% target.comments.each do |comment| %>
+              <li class="whitespace-pre-wrap break-words rounded bg-stone-50 px-3 py-2 text-sm"><%= comment %></li>
+            <% end %>
+          </ul>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+<% end %>
