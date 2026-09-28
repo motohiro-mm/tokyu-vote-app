@@ -1,0 +1,7 @@
+<% content_for :title, "#{@category.label}の結果" %>
+<h1 class="text-xl font-bold"><%= @category.label %>の結果</h1>
+<p class="mt-2 text-sm text-stone-500"><%= @event.title %></p>
+
+<%= render "results/result", result: @result, image_src: ->(image) { "#{@root}#{StaticExport.image_path(image)}" } %>
+
+<%= link_to "戻る", "index.html", class: "mt-6 inline-block text-sm underline" %>

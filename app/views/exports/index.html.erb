@@ -1,0 +1,15 @@
+<% content_for :title, "投票結果" %>
+<h1 class="text-xl font-bold">投票結果</h1>
+
+<% if @events.empty? %>
+  <p class="mt-6 text-stone-600">公開された結果はありません。</p>
+<% else %>
+  <ul class="mt-6 space-y-3">
+    <% @events.each do |event| %>
+      <li>
+        <%= link_to event.title, "events/#{event.id}/index.html",
+                    class: "block rounded border border-stone-200 bg-white px-5 py-4 font-bold hover:bg-stone-100" %>
+      </li>
+    <% end %>
+  </ul>
+<% end %>
