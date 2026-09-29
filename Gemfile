@@ -42,7 +42,7 @@ gem "solid_cable"
 
 # json 3 は JSON.parse の options を位置引数で受け取らなくなり、
 # activesupport 8.1.3 のセッション復号が壊れるため 2 系に固定する
-gem "json", "< 3"
+gem "json", "< 4"
 
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
