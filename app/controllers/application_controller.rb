@@ -1,8 +1,7 @@
 class ApplicationController < ActionController::Base
-  # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
+  # importmap と CSS nesting を使うため、対応していない古いブラウザは最初から断る
   allow_browser versions: :modern
 
-  # Changes to the importmap will invalidate the etag for HTML responses
   stale_when_importmap_changes
 
   # 検証環境も本番と同じ RAILS_ENV=production で動かすため、環境名ではなく

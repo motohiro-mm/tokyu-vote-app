@@ -1,5 +1,5 @@
-# GitHub OAuth を入れるまで、画面を確認するためにユーザーを切り替える。
-# routes.rb で development のときだけ有効にしている。
+# GitHub を設定していない手元の環境で、ユーザーを切り替えて画面を確認する。
+# routes.rb で development と test のときだけ有効にしている。
 class Dev::SessionsController < ApplicationController
   skip_before_action :require_login
 
