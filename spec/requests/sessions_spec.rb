@@ -7,7 +7,11 @@ RSpec.describe "ログイン", type: :request do
     follow_redirect!
   end
 
-  it "ログイン画面に GitHub のボタンを出す" do
+  it "GitHub を設定していればログイン画面にボタンを出す" do
+    allow(ENV).to receive(:[]).and_call_original
+    allow(ENV).to receive(:[]).with("GITHUB_CLIENT_ID").and_return("id")
+    allow(ENV).to receive(:[]).with("GITHUB_CLIENT_SECRET").and_return("secret")
+
     get login_path
 
     expect(response).to have_http_status(:ok)
