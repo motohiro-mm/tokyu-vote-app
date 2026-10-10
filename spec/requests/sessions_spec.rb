@@ -7,6 +7,24 @@ RSpec.describe "ログイン", type: :request do
     follow_redirect!
   end
 
+  it "GitHub を設定していればログイン画面にボタンを出す" do
+    allow(ENV).to receive(:[]).and_call_original
+    allow(ENV).to receive(:[]).with("GITHUB_CLIENT_ID").and_return("id")
+    allow(ENV).to receive(:[]).with("GITHUB_CLIENT_SECRET").and_return("secret")
+
+    get login_path
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("GitHub でログインする")
+  end
+
+  it "GitHub を設定していなければボタンを出さず、設定が要ることを知らせる" do
+    get login_path
+
+    expect(response.body).not_to include("GitHub でログインする")
+    expect(response.body).to include("GitHub ログインは設定されていません")
+  end
+
   it "GitHub で初めてログインするとユーザーを作り、イベント画面へ送る" do
     expect { github_login }.to change(User, :count).by(1)
 
