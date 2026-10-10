@@ -1,0 +1,18 @@
+# 本番環境
+service: tokyu_vote_app
+
+servers:
+  web:
+    - SERVER_IP
+
+proxy:
+  ssl: true
+  host: vote.example.com
+
+volumes:
+  - "tokyu_vote_app_storage:/rails/storage"
+
+env:
+  clear:
+    # Host ヘッダー検証（config/environments/production.rb）
+    APP_HOST: vote.example.com
