@@ -61,7 +61,8 @@ class StaticExport
     Rails.application.assets.load_path.assets.each do |asset|
       next unless asset.logical_path.extname == ".css"
 
-      File.write(@out.join("assets", asset.logical_path), asset.content)
+      # ロケールが UTF-8 でない環境（CI など）で File.write が変換に失敗するため、バイト列のまま書く
+      File.binwrite(@out.join("assets", asset.logical_path), asset.content)
     end
     %w[icon.png icon.svg].each { |name| FileUtils.cp(Rails.public_path.join(name), @out.join(name)) }
   end
