@@ -4,7 +4,7 @@ service: tokyu_vote_app_staging
 
 servers:
   web:
-    - SERVER_IP
+    - 160.251.167.83
 
 # kamal-proxy がホスト名で振り分け、Let's Encrypt の証明書を自動取得する
 proxy:

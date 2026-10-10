@@ -3,7 +3,7 @@ service: tokyu_vote_app
 
 servers:
   web:
-    - SERVER_IP
+    - 160.251.167.83
 
 proxy:
   ssl: true
