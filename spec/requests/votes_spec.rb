@@ -39,6 +39,13 @@ RSpec.describe "投票", type: :request do
     expect { cast(create(:entry, event: event, category: drink)) }.to change(Vote, :count).by(1)
   end
 
+  it "別のイベントのエントリーには投票できない" do
+    entry = create(:entry, event: create(:event, status: :open), category: food)
+
+    expect { cast(entry) }.not_to change(Vote, :count)
+    expect(response).to have_http_status(:not_found)
+  end
+
   it "締切後は投票できない" do
     entry = create(:entry, event: event, category: food)
     event.counting!

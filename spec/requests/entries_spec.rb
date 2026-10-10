@@ -21,6 +21,15 @@ RSpec.describe "エントリー", type: :request do
     expect(response.body).to include("登録が完了しました")
   end
 
+  it "作品名が空なら登録できず、フォームに戻す" do
+    create(:entry, event: event, category: food, user: user, title: "唐揚げ")
+
+    post event_entries_path(event, category: "food"), params: { entry: { title: "" } }
+
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(response.body).to include("作品名を入力してください").and include("唐揚げ")
+  end
+
   it "部門選択にはLT王を並べない" do
     create(:category, category_name: :talk)
 

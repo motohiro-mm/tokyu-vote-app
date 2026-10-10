@@ -29,6 +29,18 @@ RSpec.describe "LT候補の管理", type: :request do
     expect(response.body).to include("LTタイトルを入力してください")
   end
 
+  it "編集画面を出し、登壇者名とタイトルを変えられる" do
+    talk = create(:talk, event: event, title: "Ruby の話")
+
+    get edit_admin_event_talk_path(event, talk)
+    expect(response.body).to include("Ruby の話")
+
+    patch admin_event_talk_path(event, talk), params: { talk: { user_name: "とうだんしゃ", title: "Rails の話" } }
+
+    expect(response).to redirect_to admin_event_path(event)
+    expect(talk.reload).to have_attributes(user_name: "とうだんしゃ", title: "Rails の話")
+  end
+
   it "準備中のあいだはキャンセルにできる" do
     talk = create(:talk, event: event)
 

@@ -4,12 +4,40 @@ RSpec.describe "イベント管理", type: :request do
   let(:admin) { create(:user, :admin) }
   let(:event) { create(:event) }
 
+  it "管理者はイベントを作成できる" do
+    sign_in(admin)
+
+    expect {
+      post admin_events_path, params: { event: { title: "TokyuRuby会議99" } }
+    }.to change(Event, :count).by(1)
+    expect(response).to redirect_to admin_event_path(Event.last)
+    expect(Event.last).to be_preparing
+  end
+
+  it "タイトルが空なら作成できず、フォームに戻す" do
+    sign_in(admin)
+
+    post admin_events_path, params: { event: { title: "" } }
+
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(response.body).to include("タイトルを入力してください")
+  end
+
   it "管理者はステータスを変更できる" do
     sign_in(admin)
 
     patch admin_event_path(event), params: { event: { status: "open" } }
 
     expect(event.reload).to be_open
+  end
+
+  it "存在しないステータスには変更できない" do
+    sign_in(admin)
+
+    patch admin_event_path(event), params: { event: { status: "archived" } }
+
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(event.reload).to be_preparing
   end
 
   it "管理者は集計中になると集計を確認できる" do
