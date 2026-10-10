@@ -81,6 +81,10 @@ group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
 
+  # 手元の GitHub OAuth などの環境変数を .env から読む（.env* は gitignore 済み）。
+  # test に入れると手元の .env の値がテストに漏れるため development だけにする
+  gem "dotenv-rails"
+
   # ERB のフォーマット・Lint
   gem "erb_lint", require: false
 end
