@@ -23,7 +23,10 @@ Rails.application.routes.draw do
   end
 
   namespace :admin do
-    resources :events, only: [ :index, :new, :create, :show, :update ]
+    resources :events, only: [ :index, :new, :create, :show, :update ] do
+      resources :talks, only: [ :new, :create, :edit, :update ]
+      resources :talk_imports, only: [ :create ]
+    end
   end
 
   # GitHub OAuth を入れるまでの代用。本番に出ないよう development と test でだけ有効にする
