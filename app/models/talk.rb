@@ -14,6 +14,14 @@ class Talk < ApplicationRecord
   validates :title, presence: true
   validate :status_changeable_only_before_voting, if: :status_changed?
 
+  def self.status_label(status)
+    I18n.t("enums.talk.status.#{status}")
+  end
+
+  def status_label
+    self.class.status_label(status)
+  end
+
   private
 
   # 票が入った後のキャンセルは票の扱いが決まっていないため、投票開始前しか認めない

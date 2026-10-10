@@ -20,6 +20,7 @@ class Admin::EventsController < Admin::BaseController
   end
 
   def show
+    @talks = talks
     @rankings = rankings if @event.counting_started?
   end
 
@@ -27,6 +28,7 @@ class Admin::EventsController < Admin::BaseController
     if @event.update(status_param)
       redirect_to admin_event_path(@event), notice: "ステータスを変更しました。"
     else
+      @talks = talks
       @rankings = rankings if @event.counting_started?
       render :show, status: :unprocessable_entity
     end
@@ -36,6 +38,10 @@ class Admin::EventsController < Admin::BaseController
 
   def set_event
     @event = Event.find(params[:id])
+  end
+
+  def talks
+    @event.talks.order(:id)
   end
 
   def rankings
