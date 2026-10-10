@@ -55,8 +55,10 @@ gem "thruster", require: false
 
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
 gem "image_processing", "~> 2.2"
-# image_processing 2 はバックエンドを依存に含めなくなったため、使う ruby-vips を明示する
-gem "ruby-vips", "~> 2.0"
+# image_processing 2 はバックエンドを依存に含めなくなったため、使う ruby-vips を明示する。
+# 起動時に読み込むと libvips の無い環境（手元や CI）で落ちるので、variant を作るときに
+# Active Storage が読み込むのに任せる
+gem "ruby-vips", "~> 2.0", require: false
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
