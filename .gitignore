@@ -39,3 +39,6 @@
 
 # Claude Code のスキル（各自のローカル設定）
 /.claude/skills/
+
+# 静的書き出しの出力先
+/public_export/

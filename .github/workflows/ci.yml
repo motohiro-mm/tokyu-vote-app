@@ -83,7 +83,13 @@ jobs:
       # SQLite なので DB サーバーの services 定義は不要。
       # storage/ 配下にファイルが作られるだけ。
       # db:test:prepare は schema.rb を要求するが、rails_helper の
-      # maintain_test_schema! が test DB の用意と更新を行うため不要
+      # maintain_test_schema! が test DB の用意と更新を行うため不要。
+      #
+      # app/assets/builds/ は gitignore されているため、静的書き出しのテストが
+      # 参照する tailwind.css を CI でも作る
+      - name: Build Tailwind CSS
+        run: bin/rails tailwindcss:build
+
       - name: Run tests
         env:
           RAILS_ENV: test

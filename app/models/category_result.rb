@@ -21,7 +21,7 @@ class CategoryResult
   end
 
   def targets
-    category.talk? ? talk_targets : entry_targets
+    @targets ||= category.talk? ? talk_targets : entry_targets
   end
 
   private
