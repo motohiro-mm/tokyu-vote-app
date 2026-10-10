@@ -9,7 +9,7 @@ servers:
 # kamal-proxy がホスト名で振り分け、Let's Encrypt の証明書を自動取得する
 proxy:
   ssl: true
-  host: staging.vote.example.com
+  host: vote-staging.gohansummit.com
 
 volumes:
   - "tokyu_vote_app_staging_storage:/rails/storage"
@@ -25,4 +25,4 @@ env:
     # Basic 認証と noindex を付ける（ApplicationController 参照）
     APP_ENV_LABEL: staging
     # Host ヘッダー検証（config/environments/production.rb）
-    APP_HOST: staging.vote.example.com
+    APP_HOST: vote-staging.gohansummit.com

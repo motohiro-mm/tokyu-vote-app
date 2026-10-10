@@ -7,7 +7,7 @@ servers:
 
 proxy:
   ssl: true
-  host: vote.example.com
+  host: vote.gohansummit.com
 
 volumes:
   - "tokyu_vote_app_storage:/rails/storage"
@@ -15,4 +15,4 @@ volumes:
 env:
   clear:
     # Host ヘッダー検証（config/environments/production.rb）
-    APP_HOST: vote.example.com
+    APP_HOST: vote.gohansummit.com
