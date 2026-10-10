@@ -25,7 +25,7 @@
 
     <div class="mt-4 space-y-6">
       <% @rankings.each do |title, rows| %>
-        <%= render "ranking", title: title, rows: rows %>
+        <%= render "results/ranking", title: title, rows: rows %>
       <% end %>
     </div>
   <% else %>

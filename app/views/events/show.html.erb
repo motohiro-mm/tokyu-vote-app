@@ -7,9 +7,14 @@
 
 <% if @event.closed? %>
   <h2 class="mt-8 font-bold">投票結果</h2>
-  <p class="mt-2 rounded bg-stone-100 px-4 py-3 text-sm text-stone-600">
-    結果発表の画面はまだ実装されていません。
-  </p>
+  <ul class="mt-2 space-y-3">
+    <% @categories.each do |category| %>
+      <li>
+        <%= link_to "#{category.label}の結果を見る", event_results_path(@event, category: category.category_name),
+                    class: "block rounded border border-stone-200 bg-white px-5 py-4 hover:bg-stone-100" %>
+      </li>
+    <% end %>
+  </ul>
 <% else %>
   <h2 class="mt-8 font-bold">エントリーする</h2>
   <%= link_to "飯王・酒王に登録する", event_entries_categories_path(@event),
