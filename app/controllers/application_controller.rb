@@ -33,8 +33,20 @@ class ApplicationController < ActionController::Base
     response.set_header("X-Robots-Tag", "noindex, nofollow")
   end
 
+  # session の user_id だけでなく、ログイン時に発行したトークンも照合する。
+  # users.session_digest を消せばそのユーザーをサーバー側から強制ログアウトできる
   def current_user
-    @current_user ||= User.find_by(id: session[:user_id])
+    return @current_user if defined?(@current_user)
+
+    user = User.find_by(id: session[:user_id])
+    @current_user = user if user&.authenticated?(session[:token])
+  end
+
+  # セッション固定攻撃を防ぐため、ログインのたびにセッションを作り直す
+  def log_in(user)
+    reset_session
+    session[:user_id] = user.id
+    session[:token] = user.start_session!
   end
 
   def require_login

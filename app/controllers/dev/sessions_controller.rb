@@ -4,8 +4,7 @@ class Dev::SessionsController < ApplicationController
   skip_before_action :require_login
 
   def create
-    reset_session
-    session[:user_id] = User.find(params[:user_id]).id
+    log_in(User.find(params[:user_id]))
     redirect_to root_path
   end
 end
