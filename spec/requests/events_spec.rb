@@ -67,8 +67,10 @@ RSpec.describe "イベント画面", type: :request do
 
     get terms_path
     expect(response).to have_http_status(:ok)
+    expect(response.body).to include("第1条（適用）", "第10条（準拠法）")
 
     get privacy_path
     expect(response).to have_http_status(:ok)
+    expect(response.body).to include("1. 取得する情報", "GitHubアカウントの識別子（ユーザーID）")
   end
 end
