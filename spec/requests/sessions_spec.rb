@@ -25,6 +25,26 @@ RSpec.describe "ログイン", type: :request do
     expect(response.body).to include("GitHub ログインは設定されていません")
   end
 
+  it "開発用ログインでもログインできる" do
+    event = create(:event, status: :open)
+
+    post dev_sessions_path(user_id: create(:user).id)
+    get event_path(event)
+
+    expect(response).to have_http_status(:ok)
+  end
+
+  it "検証環境では赤いバナーを出す" do
+    allow(ENV).to receive(:[]).and_call_original
+    allow(ENV).to receive(:[]).with("APP_ENV_LABEL").and_return("staging")
+    allow(ENV).to receive(:fetch).and_call_original
+    allow(ENV).to receive(:fetch).with("STAGING_BASIC_AUTH_PASSWORD").and_return("secret")
+
+    get login_path, headers: { "HTTP_AUTHORIZATION" => ActionController::HttpAuthentication::Basic.encode_credentials("staging", "secret") }
+
+    expect(response.body).to include("staging 環境です。ここでの投票は集計されません。")
+  end
+
   it "GitHub で初めてログインするとユーザーを作り、イベント画面へ送る" do
     expect { github_login }.to change(User, :count).by(1)
 

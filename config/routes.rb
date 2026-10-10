@@ -32,7 +32,7 @@ Rails.application.routes.draw do
     end
   end
 
-  # GitHub OAuth を入れるまでの代用。本番に出ないよう development と test でだけ有効にする
+  # GitHub を設定していない手元の環境でのユーザー切り替え。本番に出ないよう development と test でだけ有効にする
   if Rails.env.local?
     namespace :dev do
       resources :sessions, only: [ :create ]

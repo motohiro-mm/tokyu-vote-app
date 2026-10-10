@@ -37,6 +37,13 @@ RSpec.describe "LT王への投票", type: :request do
     expect(response).to have_http_status(:not_found)
   end
 
+  it "別のイベントのLTには投票できない" do
+    talk = create(:talk, event: create(:event, status: :open))
+
+    expect { cast(talk) }.not_to change(TalkVote, :count)
+    expect(response).to have_http_status(:not_found)
+  end
+
   it "締切後は投票できない" do
     talk = create(:talk, event: event)
     event.counting!
