@@ -23,6 +23,25 @@ RSpec.describe Entry do
     expect(entry.errors[:image]).to include("は JPEG / PNG / GIF のみ登録できます")
   end
 
+  it "上限を超える大きさの画像は登録できない" do
+    entry = build(:entry)
+    entry.image.attach(
+      io: StringIO.new("a" * (Entry::IMAGE_MAX_SIZE + 1)), filename: "entry.jpg", content_type: "image/jpeg"
+    )
+
+    expect(entry).to be_invalid
+    expect(entry.errors[:image]).to include("は 20MB 以下にしてください")
+  end
+
+  it "上限ちょうどの大きさの画像は登録できる" do
+    entry = build(:entry)
+    entry.image.attach(
+      io: StringIO.new("a" * Entry::IMAGE_MAX_SIZE), filename: "entry.jpg", content_type: "image/jpeg"
+    )
+
+    expect(entry.errors[:image]).to be_empty
+  end
+
   it "画像は任意" do
     expect(build(:entry)).to be_valid
   end

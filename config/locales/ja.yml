@@ -40,6 +40,7 @@ ja:
               not_allowed_for_entry: にLT王は指定できません
             image:
               invalid_content_type: は JPEG / PNG / GIF のみ登録できます
+              too_large: は %{max}MB 以下にしてください
         talk:
           attributes:
             status:
