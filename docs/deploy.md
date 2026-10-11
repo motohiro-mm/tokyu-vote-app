@@ -93,6 +93,12 @@ Actions から最初に push すれば自動で紐づく。手元の PAT で先�
 
 サーバーの初期化（Docker と kamal-proxy のインストール、証明書の取得）は `bin/kamal setup -d <環境>` を手元から一度行う。2 回目以降は Actions でよい。
 
+## ログの見方
+
+- 「デプロイする」に大量に出る `DEBUG` 行は、Kamal が流す Docker のビルドログ（apt-get や bundle install の進捗）。手元で `bin/kamal deploy` したときと同じもので、異常ではない
+- 各ステップ冒頭の `env:` に Secrets の名前が並ぶのは GitHub Actions の仕様。値は `***` に置き換えられる
+- ログは実行ページ右上の「...」→ Delete all logs で消せる。放置しても 90 日で自動的に消える
+
 ## よくある失敗
 
 | 症状 | 原因 | 対処 |
