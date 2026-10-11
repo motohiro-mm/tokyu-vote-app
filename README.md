@@ -1,24 +1,33 @@
-# README
+# tokyu-vote-app
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+TokyuRuby会議の投票アプリ。参加者が持ち寄った料理（飯王）・酒（酒王）と LT（LT王）に投票し、管理者が集計して結果を公開する。
 
-Things you may want to cover:
+## 動かすのに必要なもの
 
-* Ruby version
+- Ruby（バージョンは `.ruby-version`）
+- SQLite 3
+- libvips（画像のアップロードに使う。macOS は `brew install vips`）
 
-* System dependencies
+## セットアップ
 
-* Configuration
+```bash
+bin/setup --skip-server   # gem のインストールと DB の準備
+bin/rails demo:setup      # 動作確認用のイベントとユーザーを作る（結果発表まで見るなら demo:results）
+bin/dev                   # 開発サーバー。http://localhost:3000/login でユーザーを選んでログインする
+```
 
-* Database creation
+GitHub ログインを手元で試す場合は `.env` に `GITHUB_CLIENT_ID` と `GITHUB_CLIENT_SECRET` を置く（`.env*` は gitignore 済み）。設定しなくても `/login` の開発用ユーザー切り替えで動く。
 
-* Database initialization
+## テストと静的解析
 
-* How to run the test suite
+```bash
+bin/rspec                 # テスト
+bin/rubocop               # Ruby のスタイル
+bin/erb_lint --lint-all   # ERB のスタイル
+bin/brakeman --no-pager   # 脆弱性の静的解析
+bin/ci                    # 上記をまとめて実行（CI と同じ内容）
+```
 
-* Services (job queues, cache servers, search engines, etc.)
+## デプロイ
 
-* Deployment instructions
-
-* ...
+GitHub Actions から staging / production に Kamal でデプロイする。手順と管理者付与は [docs/deploy.md](docs/deploy.md)。
