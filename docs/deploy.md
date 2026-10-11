@@ -31,9 +31,9 @@
 2. **対象の環境** と **GitHub ユーザー名** を入力して Run
 3. ログに「○○ を管理者にしました」と出れば完了。対象の人はログインし直さなくてよい
 
-ワークフロー（`.github/workflows/grant_admin.yml`）は稼働中のコンテナで `bin/rails "admin:grant[ユーザー名]"`（`lib/tasks/admin.rake`）を実行する。
-タスクは GitHub の公開 API でユーザー名を数値 ID に解決し、ログイン時に保存された `uid` と照合する。ユーザー名は改名・解放・再取得ができるため、表示名ではなく ID で引く。
-「まだログインしていません」と出たら手順の前提を確認する。「GitHub に存在しません」と出たら綴りを確認する。
+ワークフロー（`.github/workflows/grant_admin.yml`）は、入力されたユーザー名を GitHub API（`gh api users/<ユーザー名>`）で数値 ID に変換し、稼働中のコンテナで `bin/rails "admin:grant[数値 ID]"`（`lib/tasks/admin.rake`）を実行する。
+タスクは ID をログイン時に保存された `uid` と照合する。ユーザー名は改名・解放・再取得ができるため、表示名ではなく ID で引く。
+「まだログインしていません」と出たら手順の前提を確認する。「ID を取得できませんでした」と出たら綴りを確認する。
 
 ## 初期設定（リポジトリ管理者が一度だけ行う）
 
@@ -109,7 +109,7 @@ Actions から最初に push すれば自動で紐づく。手元の PAT で先�
 | `GITHUB_CLIENT_ID` が空でログインボタンが出ない | Environment secrets の登録漏れ | `OAUTH_GITHUB_*` を該当 Environment に登録 |
 | `ActiveSupport::MessageEncryptor::InvalidMessage` | `RAILS_MASTER_KEY` が違う | 手元の `config/master.key` と一致させる |
 | 管理者付与で「まだログインしていません」 | 対象の人が未ログイン | その環境に一度ログインしてもらう |
-| 管理者付与で「確認できませんでした」 | ランナーから GitHub API（api.github.com）に届かない、または回数制限 | 時間をおいて再実行する |
+| 管理者付与で「ID を取得できませんでした」 | ユーザー名の綴りが違う、または GitHub API に届かない | 綴りを確認し、時間をおいて再実行する |
 
 ## 手元から行う場合
 
@@ -120,5 +120,9 @@ bin/kamal deploy -d staging
 ```
 
 ```bash
-bin/kamal app exec -d staging --reuse 'bin/rails "admin:grant[ユーザー名]"'
+gh api users/<ユーザー名> --jq .id
+```
+
+```bash
+bin/kamal app exec -d staging --reuse 'bin/rails "admin:grant[数値 ID]"'
 ```

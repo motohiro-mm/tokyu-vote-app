@@ -1,22 +1,17 @@
 # 管理者の付与。本番では管理画面から昇格できる人がまだいない（初回）ことがあるため、
 # GitHub Actions の「Grant admin」ワークフローと手元の両方からこのタスクを使う。
 namespace :admin do
-  desc "GitHub ユーザー名で指定したユーザーを管理者にする（admin:grant[login]）"
-  task :grant, [ :login ] => :environment do |_task, args|
-    login = args[:login].to_s.strip
-    abort "GitHub ユーザー名を指定してください（例: bin/rails \"admin:grant[octocat]\"）" if login.blank?
-
-    # users.name は改名・解放・再取得ができるログイン名のスナップショットなので、照合には使わない。
-    # GitHub API でログイン名を数値 ID に解決し、変わらない uid で引く
-    begin
-      uid = GithubAccount.uid_for(login)
-    rescue GithubAccount::LookupError => e
-      abort "GitHub ユーザー「#{login}」を確認できませんでした: #{e.message}"
+  desc "GitHub の数値 ID（users.uid）で指定したユーザーを管理者にする（admin:grant[uid]）"
+  task :grant, [ :uid ] => :environment do |_task, args|
+    uid = args[:uid].to_s.strip
+    # users.name（GitHub のユーザー名）は改名・解放・再取得ができるため、照合には使わない。
+    # ユーザー名から数値 ID への変換は呼び出し側（ワークフローや手元の gh api）で行う
+    unless uid.match?(/\A\d+\z/)
+      abort "GitHub の数値 ID を指定してください（例: bin/rails \"admin:grant[583231]\"。ID は gh api users/<ユーザー名> --jq .id で調べられます）"
     end
-    abort "GitHub ユーザー「#{login}」は GitHub に存在しません。綴りを確認してください" if uid.nil?
 
     user = User.find_by(provider: "github", uid: uid)
-    abort "GitHub ユーザー「#{login}」（uid: #{uid}）はまだログインしていません。先に一度ログインしてもらってください" if user.nil?
+    abort "GitHub ID #{uid} のユーザーはまだログインしていません。先に一度ログインしてもらってください" if user.nil?
 
     if user.admin?
       puts "#{user.name}（uid: #{uid}）はすでに管理者です"

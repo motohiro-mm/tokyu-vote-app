@@ -1,5 +1,5 @@
 # Actions タブの「Run workflow」から、環境と GitHub ユーザー名を入力して管理者にする。
-# 稼働中のコンテナで `bin/rails admin:grant[login]` を実行する（lib/tasks/admin.rake）。
+# ユーザー名を GitHub API で数値 ID に変換し、稼働中のコンテナで `bin/rails admin:grant[uid]` を実行する（lib/tasks/admin.rake）。
 # 対象ユーザーは先に一度その環境にログインしている必要がある。
 name: Grant admin
 
@@ -49,11 +49,27 @@ jobs:
           KAMAL_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
         run: .github/scripts/write_kamal_secrets "$DESTINATION"
 
-      - name: 管理者にする
+      # users.name（GitHub のユーザー名）は改名・解放・再取得ができるため、アプリ側では変わらない数値 ID
+      # （users.uid）で照合する。ユーザー名から ID への変換はここで GitHub API を使って行う
+      - name: GitHub ユーザー名を数値 ID に変換する
+        id: resolve
+        env:
+          GH_TOKEN: ${{ github.token }}
         # GitHub ユーザー名は英数字とハイフンだけなので、引用符や空白を含む入力はここで弾く
         run: |
           if ! printf '%s' "$LOGIN" | grep -Eq '^[A-Za-z0-9-]+$'; then
             echo "GitHub ユーザー名として不正です: $LOGIN" >&2
             exit 1
           fi
-          bin/kamal app exec -d "$DESTINATION" --reuse "bin/rails \"admin:grant[$LOGIN]\""
+          uid="$(gh api "users/$LOGIN" --jq .id)"
+          if ! printf '%s' "$uid" | grep -Eq '^[0-9]+$'; then
+            echo "GitHub ユーザー「$LOGIN」の ID を取得できませんでした" >&2
+            exit 1
+          fi
+          echo "$LOGIN の GitHub ID は $uid"
+          echo "uid=$uid" >> "$GITHUB_OUTPUT"
+
+      - name: 管理者にする
+        env:
+          UID_TO_GRANT: ${{ steps.resolve.outputs.uid }}
+        run: bin/kamal app exec -d "$DESTINATION" --reuse "bin/rails \"admin:grant[$UID_TO_GRANT]\""
