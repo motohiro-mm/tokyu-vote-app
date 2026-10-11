@@ -36,17 +36,14 @@ jobs:
         with:
           bundler-cache: true
 
-      - name: サーバーへの SSH 鍵を用意する
-        uses: webfactory/ssh-agent@v0.9.1
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-      - name: サーバーのホスト鍵を登録する
-        run: .github/scripts/register_ssh_host "$DESTINATION"
+      - name: サーバーへの接続を用意する
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: .github/scripts/prepare_ssh "$DESTINATION"
 
       # 稼働中のコンテナを再利用する（--reuse）ので環境変数の注入は不要だが、
       # Kamal が設定を読む際に secrets-common の config/master.key を参照するため用意する
-      - name: Kamal の秘密情報を書き出す
+      - name: Kamal の設定を用意する
         env:
           RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
           KAMAL_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}

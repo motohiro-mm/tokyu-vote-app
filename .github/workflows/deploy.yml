@@ -2,6 +2,9 @@
 # 手元の `bin/kamal deploy -d <環境>` と同じことをランナーで行う。
 # 秘密情報は GitHub Secrets から .kamal/secrets.<環境> と config/master.key に書き出す（どちらも gitignore 済み）。
 # 必要な Secrets の一覧は docs/deploy.md を参照。
+#
+# ログについて: GitHub は run ステップの env の「名前」を必ず表示し、Secrets 由来の値は *** に置き換える。
+# 「デプロイする」の DEBUG 行は Kamal が流す Docker のビルドログで、手元での実行と同じもの。
 name: Deploy
 
 on:
@@ -43,15 +46,12 @@ jobs:
       - name: Docker Buildx を用意する
         uses: docker/setup-buildx-action@v3
 
-      - name: サーバーへの SSH 鍵を用意する
-        uses: webfactory/ssh-agent@v0.9.1
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: サーバーへの接続を用意する
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: .github/scripts/prepare_ssh "$DESTINATION"
 
-      - name: サーバーのホスト鍵を登録する
-        run: .github/scripts/register_ssh_host "$DESTINATION"
-
-      - name: Kamal の秘密情報を書き出す
+      - name: Kamal の設定を用意する
         env:
           RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
           KAMAL_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
