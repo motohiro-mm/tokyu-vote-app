@@ -46,8 +46,6 @@ class EntriesController < ApplicationController
     @event.entries.where(category: @category, user: current_user).order(:id)
   end
 
-  # LT候補は talks が持つため、ここで受け付けるのは飯王・酒王だけ。
-  # 未知の部門名も LT王もそのまま 404 にする
   def set_category
     @category = Category.for_entries.find_by_name!(params[:category])
   end

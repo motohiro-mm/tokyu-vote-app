@@ -14,7 +14,6 @@ rescue ActiveRecord::PendingMigrationError => e
 end
 
 RSpec.configure do |config|
-  # FactoryBot.create(:user) を create(:user) と書けるようにする
   config.include FactoryBot::Syntax::Methods
 
   config.fixture_paths = [ Rails.root.join("spec/fixtures") ]
