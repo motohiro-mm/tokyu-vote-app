@@ -1,0 +1,62 @@
+# Actions タブの「Run workflow」から、環境と GitHub ユーザー名を入力して管理者にする。
+# 稼働中のコンテナで `bin/rails admin:grant[login]` を実行する（lib/tasks/admin.rake）。
+# 対象ユーザーは先に一度その環境にログインしている必要がある。
+name: Grant admin
+
+on:
+  workflow_dispatch:
+    inputs:
+      destination:
+        description: 対象の環境
+        type: choice
+        options: [staging, production]
+        default: staging
+        required: true
+      login:
+        description: 管理者にする人の GitHub ユーザー名
+        type: string
+        required: true
+
+jobs:
+  grant:
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.destination }}
+    permissions:
+      contents: read
+    env:
+      DESTINATION: ${{ inputs.destination }}
+      LOGIN: ${{ inputs.login }}
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Ruby と Kamal を用意する
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+
+      - name: サーバーへの SSH 鍵を用意する
+        uses: webfactory/ssh-agent@v0.9.1
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: サーバーのホスト鍵を登録する
+        run: .github/scripts/register_ssh_host "$DESTINATION"
+
+      # 稼働中のコンテナを再利用する（--reuse）ので環境変数の注入は不要だが、
+      # Kamal が設定を読む際に secrets-common の config/master.key を参照するため用意する
+      - name: Kamal の秘密情報を書き出す
+        env:
+          RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
+          KAMAL_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        run: .github/scripts/write_kamal_secrets "$DESTINATION"
+
+      - name: 管理者にする
+        # GitHub ユーザー名は英数字とハイフンだけなので、引用符や空白を含む入力はここで弾く
+        run: |
+          if ! printf '%s' "$LOGIN" | grep -Eq '^[A-Za-z0-9-]+$'; then
+            echo "GitHub ユーザー名として不正です: $LOGIN" >&2
+            exit 1
+          fi
+          bin/kamal app exec -d "$DESTINATION" --reuse "bin/rails \"admin:grant[$LOGIN]\""

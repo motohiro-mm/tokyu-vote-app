@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# GitHub Actions 用。config/deploy.<環境>.yml のサーバーのホスト鍵を known_hosts に登録する。
+# IP をワークフローに重複して書かないため、Kamal の設定から読む。
+set -euo pipefail
+
+destination="${1:?usage: .github/scripts/register_ssh_host <destination>}"
+host="$(ruby -ryaml -e 'puts YAML.load_file("config/deploy.#{ARGV[0]}.yml").dig("servers", "web").first' "$destination")"
+
+mkdir -p ~/.ssh
+chmod 700 ~/.ssh
+ssh-keyscan -H "$host" >> ~/.ssh/known_hosts

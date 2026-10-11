@@ -1,0 +1,64 @@
+# Actions タブの「Run workflow」から、ブランチ（Use workflow from）と環境を選んでデプロイする。
+# 手元の `bin/kamal deploy -d <環境>` と同じことをランナーで行う。
+# 秘密情報は GitHub Secrets から .kamal/secrets.<環境> と config/master.key に書き出す（どちらも gitignore 済み）。
+# 必要な Secrets の一覧は docs/deploy.md を参照。
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      destination:
+        description: デプロイ先
+        type: choice
+        options: [staging, production]
+        default: staging
+        required: true
+
+# 同じ環境への同時デプロイを防ぐ（Kamal のロックと二重で守る）
+concurrency:
+  group: deploy-${{ inputs.destination }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # Environment の Secrets と承認ルール（production は Required reviewers）を使う
+    environment:
+      name: ${{ inputs.destination }}
+      url: ${{ inputs.destination == 'production' && 'https://vote.gohansummit.com' || 'https://vote-staging.gohansummit.com' }}
+    permissions:
+      contents: read
+      packages: write # GITHUB_TOKEN で ghcr.io にイメージを push する
+    env:
+      DESTINATION: ${{ inputs.destination }}
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Ruby と Kamal を用意する
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+
+      - name: Docker Buildx を用意する
+        uses: docker/setup-buildx-action@v3
+
+      - name: サーバーへの SSH 鍵を用意する
+        uses: webfactory/ssh-agent@v0.9.1
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: サーバーのホスト鍵を登録する
+        run: .github/scripts/register_ssh_host "$DESTINATION"
+
+      - name: Kamal の秘密情報を書き出す
+        env:
+          RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
+          KAMAL_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+          OAUTH_GITHUB_CLIENT_ID: ${{ secrets.OAUTH_GITHUB_CLIENT_ID }}
+          OAUTH_GITHUB_CLIENT_SECRET: ${{ secrets.OAUTH_GITHUB_CLIENT_SECRET }}
+          STAGING_BASIC_AUTH_PASSWORD: ${{ secrets.STAGING_BASIC_AUTH_PASSWORD }}
+        run: .github/scripts/write_kamal_secrets "$DESTINATION"
+
+      - name: デプロイする
+        run: bin/kamal deploy -d "$DESTINATION"
