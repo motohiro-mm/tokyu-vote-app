@@ -25,10 +25,10 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    # Environment の Secrets と承認ルール（production は Required reviewers）を使う
+    # Environment の Secrets と承認ルール（production は Required reviewers）を使う。
+    # url は指定しない。指定すると実行ページと Deployments に URL が表示されるが、URL は参加者にだけ配る
     environment:
       name: ${{ inputs.destination }}
-      url: ${{ inputs.destination == 'production' && 'https://vote.gohansummit.com' || 'https://vote-staging.gohansummit.com' }}
     permissions:
       contents: read
       packages: write # GITHUB_TOKEN で ghcr.io にイメージを push する
