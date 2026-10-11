@@ -101,5 +101,19 @@ RSpec.describe "LT候補の管理", type: :request do
 
       expect(flash[:alert]).to eq "CSV ファイルを選んでください。"
     end
+
+    it "ファイルでない値が送られても 500 にせず知らせる" do
+      post admin_event_talk_imports_path(event), params: { file: "abc" }
+
+      expect(response).to redirect_to admin_event_path(event)
+      expect(flash[:alert]).to eq "CSV ファイルを選んでください。"
+    end
+
+    it "上限を超える大きさの CSV は読まずに断る" do
+      text = "登壇者名,LTタイトル\n" + ("とうだんしゃ,Ruby の話\n" * (Admin::TalkImportsController::CSV_MAX_SIZE / 20))
+
+      expect { upload(text) }.not_to change(Talk, :count)
+      expect(flash[:alert]).to eq "CSV ファイルが大きすぎます（1MB まで）。"
+    end
   end
 end
