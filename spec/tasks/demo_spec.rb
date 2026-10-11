@@ -51,6 +51,23 @@ RSpec.describe "demo:results" do
     expect(result.targets.map(&:title)).not_to include("当日欠席になった話")
   end
 
+  it "検証環境のラベルが無い production では実行できない" do
+    allow(Rails).to receive(:env).and_return(ActiveSupport::EnvironmentInquirer.new("production"))
+
+    expect { run_task }.to raise_error(SystemExit).and output(/APP_ENV_LABEL=staging/).to_stderr
+    expect(Event.where(title: "TokyuRuby会議デモ（結果公開済み）")).not_to exist
+  end
+
+  it "検証環境（APP_ENV_LABEL=staging）では production でも実行できる" do
+    allow(Rails).to receive(:env).and_return(ActiveSupport::EnvironmentInquirer.new("production"))
+    allow(ENV).to receive(:[]).and_call_original
+    allow(ENV).to receive(:[]).with("APP_ENV_LABEL").and_return("staging")
+    allow(ENV).to receive(:[]).with("APP_HOST").and_return("vote-staging.example.com")
+
+    expect { run_task }.to output(%r{https://vote-staging.example.com/events/}).to_stdout
+    expect(event).to be_closed
+  end
+
   it "2 回実行しても候補と票が増えない" do
     expect { run_task }.to output.to_stdout
 

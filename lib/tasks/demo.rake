@@ -1,8 +1,19 @@
-# 画面を触って確認するためのデータを作る。development（と、タスク自体を確かめる test）専用。
+# 画面を触って確認するためのデータを作る。
+# development（と、タスク自体を確かめる test）のほか、検証環境（APP_ENV_LABEL=staging）でも動かす。
+# 本番は RAILS_ENV が同じ production なので、ラベルで区別して拒否する。
 namespace :demo do
+  def demo_data_allowed?
+    Rails.env.local? || ENV["APP_ENV_LABEL"] == "staging"
+  end
+
+  # 画面の URL。検証環境では APP_HOST が入っている
+  def demo_base_url
+    ENV["APP_HOST"].present? ? "https://#{ENV["APP_HOST"]}" : "http://localhost:3000"
+  end
+
   desc "動作確認用のイベント・ユーザー・エントリーを作成する"
   task setup: :environment do
-    abort "development でのみ実行できます" unless Rails.env.local?
+    abort "development か検証環境（APP_ENV_LABEL=staging）でのみ実行できます" unless demo_data_allowed?
 
     Rake::Task["db:seed"].invoke
 
@@ -36,12 +47,12 @@ namespace :demo do
     end
 
     puts "できました: #{event.title}（#{event.status_label}）"
-    puts "ログイン画面 http://localhost:3000/login から #{admin.name} を選ぶと管理画面に入れます"
+    puts "ログイン画面 #{demo_base_url}/login から #{admin.name} を選ぶと管理画面に入れます（demo ユーザーで入れるのは development のみ）"
   end
 
   desc "投票と集計を終えて結果を公開済みのイベントを作成する（結果発表の画面と静的書き出しの確認用）"
   task results: :environment do
-    abort "development でのみ実行できます" unless Rails.env.local?
+    abort "development か検証環境（APP_ENV_LABEL=staging）でのみ実行できます" unless demo_data_allowed?
 
     Rake::Task["demo:setup"].invoke
 
@@ -151,7 +162,7 @@ namespace :demo do
     end
 
     puts "できました: #{event.title}（#{event.status_label}）"
-    puts "ログイン画面 http://localhost:3000/login から #{admin.name} を選ぶと管理画面の集計、誰でも http://localhost:3000/events/#{event.id} から結果を見られます"
+    puts "ログイン画面 #{demo_base_url}/login から #{admin.name} を選ぶと管理画面の集計、誰でも #{demo_base_url}/events/#{event.id} から結果を見られます"
     puts "静的書き出しは bin/rails export:static"
   end
 end
