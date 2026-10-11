@@ -5,6 +5,8 @@
 #
 # ログについて: GitHub は run ステップの env の「名前」を必ず表示し、Secrets 由来の値は *** に置き換える。
 # 「デプロイする」の DEBUG 行は Kamal が流す Docker のビルドログで、手元での実行と同じもの。
+# サードパーティのアクションはタグではなくコミット SHA で固定する（タグは差し替えられる）。
+# SSH 秘密鍵と master.key を扱うため、改ざんされたアクションに渡さない。更新は Dependabot が行う。
 name: Deploy
 
 on:
@@ -36,15 +38,15 @@ jobs:
       DESTINATION: ${{ inputs.destination }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
       - name: Ruby と Kamal を用意する
-        uses: ruby/setup-ruby@v1
+        uses: ruby/setup-ruby@e81a8fa391b11a595c1b7ed84177cc0fe02faf83 # v1.328.0
         with:
           bundler-cache: true
 
       - name: Docker Buildx を用意する
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
 
       - name: サーバーへの接続を用意する
         env:
