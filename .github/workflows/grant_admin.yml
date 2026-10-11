@@ -39,7 +39,8 @@ jobs:
       - name: サーバーへの接続を用意する
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        run: .github/scripts/prepare_ssh "$DESTINATION"
+          SSH_KNOWN_HOSTS: ${{ vars.SSH_KNOWN_HOSTS }}
+        run: .github/scripts/prepare_ssh
 
       # 稼働中のコンテナを再利用する（--reuse）ので環境変数の注入は不要だが、
       # Kamal が設定を読む際に secrets-common の config/master.key を参照するため用意する

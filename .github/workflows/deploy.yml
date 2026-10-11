@@ -49,7 +49,8 @@ jobs:
       - name: サーバーへの接続を用意する
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        run: .github/scripts/prepare_ssh "$DESTINATION"
+          SSH_KNOWN_HOSTS: ${{ vars.SSH_KNOWN_HOSTS }}
+        run: .github/scripts/prepare_ssh
 
       - name: Kamal の設定を用意する
         env:

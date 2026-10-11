@@ -1,17 +1,18 @@
 #!/usr/bin/env bash
 # GitHub Actions 用。Kamal がサーバーに SSH 接続できるように、秘密鍵の配置とホスト鍵の登録を行う。
 # 秘密鍵は環境変数 SSH_PRIVATE_KEY（GitHub Secrets）から受け取り、net-ssh が既定で読む場所に置く。
-# サーバーの IP はワークフローに重複して書かず、config/deploy.<環境>.yml から読む。
+# ホスト鍵は環境変数 SSH_KNOWN_HOSTS（GitHub の Actions 変数）から受け取る。
+# 実行のたびに ssh-keyscan で取り込むと、その時点でサーバーを名乗るものを無条件に信頼してしまい、
+# 経路を乗っ取られたときに秘密鍵でのログイン先と Kamal が送る秘密情報を偽サーバーへ渡すことになる。
+# 一度手元で指紋を確認した鍵だけを信頼するため、ここでは取得せず与えられたものを書く。
 # 鍵の指紋や公開鍵をログに出す必要はないので、何も表示しない。
 set -euo pipefail
 
-destination="${1:?usage: .github/scripts/prepare_ssh <destination>}"
 : "${SSH_PRIVATE_KEY:?SSH_PRIVATE_KEY が設定されていません}"
-
-host="$(ruby -ryaml -e 'puts YAML.load_file("config/deploy.#{ARGV[0]}.yml").dig("servers", "web").first' "$destination")"
+: "${SSH_KNOWN_HOSTS:?SSH_KNOWN_HOSTS が設定されていません（docs/deploy.md「サーバーのホスト鍵」）}"
 
 mkdir -p ~/.ssh
 chmod 700 ~/.ssh
 printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
-chmod 600 ~/.ssh/id_ed25519
-ssh-keyscan -H "$host" >> ~/.ssh/known_hosts 2>/dev/null
+printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+chmod 600 ~/.ssh/id_ed25519 ~/.ssh/known_hosts

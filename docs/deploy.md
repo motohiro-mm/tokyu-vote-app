@@ -50,6 +50,12 @@ Settings → Secrets and variables → Actions で登録する。**Secrets 名�
 | `OAUTH_GITHUB_CLIENT_ID` | Environment `production` | production 用 GitHub OAuth App の Client ID |
 | `OAUTH_GITHUB_CLIENT_SECRET` | Environment `production` | 同 Client Secret |
 
+Actions の変数（Settings → Secrets and variables → Actions → Variables）:
+
+| 名前 | 値 |
+|---|---|
+| `SSH_KNOWN_HOSTS` | サーバーのホスト鍵（下記「サーバーのホスト鍵」） |
+
 ghcr.io への push は Actions の `GITHUB_TOKEN` を使うので登録不要。値に `'` は使えない（dotenv の単引用符で囲むため）。
 
 `gh` で登録する例（値を画面に出さずに済む）:
@@ -80,6 +86,26 @@ gh secret set SSH_PRIVATE_KEY < ~/.ssh/tokyu-vote-app-deploy
 
 登録後、手元の秘密鍵は消してよい。サーバーの IP は `config/deploy.<環境>.yml` の `servers.web`。
 
+### サーバーのホスト鍵
+
+Actions は毎回まっさらなランナーで動くため、サーバーのホスト鍵を知らない。実行のたびに `ssh-keyscan` で取り込むと、その時点でサーバーを名乗るものを無条件に信頼してしまうので、一度手元で指紋を確認した鍵を Actions の変数に固定して使う（ホストの公開鍵なので Secrets でなくてよい）。
+
+```bash
+ssh-keyscan -t ed25519 <サーバーの IP> 2>/dev/null | tee /tmp/host_key.txt | ssh-keygen -lf -
+```
+
+```bash
+ssh root@<サーバーの IP> ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub
+```
+
+2 つの指紋（`SHA256:...`）が一致することを確かめてから登録する。
+
+```bash
+gh variable set SSH_KNOWN_HOSTS < /tmp/host_key.txt
+```
+
+サーバーを作り直したときはホスト鍵が変わるので、同じ手順で登録し直す。
+
 ### Environments
 
 Settings → Environments に `staging` と `production` を作る。`production` には **Required reviewers**（承認者）を設定し、Deployment branches を `main` に限定する。
@@ -104,6 +130,7 @@ Actions から最初に push すれば自動で紐づく。手元の PAT で先�
 | 症状 | 原因 | 対処 |
 |---|---|---|
 | `Permission denied (publickey)` | 公開鍵が `authorized_keys` に無い、または `SSH_PRIVATE_KEY` が壊れている | 鍵を作り直す。秘密鍵は改行を含めて丸ごと登録する |
+| `Host key verification failed` | `SSH_KNOWN_HOSTS` が未登録、またはサーバーを作り直してホスト鍵が変わった | 上記「サーバーのホスト鍵」の手順で登録し直す |
 | ghcr.io に `denied` | Package がリポジトリに紐づいていない | 上記「ghcr.io のイメージ」 |
 | `GITHUB_CLIENT_ID` が空でログインボタンが出ない | Environment secrets の登録漏れ | `OAUTH_GITHUB_*` を該当 Environment に登録 |
 | `ActiveSupport::MessageEncryptor::InvalidMessage` | `RAILS_MASTER_KEY` が違う | 手元の `config/master.key` と一致させる |
