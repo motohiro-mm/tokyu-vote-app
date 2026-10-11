@@ -88,6 +88,19 @@ RSpec.describe "ログイン", type: :request do
     expect(response).to redirect_to login_path
   end
 
+  it "ログアウトするとサーバー側のトークンも消え、以前の Cookie を使い回してもログインできない" do
+    github_login
+    cookie_name = Rails.application.config.session_options[:key]
+    stolen_cookie = cookies[cookie_name]
+
+    delete logout_path
+
+    expect(User.last.session_digest).to be_nil
+    cookies[cookie_name] = stolen_cookie
+    get root_path
+    expect(response).to redirect_to login_path
+  end
+
   it "サーバー側でトークンを消すと、セッションが残っていてもログアウト扱いになる" do
     github_login
     User.last.update!(session_digest: nil)

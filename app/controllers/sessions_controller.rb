@@ -20,7 +20,10 @@ class SessionsController < ApplicationController
     redirect_to login_path, alert: "GitHub でのログインに失敗しました。もう一度お試しください。"
   end
 
+  # Cookie が盗まれていた場合に備え、サーバー側のトークンも消して以前の Cookie を無効にする。
+  # 全端末からのログアウトになるが、このアプリの用途では問題にならない
   def destroy
+    current_user&.update!(session_digest: nil)
     reset_session
     redirect_to login_path, notice: "ログアウトしました。"
   end
