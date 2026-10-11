@@ -1,22 +1,23 @@
 # 管理者の付与。本番では管理画面から昇格できる人がまだいない（初回）ことがあるため、
 # GitHub Actions の「Grant admin」ワークフローと手元の両方からこのタスクを使う。
 namespace :admin do
-  desc "GitHub ユーザー名で指定したユーザーを管理者にする（admin:grant[login]）"
-  task :grant, [ :login ] => :environment do |_task, args|
-    login = args[:login].to_s.strip
-    abort "GitHub ユーザー名を指定してください（例: bin/rails \"admin:grant[octocat]\"）" if login.blank?
+  desc "GitHub の数値 ID（users.uid）で指定したユーザーを管理者にする（admin:grant[uid]）"
+  task :grant, [ :uid ] => :environment do |_task, args|
+    uid = args[:uid].to_s.strip
+    # users.name（GitHub のユーザー名）は改名・解放・再取得ができるため、照合には使わない。
+    # ユーザー名から数値 ID への変換は呼び出し側（ワークフローや手元の gh api）で行う
+    unless uid.match?(/\A\d+\z/)
+      abort "GitHub の数値 ID を指定してください（例: bin/rails \"admin:grant[583231]\"。ID は gh api users/<ユーザー名> --jq .id で調べられます）"
+    end
 
-    # name はログインのたびに GitHub の nickname で更新されるが、改名直後は同名が 2 人いることがありうる
-    users = User.where(provider: "github", name: login).order(:id).to_a
-    abort "GitHub ユーザー「#{login}」はまだログインしていません。先に一度ログインしてもらってください" if users.empty?
-    abort "GitHub ユーザー「#{login}」が複数います（uid: #{users.map(&:uid).join(', ')}）。改名した人に再ログインしてもらってから実行してください" if users.size > 1
+    user = User.find_by(provider: "github", uid: uid)
+    abort "GitHub ID #{uid} のユーザーはまだログインしていません。先に一度ログインしてもらってください" if user.nil?
 
-    user = users.first
     if user.admin?
-      puts "#{user.name} はすでに管理者です"
+      puts "#{user.name}（uid: #{uid}）はすでに管理者です"
     else
       user.update!(admin: true)
-      puts "#{user.name} を管理者にしました"
+      puts "#{user.name}（uid: #{uid}）を管理者にしました"
     end
   end
 end

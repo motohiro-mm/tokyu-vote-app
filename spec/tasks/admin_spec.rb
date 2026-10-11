@@ -10,43 +10,45 @@ RSpec.describe "admin:grant" do
 
   before { task.reenable }
 
-  def run_task(login)
-    task.invoke(login)
+  def run_task(uid)
+    task.invoke(uid)
   end
 
-  it "GitHub ユーザー名が一致するユーザーを管理者にする" do
-    user = create(:user, provider: "github", name: "octocat")
+  it "GitHub の数値 ID（uid）が一致するユーザーを管理者にする" do
+    user = create(:user, provider: "github", uid: "583231", name: "octocat")
 
-    expect { run_task("octocat") }.to output(/octocat を管理者にしました/).to_stdout
+    expect { run_task("583231") }.to output(/octocat（uid: 583231）を管理者にしました/).to_stdout
     expect(user.reload).to be_admin
+  end
+
+  it "name が同じでも uid が違う別人は管理者にしない" do
+    impostor = create(:user, provider: "github", uid: "999", name: "octocat")
+
+    expect { run_task("583231") }.to raise_error(SystemExit).and output(/まだログインしていません/).to_stderr
+    expect(impostor.reload).not_to be_admin
   end
 
   it "すでに管理者なら何もしない" do
-    user = create(:user, :admin, provider: "github", name: "octocat")
+    user = create(:user, :admin, provider: "github", uid: "583231", name: "octocat")
 
-    expect { run_task("octocat") }.to output(/すでに管理者です/).to_stdout
+    expect { run_task("583231") }.to output(/すでに管理者です/).to_stdout
     expect(user.reload).to be_admin
   end
 
-  it "まだログインしていないユーザー名ならエラーで終了する" do
-    expect { run_task("nobody") }.to raise_error(SystemExit).and output(/まだログインしていません/).to_stderr
-  end
-
-  it "同名のユーザーが複数いるならエラーで終了し、誰も変更しない" do
-    users = create_list(:user, 2, provider: "github", name: "octocat")
-
-    expect { run_task("octocat") }.to raise_error(SystemExit).and output(/複数います/).to_stderr
-    expect(users.map { |u| u.reload.admin? }).to all(be false)
-  end
-
   it "GitHub 以外の provider は対象にしない" do
-    user = create(:user, provider: "demo", name: "octocat")
+    user = create(:user, provider: "demo", uid: "583231", name: "octocat")
 
-    expect { run_task("octocat") }.to raise_error(SystemExit).and output(/まだログインしていません/).to_stderr
+    expect { run_task("583231") }.to raise_error(SystemExit).and output(/まだログインしていません/).to_stderr
     expect(user.reload).not_to be_admin
   end
 
-  it "ユーザー名が空ならエラーで終了する" do
-    expect { run_task("") }.to raise_error(SystemExit).and output(/指定してください/).to_stderr
+  it "数値以外（ユーザー名など）が渡されたらエラーで終了する" do
+    create(:user, provider: "github", uid: "583231", name: "octocat")
+
+    expect { run_task("octocat") }.to raise_error(SystemExit).and output(/数値 ID を指定してください/).to_stderr
+  end
+
+  it "引数が空ならエラーで終了する" do
+    expect { run_task("") }.to raise_error(SystemExit).and output(/数値 ID を指定してください/).to_stderr
   end
 end
