@@ -6,17 +6,23 @@ namespace :admin do
     login = args[:login].to_s.strip
     abort "GitHub ユーザー名を指定してください（例: bin/rails \"admin:grant[octocat]\"）" if login.blank?
 
-    # name はログインのたびに GitHub の nickname で更新されるが、改名直後は同名が 2 人いることがありうる
-    users = User.where(provider: "github", name: login).order(:id).to_a
-    abort "GitHub ユーザー「#{login}」はまだログインしていません。先に一度ログインしてもらってください" if users.empty?
-    abort "GitHub ユーザー「#{login}」が複数います（uid: #{users.map(&:uid).join(', ')}）。改名した人に再ログインしてもらってから実行してください" if users.size > 1
+    # users.name は改名・解放・再取得ができるログイン名のスナップショットなので、照合には使わない。
+    # GitHub API でログイン名を数値 ID に解決し、変わらない uid で引く
+    begin
+      uid = GithubAccount.uid_for(login)
+    rescue GithubAccount::LookupError => e
+      abort "GitHub ユーザー「#{login}」を確認できませんでした: #{e.message}"
+    end
+    abort "GitHub ユーザー「#{login}」は GitHub に存在しません。綴りを確認してください" if uid.nil?
 
-    user = users.first
+    user = User.find_by(provider: "github", uid: uid)
+    abort "GitHub ユーザー「#{login}」（uid: #{uid}）はまだログインしていません。先に一度ログインしてもらってください" if user.nil?
+
     if user.admin?
-      puts "#{user.name} はすでに管理者です"
+      puts "#{user.name}（uid: #{uid}）はすでに管理者です"
     else
       user.update!(admin: true)
-      puts "#{user.name} を管理者にしました"
+      puts "#{user.name}（uid: #{uid}）を管理者にしました"
     end
   end
 end
