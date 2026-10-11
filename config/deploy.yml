@@ -17,9 +17,6 @@ env:
     - RAILS_MASTER_KEY
     - GITHUB_CLIENT_ID
     - GITHUB_CLIENT_SECRET
-  clear:
-    # ジョブは Puma の中で動かす（サーバー 1 台なので分けない）
-    SOLID_QUEUE_IN_PUMA: true
 
 aliases:
   console: app exec --interactive --reuse "bin/rails console"

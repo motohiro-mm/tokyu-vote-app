@@ -26,9 +26,6 @@ gem "omniauth-github"
 # OmniAuth の CVE-2015-9284（GET によるログイン CSRF）対策
 gem "omniauth-rails_csrf_protection"
 
-# OGP / メタタグ
-gem "meta-tags"
-
 # LT候補の CSV 一括登録。Ruby 3.4 から csv は bundled gem になり、Gemfile に書かないと読み込めない
 gem "csv"
 
@@ -37,11 +34,6 @@ gem "rails-i18n"
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]
-
-# Use the database-backed adapters for Rails.cache, Active Job, and Action Cable
-gem "solid_cache"
-gem "solid_queue"
-gem "solid_cable"
 
 # activesupport 8.1.3 は json 3 と組み合わせるとセッションの復号が壊れたため 2 系に固定していた。
 # 8.1.4 で直ったので上限を外す
