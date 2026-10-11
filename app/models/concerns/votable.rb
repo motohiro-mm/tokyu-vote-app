@@ -3,7 +3,6 @@
 module Votable
   extend ActiveSupport::Concern
 
-  # 1ユーザーが1イベント × 1部門に投じられる票数の上限
   MAX_VOTES_PER_CATEGORY = 3
 
   TOP_RANKS = 3
@@ -42,17 +41,14 @@ module Votable
 
   private
 
-  # 投票対象。各モデルで定義する
   def vote_target
     raise NotImplementedError
   end
 
-  # 同じユーザーが同じイベント・同じ部門に投じた票。各モデルで定義する
   def votes_in_same_category
     raise NotImplementedError
   end
 
-  # 同じユーザーが同じ対象に投じた票。各モデルで定義する
   def votes_for_same_target
     raise NotImplementedError
   end

@@ -19,7 +19,6 @@ class Entry < ApplicationRecord
 
   private
 
-  # LT候補は talks が持つため、entries には LT王の部門を入れない
   def category_must_not_be_talk
     errors.add(:category, :not_allowed_for_entry) if category&.talk?
   end

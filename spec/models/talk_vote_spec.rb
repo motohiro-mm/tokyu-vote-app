@@ -4,7 +4,6 @@ RSpec.describe TalkVote do
   let(:event) { create(:event, status: :open) }
   let(:user) { create(:user) }
 
-  # 1ユーザーが投じられるのは3票までなので、票数の分だけ投票者を作る
   def vote_for_talk(talk, count)
     count.times { create(:talk_vote, user: create(:user), talk: talk) }
   end

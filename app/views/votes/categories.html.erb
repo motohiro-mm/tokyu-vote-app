@@ -4,7 +4,6 @@
 <ul class="mt-6 space-y-3">
   <% @categories.each do |category| %>
     <li>
-      <%# LT王だけ投票対象が talks なのでリンク先が変わる %>
       <%= link_to category.talk? ? event_talks_path(@event) : event_entries_path(@event, category: category.category_name),
                   class: "block rounded border border-stone-200 bg-white px-5 py-4 hover:bg-stone-100" do %>
         <span class="font-bold"><%= category.label %>に投票する</span>

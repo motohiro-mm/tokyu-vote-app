@@ -1,4 +1,3 @@
-# LT王の候補。登壇者はログインしないため、参加者の entries とは別に管理者が登録する。
 class Admin::TalksController < Admin::BaseController
   before_action :set_event
   before_action :set_talk, only: [ :edit, :update ]
