@@ -1,4 +1,8 @@
 <% flash.each do |type, message| %>
-  <% style = type.to_s == "alert" ? "bg-red-50 text-red-800" : "bg-white text-tokyu-blue-dark border border-tokyu-blue/30" %>
-  <p class="mb-4 rounded-lg px-4 py-3 text-sm <%= style %>"><%= message %></p>
+  <% style = type.to_s == "alert" ? "bg-red-50 text-red-800" : "border border-tokyu-blue/30 bg-white text-tokyu-blue-dark" %>
+  <div class="mb-4 flex items-center gap-3 rounded-lg px-4 py-3 text-sm <%= style %>" data-controller="dismiss">
+    <p class="flex-1"><%= message %></p>
+    <button type="button" aria-label="閉じる" data-action="click->dismiss#close"
+            class="shrink-0 rounded-full px-2 text-lg leading-none hover:bg-black/10">&times;</button>
+  </div>
 <% end %>
