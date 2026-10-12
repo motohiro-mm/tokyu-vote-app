@@ -23,6 +23,14 @@ RSpec.describe "イベント管理", type: :request do
     expect(response.body).to include("タイトルを入力してください")
   end
 
+  it "ステータス変更のボタンに確認ダイアログを付ける" do
+    sign_in(admin)
+
+    get admin_event_path(event)
+
+    expect(response.body).to include('data-turbo-confirm="ステータスを変更します。よろしいですか？"')
+  end
+
   it "管理者はステータスを変更できる" do
     sign_in(admin)
 
