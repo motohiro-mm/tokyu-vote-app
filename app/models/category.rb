@@ -23,6 +23,10 @@ class Category < ApplicationRecord
     I18n.t("enums.category.category_name.#{category_name}")
   end
 
+  def self.joined_label
+    order(:id).map(&:label).join("・")
+  end
+
   def description
     I18n.t("categories.descriptions.#{category_name}")
   end

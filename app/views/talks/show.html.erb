@@ -12,7 +12,7 @@
   <% elsif !@event.open? %>
     <p class="text-sm text-stone-500">投票を受け付けていません。</p>
   <% elsif @remaining_votes <= 0 %>
-    <p class="text-sm text-stone-500">LT王の票を使い切りました。</p>
+    <p class="text-sm text-stone-500"><%= @category.label %>の票を使い切りました。</p>
   <% else %>
     <%= form_with model: @talk_vote, url: event_talk_votes_path(@event) do |f| %>
       <%= f.hidden_field :talk_id, value: @talk.id %>
@@ -20,10 +20,16 @@
       <span class="text-xs text-stone-500">300文字まで</span>
       <%= f.text_area :comment, rows: 5,
                       class: "input mt-2" %>
-      <%= f.submit "投票する（残り #{@remaining_votes} 票）",
-                   class: "btn-primary mt-3" %>
+      <div class="mt-4 text-center">
+        <%= f.submit "投票する（残り #{@remaining_votes} 票）",
+                   class: "btn-primary" %>
+      </div>
     <% end %>
   <% end %>
 </div>
 
-<%= link_to "戻る", event_talks_path(@event), class: "btn-secondary mt-6" %>
+<div class="mt-8 text-center">
+
+  <%= link_to "戻る", event_talks_path(@event), class: "btn-secondary" %>
+
+</div>
