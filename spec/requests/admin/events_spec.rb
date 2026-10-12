@@ -53,7 +53,8 @@ RSpec.describe "イベント管理", type: :request do
 
     get admin_event_path(event)
 
-    expect(response.body).to include("飯王（単品王）", "唐揚げ", "飯王（合算王）", "LT王（単品王）", "Ruby の話")
+    expect(response.body).to include("飯王（単品王）", "唐揚げ", "飯王（合算王）", "Ruby の話")
+    expect(response.body).not_to include("LT王（単品王）")
   end
 
   it "公開中のあいだは管理者にも集計を見せない" do

@@ -11,8 +11,8 @@ class CategoryResult
   end
 
   def rankings
-    # LT王は登壇者を users と紐づけていないため合算王を出せない
-    return [ [ "#{category.label}（単品王）", TalkVote.ranking(event) ] ] if category.talk?
+    # LT王は登壇者を users と紐づけていないため合算王を出せず、単品王と書き分ける必要もない
+    return [ [ category.label, TalkVote.ranking(event) ] ] if category.talk?
 
     [
       [ "#{category.label}（単品王）", Vote.ranking_by_entry(event, category) ],
