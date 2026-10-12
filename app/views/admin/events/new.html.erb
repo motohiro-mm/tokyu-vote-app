@@ -15,8 +15,8 @@
     <%= f.text_field :title, class: "input" %>
   </div>
 
-  <div class="flex items-center justify-center gap-4 pt-6">
-    <%= f.submit "作成する", class: "btn-primary" %>
-    <%= link_to "一覧に戻る", admin_events_path, class: "btn-secondary" %>
+  <div class="mx-auto grid max-w-sm grid-cols-2 gap-4 pt-6">
+    <%= f.submit "作成する", class: "btn-primary w-full" %>
+    <%= link_to "一覧に戻る", admin_events_path, class: "btn-secondary w-full text-center" %>
   </div>
 <% end %>
