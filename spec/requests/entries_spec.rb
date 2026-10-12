@@ -21,6 +21,12 @@ RSpec.describe "エントリー", type: :request do
     expect(response.body).to include("登録が完了しました")
   end
 
+  it "登録フォームの作品名ラベルに何の名前かを添える" do
+    get new_event_entry_path(event, category: "food")
+
+    expect(response.body).to include("作品名（食べ物の名前）")
+  end
+
   it "作品名が空なら登録できず、フォームに戻す" do
     create(:entry, event: event, category: food, user: user, title: "唐揚げ")
 

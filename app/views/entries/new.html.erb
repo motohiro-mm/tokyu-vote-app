@@ -23,7 +23,7 @@
   <% end %>
 
   <div>
-    <%= f.label :title, "作品名", class: "block text-sm font-bold" %>
+    <%= f.label :title, @category.title_label, class: "block text-sm font-bold" %>
     <%= f.text_field :title, class: "input" %>
   </div>
 

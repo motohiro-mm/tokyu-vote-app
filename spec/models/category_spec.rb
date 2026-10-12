@@ -22,4 +22,9 @@ RSpec.describe Category do
   it "投票の誘い文に部門ごとの票数を入れる" do
     expect(create(:category, category_name: :food).description).to include("3つまで")
   end
+
+  it "作品名のラベルは部門ごとに何の名前かを添える" do
+    expect(create(:category, category_name: :food).title_label).to eq "作品名（食べ物の名前）"
+    expect(create(:category, category_name: :drink).title_label).to eq "作品名（お酒の名前）"
+  end
 end
