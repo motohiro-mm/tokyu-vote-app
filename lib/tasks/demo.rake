@@ -66,7 +66,7 @@ namespace :demo do
     # 持ち込みは 4 人に絞り、同じ人が複数持ち込むことで単品王と合算王の顔ぶれが変わるようにする
     cooks = voters.first(4)
 
-    event = Event.find_or_create_by!(title: "TokyuRuby会議デモ（結果公開済み）") { |e| e.status = :closed }
+    event = Event.find_or_create_by!(title: "デモイベント") { |e| e.status = :closed }
     event.update!(status: :closed) unless event.closed?
 
     food = Category.find_by!(category_name: :food)

@@ -11,12 +11,12 @@ RSpec.describe "demo:results" do
     Rake::Task["demo:results"].invoke
   end
 
-  let(:event) { Event.find_by!(title: "TokyuRuby会議デモ（結果公開済み）") }
+  let(:event) { Event.find_by!(title: "デモイベント") }
   let(:food) { Category.find_by!(category_name: :food) }
   let(:drink) { Category.find_by!(category_name: :drink) }
 
   it "結果を公開済みのイベントを、投票済みの候補付きで作る" do
-    expect { run_task }.to output(/できました: TokyuRuby会議デモ（結果公開済み）/).to_stdout
+    expect { run_task }.to output(/できました: デモイベント/).to_stdout
 
     expect(event).to be_closed
     expect(event.entries.where(category: food).count).to eq 5
@@ -55,7 +55,7 @@ RSpec.describe "demo:results" do
     allow(Rails).to receive(:env).and_return(ActiveSupport::EnvironmentInquirer.new("production"))
 
     expect { run_task }.to raise_error(SystemExit).and output(/APP_ENV_LABEL=staging/).to_stderr
-    expect(Event.where(title: "TokyuRuby会議デモ（結果公開済み）")).not_to exist
+    expect(Event.where(title: "デモイベント")).not_to exist
   end
 
   it "検証環境（APP_ENV_LABEL=staging）では production でも実行できる" do
