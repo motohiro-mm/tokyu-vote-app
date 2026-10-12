@@ -7,7 +7,6 @@
   </div>
 
   <% if event.accepting_talks? %>
-    <%# 当日のタイムテーブルから作った CSV を流し込む。見本のヘッダは TalkCsvImport::HEADERS と同じ %>
     <%= form_with url: admin_event_talk_imports_path(event), class: "mt-4 rounded-lg bg-tokyu-blue-light px-4 py-3" do |f| %>
       <p class="text-sm font-bold">CSV で一括登録</p>
       <p class="mt-1 text-xs text-stone-500">
