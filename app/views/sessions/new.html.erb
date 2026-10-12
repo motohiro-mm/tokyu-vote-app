@@ -8,11 +8,10 @@
 </div>
 
 <div class="card mt-6 text-center">
-  <p class="text-sm text-stone-600">GitHub アカウントでログインします。</p>
   <% if github_configured? %>
     <%# GitHub への遷移はクロスオリジンのリダイレクトなので、Turbo の fetch では追えない %>
     <%= button_to "GitHub でログインする", "/auth/github", data: { turbo: false },
-                  class: "btn-primary mt-3", form_class: "inline-block" %>
+                  class: "btn-primary", form_class: "inline-block" %>
   <% else %>
     <p class="mt-3 rounded-lg bg-tokyu-blue-light px-3 py-2 text-sm text-stone-500">
       GitHub ログインは設定されていません。環境変数
