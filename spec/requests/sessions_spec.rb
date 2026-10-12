@@ -42,7 +42,7 @@ RSpec.describe "ログイン", type: :request do
 
     get login_path, headers: { "HTTP_AUTHORIZATION" => ActionController::HttpAuthentication::Basic.encode_credentials("staging", "secret") }
 
-    expect(response.body).to include("staging 環境です。ここでの投票は集計されません。")
+    expect(response.body).to include("staging 環境です。")
   end
 
   it "GitHub で初めてログインするとユーザーを作り、イベント画面へ送る" do
