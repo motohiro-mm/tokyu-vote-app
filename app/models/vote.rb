@@ -24,9 +24,11 @@ class Vote < ApplicationRecord
 
   def self.ranking_by_user(event, category)
     counts = in_category(event, category).group("entries.user_id").count
+    titles = in_category(event, category).order("entries.id").distinct.pluck("entries.user_id", "entries.title")
+                                         .group_by(&:first).transform_values { |pairs| pairs.map(&:last) }
 
     ranked(User.where(id: counts.keys).map { |user|
-      { id: user.id, name: user.name, title: nil, vote_count: counts.fetch(user.id) }
+      { id: user.id, name: user.name, title: nil, vote_count: counts.fetch(user.id), entry_titles: titles.fetch(user.id) }
     })
   end
 
