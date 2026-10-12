@@ -36,7 +36,7 @@
   <div>
     <%= f.label :image, "画像【任意】", class: "block text-sm font-bold" %>
     <span class="text-xs text-stone-500">JPEG / PNG / GIF、<%= Entry::IMAGE_MAX_SIZE / 1.megabyte %>MB まで</span>
-    <%= f.file_field :image, accept: Entry::IMAGE_CONTENT_TYPES.join(","), class: "mt-1 block text-sm" %>
+    <%= f.file_field :image, accept: Entry::IMAGE_CONTENT_TYPES.join(","), class: "input-file" %>
   </div>
 
   <%= f.submit "登録する", class: "btn-primary" %>

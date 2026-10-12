@@ -13,8 +13,8 @@
       <p class="mt-1 text-xs text-stone-500">
         1 行目をヘッダ <code class="rounded bg-white px-1"><%= TalkCsvImport::HEADERS.values.join(",") %></code> にした UTF-8 の CSV
       </p>
-      <div class="mt-2 flex flex-wrap items-center gap-3">
-        <%= f.file_field :file, accept: "text/csv,.csv", class: "text-sm" %>
+      <div class="mt-2 flex flex-wrap items-center justify-between gap-3">
+        <%= f.file_field :file, accept: "text/csv,.csv", class: "input-file mt-0 w-auto" %>
         <%= f.submit "登録する", class: "btn-secondary" %>
       </div>
     <% end %>
