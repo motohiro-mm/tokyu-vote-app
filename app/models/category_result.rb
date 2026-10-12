@@ -20,8 +20,9 @@ class CategoryResult
     ]
   end
 
+  # コメントの無い候補は出さない（参考リポジトリと同じ。「コメントはありません」と並べると寂しいため）
   def targets
-    category.talk? ? talk_targets : entry_targets
+    (category.talk? ? talk_targets : entry_targets).select { |target| target.comments.any? }
   end
 
   private
