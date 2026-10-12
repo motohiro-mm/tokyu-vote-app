@@ -8,6 +8,8 @@
   --color-tokyu-pink: #e7008b;
   --color-tokyu-pink-dark: #c30174;
   --color-tokyu-pink-light: #fde7f2;
+  /* 管理画面のヘッダー。参加者向けの水色と一目で区別できる濃さにしている */
+  --color-tokyu-navy: #0b4f66;
 }
 
 @layer components {
