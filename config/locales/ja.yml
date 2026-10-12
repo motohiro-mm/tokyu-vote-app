@@ -39,7 +39,7 @@ ja:
             category:
               not_allowed_for_entry: にLT王は指定できません
             image:
-              invalid_content_type: は JPEG / PNG / GIF のみ登録できます
+              invalid_content_type: は JPEG / PNG のみ登録できます
               too_large: は %{max}MB 以下にしてください
         talk:
           attributes:
@@ -57,9 +57,12 @@ ja:
               already_voted: 同じLTには投票できません
   categories:
     descriptions:
-      food: 持ち寄った料理に投票する
-      drink: 持ち寄ったお酒に投票する
-      talk: 当日のLTに投票する
+      food: 美味しかった料理を%{max}つまで選んで、作った人に感想を届けましょう
+      drink: 美味しかったお酒を%{max}つまで選んで、持ってきた人に感想を届けましょう
+      talk: 心に残ったLTを%{max}つまで選んで、登壇者に感想を届けましょう
+    title_labels:
+      food: 作品名（食べ物の名前）
+      drink: 作品名（お酒の名前）
   enums:
     event:
       status:

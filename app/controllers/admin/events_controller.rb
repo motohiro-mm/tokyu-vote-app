@@ -13,7 +13,7 @@ class Admin::EventsController < Admin::BaseController
     @event = Event.new(event_params)
 
     if @event.save
-      redirect_to admin_event_path(@event), notice: "イベントを作成しました。"
+      redirect_to admin_event_path(@event), notice: "#{Event.model_name.human}を作成しました。"
     else
       render :new, status: :unprocessable_entity
     end
@@ -26,7 +26,7 @@ class Admin::EventsController < Admin::BaseController
 
   def update
     if @event.update(status_param)
-      redirect_to admin_event_path(@event), notice: "ステータスを変更しました。"
+      redirect_to admin_event_path(@event), notice: "#{Event.human_attribute_name(:status)}を変更しました。"
     else
       @talks = talks
       @rankings = rankings if @event.counting_started?

@@ -31,7 +31,7 @@ RSpec.describe "結果画面", type: :request do
 
     get event_results_path(event, category: "talk")
 
-    expect(response.body).to include("LT王（単品王）", "Ruby の話", "よかった")
+    expect(response.body).to include("LT王", "Ruby の話", "よかった")
   end
 
   it "イベント画面から各部門の結果へ行ける" do

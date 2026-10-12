@@ -12,7 +12,30 @@ RSpec.describe "LT候補の管理", type: :request do
 
     get admin_event_path(event)
 
-    expect(response.body).to include("Ruby の話", "欠席の話", "キャンセル", new_admin_event_talk_path(event))
+    expect(response.body).to include("LTの一覧", "Ruby の話", "欠席の話", "キャンセル", new_admin_event_talk_path(event))
+  end
+
+  it "公開中のあいだはまだLTを登録できる" do
+    event.open!
+
+    expect {
+      post admin_event_talks_path(event), params: { talk: { user_name: "とうだんしゃ", title: "Ruby の話" } }
+    }.to change(event.talks, :count).by(1)
+  end
+
+  it "集計中になるとLTを登録できず、管理画面にも登録の導線を出さない" do
+    event.counting!
+
+    get admin_event_path(event)
+    expect(response.body).not_to include(new_admin_event_talk_path(event))
+
+    get new_admin_event_talk_path(event)
+    expect(response).to redirect_to admin_event_path(event)
+
+    expect {
+      post admin_event_talks_path(event), params: { talk: { user_name: "とうだんしゃ", title: "Ruby の話" } }
+    }.not_to change(Talk, :count)
+    expect(flash[:alert]).to eq "LTの登録は準備中・公開中のあいだだけできます。"
   end
 
   it "管理者はLTを登録できる" do
@@ -94,6 +117,15 @@ RSpec.describe "LT候補の管理", type: :request do
         upload("登壇者名,LTタイトル\nとうだんしゃ1,Ruby の話\nとうだんしゃ2,\n")
       }.not_to change(Talk, :count)
       expect(flash[:alert]).to include("3 行目")
+    end
+
+    it "集計中になると CSV でも登録できない" do
+      event.counting!
+
+      expect {
+        upload("登壇者名,LTタイトル\nとうだんしゃ1,Ruby の話\n")
+      }.not_to change(Talk, :count)
+      expect(flash[:alert]).to eq "LTの登録は準備中・公開中のあいだだけできます。"
     end
 
     it "ファイルが無ければ知らせる" do

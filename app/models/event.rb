@@ -14,7 +14,11 @@ class Event < ApplicationRecord
     self.class.status_label(status)
   end
 
-  # 途中経過が見えると投票が偏りかねないので、管理者にも受付を締め切るまで集計を見せない
+  # 集計に入ってから候補が増えると票の扱いが決まらないため、LT の登録は受付中まで
+  def accepting_talks?
+    preparing? || open?
+  end
+
   def counting_started?
     counting? || closed?
   end

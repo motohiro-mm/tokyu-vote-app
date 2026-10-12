@@ -4,6 +4,7 @@ class Admin::TalkImportsController < Admin::BaseController
   CSV_MAX_SIZE = 1.megabyte
 
   before_action :set_event
+  before_action :require_accepting_talks
 
   def create
     file = params[:file]
@@ -28,5 +29,11 @@ class Admin::TalkImportsController < Admin::BaseController
 
   def set_event
     @event = Event.find(params[:event_id])
+  end
+
+  def require_accepting_talks
+    return if @event.accepting_talks?
+
+    redirect_to admin_event_path(@event), alert: "LTの登録は#{Event.status_label(:preparing)}・#{Event.status_label(:open)}のあいだだけできます。"
   end
 end

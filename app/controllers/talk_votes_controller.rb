@@ -15,6 +15,7 @@ class TalkVotesController < ApplicationController
   end
 
   def completions
+    @category = Category.find_by_name!(:talk)
     @remaining_votes = TalkVote.remaining_for(current_user, @event)
   end
 

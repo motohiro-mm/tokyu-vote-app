@@ -1,5 +1,5 @@
 class Entry < ApplicationRecord
-  IMAGE_CONTENT_TYPES = %w[image/jpeg image/png image/gif].freeze
+  IMAGE_CONTENT_TYPES = %w[image/jpeg image/png].freeze
   # スマホの高画素モード（48MP 前後）の JPEG でも 15MB に収まるため、通常の撮影を弾かずに
   # 異常に大きなファイルだけを止められる値にしている
   IMAGE_MAX_SIZE = 20.megabytes

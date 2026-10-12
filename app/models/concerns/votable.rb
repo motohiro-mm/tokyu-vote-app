@@ -7,7 +7,11 @@ module Votable
 
   TOP_RANKS = 3
 
-  RankingRow = Data.define(:rank, :name, :title, :vote_count)
+  RankingRow = Data.define(:rank, :name, :title, :vote_count, :entry_titles) do
+    def initialize(entry_titles: [], **rest)
+      super
+    end
+  end
 
   included do
     belongs_to :user
@@ -34,7 +38,8 @@ module Votable
         previous_count = source[:vote_count]
         next if rank > TOP_RANKS
 
-        RankingRow.new(rank: rank, name: source[:name], title: source[:title], vote_count: source[:vote_count])
+        RankingRow.new(rank: rank, name: source[:name], title: source[:title], vote_count: source[:vote_count],
+                       entry_titles: source.fetch(:entry_titles, []))
       end
     end
   end

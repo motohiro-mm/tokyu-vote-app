@@ -1,8 +1,8 @@
 <% content_for :title, @event.title %>
-<h1 class="text-xl font-bold"><%= @event.title %></h1>
+<h1 class="page-title"><%= @event.title %></h1>
 
-<div class="mt-6 rounded border border-stone-200 bg-white p-5">
-  <h2 class="font-bold">ステータス</h2>
+<div class="card mt-6">
+  <h2 class="section-title"><%= Event.human_attribute_name(:status) %></h2>
   <p class="mt-1 text-sm text-stone-500">
     現在: <%= @event.status_label %>
   </p>
@@ -11,15 +11,16 @@
     <%= f.select :status,
                  Event.statuses.keys.map { |status| [ Event.status_label(status), status ] },
                  {},
-                 class: "rounded border border-stone-300 px-3 py-2" %>
-    <%= f.submit "変更する", class: "rounded bg-stone-900 px-4 py-2 text-sm text-white" %>
+                 class: "input mt-0 w-auto" %>
+    <%# 集計中にすると投票が止まり、結果公開にすると参加者に見えるため、押し間違いを一度止める %>
+    <%= f.submit "変更する", class: "btn-primary", data: { turbo_confirm: "#{Event.human_attribute_name(:status)}を変更します。よろしいですか？" } %>
   <% end %>
 </div>
 
 <%= render "admin/talks/list", event: @event, talks: @talks %>
 
-<div class="mt-6 rounded border border-stone-200 bg-white p-5">
-  <h2 class="font-bold">集計</h2>
+<div class="card mt-6">
+  <h2 class="section-title">集計</h2>
   <% if @rankings %>
     <p class="mt-1 text-sm text-stone-500">
       参加者には <%= Event.status_label(:closed) %> にするまで見えません。
@@ -32,9 +33,13 @@
     </div>
   <% else %>
     <p class="mt-1 text-sm text-stone-500">
-      ステータスを <%= Event.status_label(:counting) %> にすると表示されます。
+      <%= Event.human_attribute_name(:status) %>を <%= Event.status_label(:counting) %> にすると表示されます。
     </p>
   <% end %>
 </div>
 
-<%= link_to "一覧に戻る", admin_events_path, class: "mt-6 inline-block text-sm underline" %>
+<div class="mt-8 text-center">
+
+  <%= link_to "一覧に戻る", admin_events_path, class: "btn-secondary" %>
+
+</div>

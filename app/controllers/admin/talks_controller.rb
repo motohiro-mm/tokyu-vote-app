@@ -1,6 +1,7 @@
 class Admin::TalksController < Admin::BaseController
   before_action :set_event
   before_action :set_talk, only: [ :edit, :update ]
+  before_action :require_accepting_talks, only: [ :new, :create ]
 
   def new
     @talk = @event.talks.build
@@ -34,6 +35,12 @@ class Admin::TalksController < Admin::BaseController
 
   def set_talk
     @talk = @event.talks.find(params[:id])
+  end
+
+  def require_accepting_talks
+    return if @event.accepting_talks?
+
+    redirect_to admin_event_path(@event), alert: "LTの登録は#{Event.status_label(:preparing)}・#{Event.status_label(:open)}のあいだだけできます。"
   end
 
   def talk_params

@@ -11,10 +11,13 @@
           <span class="min-w-0 flex-1 break-words">
             <%# 合算王は個々の作品ではなく人を並べるため作品名を持たない %>
             <% if row.title.present? %>
-              <span class="font-bold"><%= row.title %></span>
-              <span class="text-stone-500">（<%= row.name %>）</span>
+              <span class="block font-bold"><%= row.title %></span>
+              <span class="block text-stone-500"><%= row.name %></span>
             <% else %>
-              <span class="font-bold"><%= row.name %></span>
+              <span class="block font-bold"><%= row.name %></span>
+              <% if row.entry_titles.any? %>
+                <span class="block text-stone-500"><%= row.entry_titles.join("・") %></span>
+              <% end %>
             <% end %>
           </span>
           <span class="shrink-0"><%= row.vote_count %>票</span>
