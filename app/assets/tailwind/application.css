@@ -1,1 +1,41 @@
 @import "tailwindcss";
+
+/* イベントのロゴ（水色の背景にピンクの文字）から取った色。他の色はロゴに合わせて抑える */
+@theme {
+  --color-tokyu-blue: #00b1d9;
+  --color-tokyu-blue-dark: #0088a8;
+  --color-tokyu-blue-light: #e6f7fb;
+  --color-tokyu-pink: #e7008b;
+  --color-tokyu-pink-dark: #c30174;
+  --color-tokyu-pink-light: #fde7f2;
+}
+
+@layer components {
+  .page-title {
+    @apply text-2xl font-bold text-tokyu-pink;
+  }
+  .section-title {
+    @apply font-bold text-tokyu-blue-dark;
+  }
+  .card {
+    @apply rounded-xl border border-tokyu-blue/20 bg-white p-5 shadow-sm;
+  }
+  .card-link {
+    @apply block rounded-xl border border-tokyu-blue/20 bg-white px-5 py-4 shadow-sm hover:border-tokyu-blue hover:bg-tokyu-blue-light;
+  }
+  .btn-primary {
+    @apply inline-block rounded-full bg-tokyu-blue px-5 py-2 text-sm font-bold text-white hover:bg-tokyu-blue-dark;
+  }
+  .btn-secondary {
+    @apply inline-block rounded-full border border-tokyu-blue bg-white px-5 py-2 text-sm font-bold text-tokyu-blue-dark hover:bg-tokyu-blue-light;
+  }
+  .text-link {
+    @apply text-tokyu-pink-dark underline hover:text-tokyu-pink;
+  }
+  .input {
+    @apply mt-1 w-full rounded-md border border-stone-300 px-3 py-2 focus:border-tokyu-blue focus:outline-none focus:ring-2 focus:ring-tokyu-blue/30;
+  }
+  .badge-done {
+    @apply shrink-0 rounded-full bg-tokyu-pink-light px-4 py-2 text-sm font-bold text-tokyu-pink-dark;
+  }
+}

@@ -1,6 +1,6 @@
 <%= form_with model: [ :admin, @event, talk ], class: "mt-6 space-y-4" do |f| %>
   <% if talk.errors.any? %>
-    <ul class="rounded bg-red-50 px-4 py-3 text-sm text-red-800">
+    <ul class="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800">
       <% talk.errors.full_messages.each do |message| %>
         <li><%= message %></li>
       <% end %>
@@ -9,12 +9,12 @@
 
   <div>
     <%= f.label :user_name, class: "block text-sm font-bold" %>
-    <%= f.text_field :user_name, class: "mt-1 w-full rounded border border-stone-300 px-3 py-2" %>
+    <%= f.text_field :user_name, class: "input" %>
   </div>
 
   <div>
     <%= f.label :title, class: "block text-sm font-bold" %>
-    <%= f.text_field :title, class: "mt-1 w-full rounded border border-stone-300 px-3 py-2" %>
+    <%= f.text_field :title, class: "input" %>
   </div>
 
   <% if talk.persisted? %>
@@ -24,11 +24,11 @@
       <%= f.select :status,
                    Talk.statuses.keys.map { |status| [ Talk.status_label(status), status ] },
                    {},
-                   class: "mt-1 rounded border border-stone-300 px-3 py-2" %>
+                   class: "input w-auto" %>
     </div>
   <% end %>
 
-  <%= f.submit submit_label, class: "rounded bg-stone-900 px-4 py-2 text-sm text-white" %>
+  <%= f.submit submit_label, class: "btn-primary" %>
 <% end %>
 
-<%= link_to "イベントに戻る", admin_event_path(@event), class: "mt-6 inline-block text-sm underline" %>
+<%= link_to "イベントに戻る", admin_event_path(@event), class: "btn-secondary mt-6" %>

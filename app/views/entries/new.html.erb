@@ -1,8 +1,8 @@
 <% content_for :title, "#{@category.label}に登録" %>
-<h1 class="text-xl font-bold"><%= @category.label %>に登録</h1>
+<h1 class="page-title"><%= @category.label %>に登録</h1>
 
 <% if @my_entries.present? %>
-  <div class="mt-4 rounded border border-stone-200 bg-white px-5 py-4 text-sm">
+  <div class="card mt-4 text-sm">
     <p class="font-bold">登録済みの作品</p>
     <ul class="mt-1 text-stone-600">
       <% @my_entries.each do |entry| %>
@@ -15,7 +15,7 @@
 <%= form_with model: @entry, url: event_entries_path(@event, category: @category.category_name),
               class: "mt-6 space-y-4" do |f| %>
   <% if @entry.errors.any? %>
-    <ul class="rounded bg-red-50 px-4 py-3 text-sm text-red-800">
+    <ul class="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800">
       <% @entry.errors.full_messages.each do |message| %>
         <li><%= message %></li>
       <% end %>
@@ -24,13 +24,13 @@
 
   <div>
     <%= f.label :title, "作品名", class: "block text-sm font-bold" %>
-    <%= f.text_field :title, class: "mt-1 w-full rounded border border-stone-300 px-3 py-2" %>
+    <%= f.text_field :title, class: "input" %>
   </div>
 
   <div>
     <%= f.label :description, "説明（アピールポイント）【任意】", class: "block text-sm font-bold" %>
     <span class="text-xs text-stone-500">300文字まで</span>
-    <%= f.text_area :description, rows: 5, class: "mt-1 w-full rounded border border-stone-300 px-3 py-2" %>
+    <%= f.text_area :description, rows: 5, class: "input" %>
   </div>
 
   <div>
@@ -39,7 +39,7 @@
     <%= f.file_field :image, accept: Entry::IMAGE_CONTENT_TYPES.join(","), class: "mt-1 block text-sm" %>
   </div>
 
-  <%= f.submit "登録する", class: "rounded bg-stone-900 px-4 py-2 text-sm text-white" %>
+  <%= f.submit "登録する", class: "btn-primary" %>
 <% end %>
 
-<%= link_to "戻る", event_entries_categories_path(@event), class: "mt-6 inline-block text-sm underline" %>
+<%= link_to "戻る", event_entries_categories_path(@event), class: "btn-secondary mt-6" %>
