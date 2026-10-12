@@ -28,6 +28,6 @@ class Category < ApplicationRecord
   end
 
   def description
-    I18n.t("categories.descriptions.#{category_name}")
+    I18n.t("categories.descriptions.#{category_name}", max: Votable::MAX_VOTES_PER_CATEGORY)
   end
 end

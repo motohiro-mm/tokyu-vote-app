@@ -18,4 +18,8 @@ RSpec.describe Category do
 
     expect(described_class.for_entries).to contain_exactly(food)
   end
+
+  it "投票の誘い文に部門ごとの票数を入れる" do
+    expect(create(:category, category_name: :food).description).to include("3つまで")
+  end
 end

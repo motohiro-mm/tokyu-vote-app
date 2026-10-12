@@ -57,9 +57,9 @@ ja:
               already_voted: 同じLTには投票できません
   categories:
     descriptions:
-      food: 持ち寄った料理に投票する
-      drink: 持ち寄ったお酒に投票する
-      talk: 当日のLTに投票する
+      food: 美味しかった料理を%{max}つまで選んで、作った人に感想を届けましょう
+      drink: 美味しかったお酒を%{max}つまで選んで、持ってきた人に感想を届けましょう
+      talk: 心に残ったLTを%{max}つまで選んで、登壇者に感想を届けましょう
   enums:
     event:
       status:
