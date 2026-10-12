@@ -12,7 +12,9 @@
                  Event.statuses.keys.map { |status| [ Event.status_label(status), status ] },
                  {},
                  class: "input mt-0 w-auto" %>
-    <%= f.submit "変更する", class: "btn-primary" %>
+    <div class="mt-4 text-center">
+      <%= f.submit "変更する", class: "btn-primary" %>
+    </div>
   <% end %>
 </div>
 
@@ -37,4 +39,8 @@
   <% end %>
 </div>
 
-<%= link_to "一覧に戻る", admin_events_path, class: "btn-secondary mt-6" %>
+<div class="mt-8 text-center">
+
+  <%= link_to "一覧に戻る", admin_events_path, class: "btn-secondary" %>
+
+</div>

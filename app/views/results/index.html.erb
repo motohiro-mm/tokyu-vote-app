@@ -1,7 +1,11 @@
 <% content_for :title, "#{@category.label}の結果" %>
 <h1 class="page-title"><%= @category.label %>の結果</h1>
-<p class="mt-2 text-sm text-stone-500"><%= @event.title %></p>
+<p class="mt-2 text-center text-sm text-stone-500"><%= @event.title %></p>
 
 <%= render "results/result", result: @result, image_src: ->(image) { url_for(image) } %>
 
-<%= link_to "戻る", event_path(@event), class: "btn-secondary mt-6" %>
+<div class="mt-8 text-center">
+
+  <%= link_to "戻る", event_path(@event), class: "btn-secondary" %>
+
+</div>

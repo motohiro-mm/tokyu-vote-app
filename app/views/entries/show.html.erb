@@ -26,11 +26,17 @@
       <span class="text-xs text-stone-500">300文字まで</span>
       <%= f.text_area :comment, rows: 5,
                       class: "input mt-2" %>
-      <%= f.submit "投票する（残り #{@remaining_votes} 票）",
-                   class: "btn-primary mt-3" %>
+      <div class="mt-4 text-center">
+        <%= f.submit "投票する（残り #{@remaining_votes} 票）",
+                   class: "btn-primary" %>
+      </div>
     <% end %>
   <% end %>
 </div>
 
-<%= link_to "戻る", event_entries_path(@event, category: @category.category_name),
-            class: "btn-secondary mt-6" %>
+<div class="mt-8 text-center">
+
+  <%= link_to "戻る", event_entries_path(@event, category: @category.category_name),
+            class: "btn-secondary" %>
+
+</div>

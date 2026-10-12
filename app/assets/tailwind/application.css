@@ -12,7 +12,7 @@
 
 @layer components {
   .page-title {
-    @apply text-2xl font-bold text-tokyu-pink;
+    @apply text-center text-2xl font-bold text-tokyu-pink;
   }
   .section-title {
     @apply font-bold text-tokyu-blue-dark;

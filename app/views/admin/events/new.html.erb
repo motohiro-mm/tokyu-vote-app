@@ -15,7 +15,15 @@
     <%= f.text_field :title, class: "input" %>
   </div>
 
-  <%= f.submit "作成する", class: "btn-primary" %>
+  <div class="mt-4 text-center">
+
+    <%= f.submit "作成する", class: "btn-primary" %>
+
+  </div>
 <% end %>
 
-<%= link_to "一覧に戻る", admin_events_path, class: "btn-secondary mt-6" %>
+<div class="mt-8 text-center">
+
+  <%= link_to "一覧に戻る", admin_events_path, class: "btn-secondary" %>
+
+</div>
