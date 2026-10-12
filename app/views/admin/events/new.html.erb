@@ -1,5 +1,5 @@
-<% content_for :title, "イベントを作成" %>
-<h1 class="page-title">イベントを作成</h1>
+<% content_for :title, "#{Event.model_name.human}を作成" %>
+<h1 class="page-title"><%= Event.model_name.human %>を作成</h1>
 
 <%= form_with model: [ :admin, @event ], class: "mt-6 space-y-4" do |f| %>
   <% if @event.errors.any? %>

@@ -1,11 +1,11 @@
-<% content_for :title, "イベント管理" %>
+<% content_for :title, "#{Event.model_name.human}管理" %>
 <div class="flex items-baseline justify-between gap-4">
-  <h1 class="page-title">イベント管理</h1>
+  <h1 class="page-title"><%= Event.model_name.human %>管理</h1>
   <%= link_to "新規作成", new_admin_event_path, class: "btn-primary" %>
 </div>
 
 <% if @events.empty? %>
-  <p class="mt-6 text-stone-600">イベントがありません。</p>
+  <p class="mt-6 text-stone-600"><%= Event.model_name.human %>がありません。</p>
 <% else %>
   <ul class="mt-6 space-y-3">
     <% @events.each do |event| %>

@@ -2,7 +2,7 @@
 <h1 class="page-title"><%= @event.title %></h1>
 
 <div class="card mt-6">
-  <h2 class="section-title">ステータス</h2>
+  <h2 class="section-title"><%= Event.human_attribute_name(:status) %></h2>
   <p class="mt-1 text-sm text-stone-500">
     現在: <%= @event.status_label %>
   </p>
@@ -13,7 +13,7 @@
                  {},
                  class: "input mt-0 w-auto" %>
     <%# 集計中にすると投票が止まり、結果公開にすると参加者に見えるため、押し間違いを一度止める %>
-    <%= f.submit "変更する", class: "btn-primary", data: { turbo_confirm: "ステータスを変更します。よろしいですか？" } %>
+    <%= f.submit "変更する", class: "btn-primary", data: { turbo_confirm: "#{Event.human_attribute_name(:status)}を変更します。よろしいですか？" } %>
   <% end %>
 </div>
 
@@ -33,7 +33,7 @@
     </div>
   <% else %>
     <p class="mt-1 text-sm text-stone-500">
-      ステータスを <%= Event.status_label(:counting) %> にすると表示されます。
+      <%= Event.human_attribute_name(:status) %>を <%= Event.status_label(:counting) %> にすると表示されます。
     </p>
   <% end %>
 </div>

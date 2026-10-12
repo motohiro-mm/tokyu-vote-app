@@ -20,7 +20,7 @@
   <% if talk.persisted? %>
     <div>
       <%= f.label :status, class: "block text-sm font-bold" %>
-      <span class="text-xs text-stone-500">変更できるのはイベントが <%= Event.status_label(:preparing) %> のあいだだけ</span>
+      <span class="text-xs text-stone-500">変更できるのは<%= Event.model_name.human %>が <%= Event.status_label(:preparing) %> のあいだだけ</span>
       <%= f.select :status,
                    Talk.statuses.keys.map { |status| [ Talk.status_label(status), status ] },
                    {},
@@ -30,6 +30,6 @@
 
   <div class="mx-auto grid max-w-sm grid-cols-2 gap-4 pt-6">
     <%= f.submit submit_label, class: "btn-primary w-full" %>
-    <%= link_to "イベントに戻る", admin_event_path(@event), class: "btn-secondary w-full text-center" %>
+    <%= link_to "#{Event.model_name.human}に戻る", admin_event_path(@event), class: "btn-secondary w-full text-center" %>
   </div>
 <% end %>
