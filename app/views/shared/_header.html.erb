@@ -6,7 +6,7 @@
       <div class="flex min-w-0 items-center gap-3 text-sm whitespace-nowrap">
         <span class="truncate text-white"><%= current_user.name %></span>
         <% if current_user.admin? %>
-          <%= link_to "管理", admin_events_path, class: "shrink-0 font-bold text-white hover:underline" %>
+          <%= link_to "管理画面", admin_events_path, class: "shrink-0 font-bold text-white hover:underline" %>
         <% end %>
         <%= button_to "ログアウト", logout_path, method: :delete,
                       class: "shrink-0 rounded-full bg-white/20 px-3 py-1 text-white hover:bg-white/30" %>
