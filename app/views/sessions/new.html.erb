@@ -3,31 +3,16 @@
   <h1 class="page-title">TokyuRuby会議</h1>
   <p class="mt-4 leading-relaxed text-stone-700">
     本日はご来場いただき誠にありがとうございます。<br>
-    このアプリは、飯王と酒王への参加登録と投票のためのアプリです。
+    <%= Category.for_entries.joined_label %>へのエントリーと、<%= Category.joined_label %>への投票ができます。
   </p>
 </div>
 
-<ul class="mt-6 space-y-4">
-  <li class="card">
-    <p class="section-title">エントリー</p>
-    <p class="mt-1 text-sm text-stone-700">飯王と酒王へエントリーしたい料理・お酒を登録できます。</p>
-  </li>
-  <li class="card">
-    <p class="section-title">投票</p>
-    <p class="mt-1 text-sm text-stone-700">飯王・酒王・LT王に対して、それぞれ3票ずつ投票できます。</p>
-  </li>
-  <li class="card">
-    <p class="section-title">投票結果</p>
-    <p class="mt-1 text-sm text-stone-700">集計後、投票結果と感想を見ることができます。</p>
-  </li>
-</ul>
-
-<div class="card mt-6">
+<div class="card mt-6 text-center">
   <p class="text-sm text-stone-600">GitHub アカウントでログインします。</p>
   <% if github_configured? %>
     <%# GitHub への遷移はクロスオリジンのリダイレクトなので、Turbo の fetch では追えない %>
     <%= button_to "GitHub でログインする", "/auth/github", data: { turbo: false },
-                  class: "btn-primary mt-3" %>
+                  class: "btn-primary mt-3", form_class: "inline-block" %>
   <% else %>
     <p class="mt-3 rounded-lg bg-tokyu-blue-light px-3 py-2 text-sm text-stone-500">
       GitHub ログインは設定されていません。環境変数
