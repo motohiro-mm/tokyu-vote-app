@@ -70,6 +70,7 @@ ja:
         open: 公開中
         counting: 集計中
         closed: 結果公開
+        finished: 終了
     category:
       category_name:
         food: 飯王

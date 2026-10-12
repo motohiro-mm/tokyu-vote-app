@@ -12,7 +12,7 @@
                  Event.statuses.keys.map { |status| [ Event.status_label(status), status ] },
                  {},
                  class: "input mt-0 w-auto" %>
-    <%# 集計中にすると投票が止まり、結果公開にすると参加者に見えるため、押し間違いを一度止める %>
+    <%# 集計中にすると投票が止まり、結果公開にすると参加者に見え、終了にするとトップページから消えるため、押し間違いを一度止める %>
     <%= f.submit "変更する", class: "btn-primary", data: { turbo_confirm: "#{Event.human_attribute_name(:status)}を変更します。よろしいですか？" } %>
   <% end %>
 </div>
