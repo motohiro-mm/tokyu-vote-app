@@ -1,6 +1,9 @@
-<% content_for :title, "投票先を選ぶ" %>
-<h1 class="page-title">投票先を選ぶ</h1>
-<p class="mt-2 text-sm text-stone-500"><%= @category.label %></p>
+<% content_for :title, "#{@category.label}に投票する" %>
+<div class="flex items-center justify-between gap-4">
+  <h1 class="page-title text-left"><%= @category.label %>に投票する</h1>
+  <%# 会場で候補が増えていくため、その場で一覧を取り直せるようにする %>
+  <%= link_to "更新", request.fullpath, class: "btn-secondary shrink-0", data: { turbo_action: "replace" } %>
+</div>
 
 <div class="card mt-4">
   <p>投票できる数: <span class="font-bold"><%= @remaining_votes %></span> 票</p>
@@ -42,4 +45,8 @@
   </ul>
 <% end %>
 
-<%= link_to "戻る", event_votes_categories_path(@event), class: "btn-secondary mt-6" %>
+<div class="mt-8 text-center">
+
+  <%= link_to "戻る", event_votes_categories_path(@event), class: "btn-secondary" %>
+
+</div>
