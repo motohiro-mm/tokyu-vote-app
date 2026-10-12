@@ -6,8 +6,8 @@
     <li>
       <%= link_to category.talk? ? event_talks_path(@event) : event_entries_path(@event, category: category.category_name),
                   class: "card-link" do %>
-        <span class="font-bold"><%= category.label %>に投票する</span>
-        <span class="ml-2 text-sm text-stone-500"><%= category.description %></span>
+        <span class="block font-bold"><%= category.label %>に投票する</span>
+        <span class="mt-1 block text-sm text-stone-500"><%= category.description %></span>
       <% end %>
     </li>
   <% end %>
