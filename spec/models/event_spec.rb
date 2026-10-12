@@ -18,4 +18,10 @@ RSpec.describe Event do
 
     expect(started).to eq %w[counting closed]
   end
+
+  it "準備中と公開中のあいだだけLTを登録できる" do
+    accepting = described_class.statuses.keys.select { |status| build(:event, status: status).accepting_talks? }
+
+    expect(accepting).to eq %w[preparing open]
+  end
 end
