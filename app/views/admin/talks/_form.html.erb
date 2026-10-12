@@ -28,15 +28,8 @@
     </div>
   <% end %>
 
-  <div class="mt-4 text-center">
-
+  <div class="flex items-center justify-center gap-4 pt-6">
     <%= f.submit submit_label, class: "btn-primary" %>
-
+    <%= link_to "イベントに戻る", admin_event_path(@event), class: "btn-secondary" %>
   </div>
 <% end %>
-
-<div class="mt-8 text-center">
-
-  <%= link_to "イベントに戻る", admin_event_path(@event), class: "btn-secondary" %>
-
-</div>
