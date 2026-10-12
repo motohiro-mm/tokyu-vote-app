@@ -7,16 +7,16 @@
   </p>
 </div>
 
-<div class="card mt-6 text-center">
+<div class="mt-8 text-center">
   <% if github_configured? %>
     <%# GitHub への遷移はクロスオリジンのリダイレクトなので、Turbo の fetch では追えない %>
     <%= button_to "GitHub でログインする", "/auth/github", data: { turbo: false },
-                  class: "btn-primary", form_class: "inline-block" %>
+                  class: "btn-primary px-10 py-3 text-base shadow-lg", form_class: "inline-block" %>
   <% else %>
-    <p class="mt-3 rounded-lg bg-tokyu-blue-light px-3 py-2 text-sm text-stone-500">
+    <p class="mt-3 rounded-lg bg-white px-3 py-2 text-sm text-stone-500">
       GitHub ログインは設定されていません。環境変数
-      <code class="rounded bg-white px-1">GITHUB_CLIENT_ID</code> と
-      <code class="rounded bg-white px-1">GITHUB_CLIENT_SECRET</code> を設定してください。
+      <code class="rounded bg-tokyu-blue-light px-1">GITHUB_CLIENT_ID</code> と
+      <code class="rounded bg-tokyu-blue-light px-1">GITHUB_CLIENT_SECRET</code> を設定してください。
     </p>
   <% end %>
 </div>
@@ -28,7 +28,7 @@
 
     <% if @users.blank? %>
       <p class="mt-3 text-sm text-amber-800">
-        ユーザーがいません。<code class="rounded bg-white px-1">bin/rails demo:setup</code> を実行してください。
+        ユーザーがいません。<code class="rounded bg-tokyu-blue-light px-1">bin/rails demo:setup</code> を実行してください。
       </p>
     <% else %>
       <ul class="mt-3 space-y-2">
