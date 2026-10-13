@@ -13,7 +13,9 @@
 </div>
 
 <div class="card mt-6">
-  <% if @voted %>
+  <% if @entry.user_id == current_user.id %>
+    <p class="text-sm text-stone-500">自分のエントリーには投票できません。</p>
+  <% elsif @voted %>
     <p class="text-sm text-tokyu-pink-dark">このエントリーには投票済みです。</p>
   <% elsif !@event.open? %>
     <p class="text-sm text-stone-500">投票を受け付けていません。</p>
