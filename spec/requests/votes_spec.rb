@@ -18,6 +18,13 @@ RSpec.describe "投票", type: :request do
     expect { cast(entry) }.to change(Vote, :count).by(1)
   end
 
+  it "自分のエントリーには投票できない" do
+    entry = create(:entry, event: event, category: food, user: user)
+
+    expect { cast(entry) }.not_to change(Vote, :count)
+    expect(flash[:alert]).to include("自分のエントリーには投票できません")
+  end
+
   it "同じエントリーには2回投票できない" do
     entry = create(:entry, event: event, category: food)
     cast(entry)
