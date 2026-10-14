@@ -14,7 +14,6 @@ class VotesController < ApplicationController
     # 同じユーザーの投票を直列化する。ロックのあとで残票と重複を読み直してから保存する。
     # count < 3 だけだと、別の対象への同時 POST が 3 票を超えられる。
     current_user.with_lock do
-      vote.validate!
       vote.save!
     end
 
