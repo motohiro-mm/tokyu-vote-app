@@ -54,13 +54,9 @@ Rails.application.configure do
   # Only use :id for inspections in production.
   config.active_record.attributes_for_inspect = [ :id ]
 
-  # Host ヘッダー偽装対策。ホスト名は環境ごとに違うので Kamal の env で与える。
-  # APP_HOST は画面 URL の基準（1つ）。別名は APP_HOST_ALIASES（カンマ区切り）。
+  # Host ヘッダー偽装対策。ホスト名は環境ごとに違うので Kamal の env（APP_HOST）で与える。
   # 未設定なら全ホストを許可する（ローカルで production を試すときのため）
-  [ ENV["APP_HOST"], *ENV["APP_HOST_ALIASES"].to_s.split(",") ].each do |host|
-    host = host.to_s.strip
-    config.hosts << host if host.present?
-  end
+  config.hosts << ENV["APP_HOST"] if ENV["APP_HOST"].present?
 
   # ヘルスチェックはホスト名無しで叩かれるので検証から除外する
   config.host_authorization = { exclude: ->(request) { request.path == "/up" } }

@@ -30,7 +30,7 @@ jobs:
     # Environment の Secrets と承認ルール（production は Required reviewers）を使う
     environment:
       name: ${{ inputs.destination }}
-      url: ${{ inputs.destination == 'production' && 'https://vote.gohansummit.com' || 'https://vote-staging.gohansummit.com' }}
+      url: ${{ inputs.destination == 'production' && 'https://vote.gohansummit.com' || 'https://stg-tokyu-ranking.3arc.dev' }}
     permissions:
       contents: read
       packages: write # GITHUB_TOKEN で ghcr.io にイメージを push する
