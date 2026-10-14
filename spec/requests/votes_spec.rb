@@ -67,4 +67,58 @@ RSpec.describe "投票", type: :request do
     expect { cast(entry) }.not_to change(Vote, :count)
     expect(response).to redirect_to login_path
   end
+
+  it "ユニーク制約に当たっても500にせず同じエントリーへの案内を返す" do
+    entry = create(:entry, event: event, category: food)
+    cast(entry)
+    allow_any_instance_of(Vote).to receive(:valid?).and_return(true)
+
+    expect { cast(entry) }.not_to change(Vote, :count)
+    expect(response).to have_http_status(:redirect)
+    expect(flash[:alert]).to include("同じエントリーには投票できません")
+  end
+
+  # トランザクションで包むとスレッドが同じ接続を使い、同時実行にならない
+  describe "同時に届いた投票" do
+    self.use_transactional_tests = false
+    uses_transaction "2スレッドが別々の対象に投票しても3票を超えない"
+    uses_transaction "同じ対象への同時投票は500にならない"
+
+    after do
+      Vote.delete_all
+      TalkVote.delete_all
+      Entry.delete_all
+      Talk.delete_all
+      User.delete_all
+      Event.delete_all
+      Category.delete_all
+    end
+
+    it "2スレッドが別々の対象に投票しても3票を超えない" do
+      2.times { cast(create(:entry, event: event, category: food)) }
+      targets = Array.new(2) { create(:entry, event: event, category: food) }
+      payloads = targets.map do |entry|
+        [ event_votes_path(event), { vote: { entry_id: entry.id, comment: "同時" } } ]
+      end
+
+      sessions = post_concurrently(payloads)
+
+      expect(Vote.cast_by(user, event, food).count).to eq(3)
+      expect(Vote.where(user: user, entry_id: targets.map(&:id)).count).to eq(1)
+      expect(sessions.map(&:response)).to all(be_redirect)
+    end
+
+    it "同じ対象への同時投票は500にならない" do
+      entry = create(:entry, event: event, category: food)
+
+      sessions = post_concurrently([
+        [ event_votes_path(event), { vote: { entry_id: entry.id, comment: "同時1" } } ],
+        [ event_votes_path(event), { vote: { entry_id: entry.id, comment: "同時2" } } ]
+      ])
+
+      expect(Vote.where(user: user, entry: entry).count).to eq(1)
+      expect(sessions.map(&:response)).to all(be_redirect)
+      expect(sessions.filter_map { |session| session.flash[:alert] }.join).to include("同じエントリーには投票できません")
+    end
+  end
 end
