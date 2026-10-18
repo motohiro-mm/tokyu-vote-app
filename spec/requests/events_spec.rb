@@ -91,6 +91,49 @@ RSpec.describe "イベント画面", type: :request do
     expect(response.body).not_to include(event_votes_categories_path(event))
   end
 
+  it "回次のURLでそのイベントの画面を開く" do
+    event.update!(slug: "17", held_on: Date.new(2026, 10, 18), title: "第17回の投票")
+
+    get "/17"
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("第17回の投票")
+    expect(response.body).to include(I18n.l(Date.new(2026, 10, 18), format: :long))
+    expect(response.body).to include(event_entries_categories_path(event))
+  end
+
+  it "数値IDのURLでも同じ画面を開く" do
+    event.update!(slug: "17", title: "第17回の投票")
+
+    get event_path(event)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("第17回の投票")
+  end
+
+  it "存在しない回次は見つからない" do
+    get "/99"
+
+    expect(response).to have_http_status(:not_found)
+  end
+
+  it "予約パスは回次URLにしない" do
+    event.update!(slug: "17", title: "第17回の投票")
+
+    get "/login"
+    expect(response).to have_http_status(:ok)
+    expect(response.body).not_to include("第17回の投票")
+
+    get "/up"
+    expect(response).to have_http_status(:ok)
+    expect(response.body).not_to include("第17回の投票")
+
+    %w[logout terms privacy admin auth events].each do |path|
+      get "/#{path}"
+      expect(response.body).not_to include("第17回の投票")
+    end
+  end
+
   it "利用規約とプライバシーポリシーはログイン不要" do
     delete logout_path
 

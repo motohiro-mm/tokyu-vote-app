@@ -27,7 +27,11 @@ namespace :demo do
       end
     end
 
-    event = Event.find_or_create_by!(title: "TokyuRuby会議デモ") { |e| e.status = :open }
+    event = Event.find_or_create_by!(title: "TokyuRuby会議デモ") do |e|
+      e.status = :open
+      e.slug = "demo"
+      e.held_on = Date.new(2026, 10, 18)
+    end
 
     food = Category.find_by!(category_name: :food)
     drink = Category.find_by!(category_name: :drink)
@@ -66,7 +70,11 @@ namespace :demo do
     # 持ち込みは 4 人に絞り、同じ人が複数持ち込むことで単品王と合算王の顔ぶれが変わるようにする
     cooks = voters.first(4)
 
-    event = Event.find_or_create_by!(title: "デモイベント") { |e| e.status = :closed }
+    event = Event.find_or_create_by!(title: "デモイベント") do |e|
+      e.status = :closed
+      e.slug = "demo-results"
+      e.held_on = Date.new(2026, 10, 18)
+    end
     event.update!(status: :closed) unless event.closed?
 
     food = Category.find_by!(category_name: :food)

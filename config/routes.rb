@@ -40,4 +40,10 @@ Rails.application.routes.draw do
   end
 
   get "up" => "rails/health#show", as: :rails_health_check
+
+  # 回次の公開URL。/17 のようにスラッグだけでイベント画面を開く。
+  # ログインや管理画面など予約パスは、上のルートに加えてここでも受けない。
+  get "/:slug", to: "events#show", as: :event_by_slug, constraints: ->(request) {
+    Event.public_slug?(request.path.delete_prefix("/"))
+  }
 end

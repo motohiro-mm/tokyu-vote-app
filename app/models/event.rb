@@ -1,4 +1,9 @@
 class Event < ApplicationRecord
+  # /:slug が既存の画面を奪わないための予約語。routes.rb の制約と揃える
+  RESERVED_SLUGS = %w[login logout terms privacy up admin auth events].freeze
+  # 回次の公開キー。例: "17" や "tokyu-17"。英数字とハイフン以外は URL にしない
+  SLUG_FORMAT = /\A[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*\z/
+
   # finished は結果公開を終えて役目を終えた状態。トップページで次のイベントが作られるまで
   # 前回の結果を出し続けないために、closed とは別に持つ
   enum :status, { preparing: 0, open: 1, counting: 2, closed: 3, finished: 4 }, validate: true
@@ -9,7 +14,20 @@ class Event < ApplicationRecord
   has_many :entries, dependent: :destroy
   has_many :talks, dependent: :destroy
 
+  before_validation :normalize_slug
+
   validates :title, presence: true
+  # DB では既存行のために null を許す。新規作成と管理画面の開催情報の更新では必須。
+  # ステータス変更は :update のままなので、未設定の既存行でも止めない
+  validates :held_on, presence: true, on: %i[create edition]
+  validates :slug, presence: true, on: %i[create edition]
+  validates :slug, uniqueness: { allow_nil: true }, format: { with: SLUG_FORMAT, allow_nil: true }
+  validate :slug_not_reserved
+
+  def self.public_slug?(value)
+    slug = value.to_s.delete_prefix("/").delete_suffix("/")
+    slug.match?(SLUG_FORMAT) && RESERVED_SLUGS.exclude?(slug)
+  end
 
   def self.status_label(status)
     I18n.t("enums.event.status.#{status}")
@@ -31,5 +49,18 @@ class Event < ApplicationRecord
   # 終了しても結果そのものは消さず、URL を知っていれば見られるようにしておく
   def results_published?
     closed? || finished?
+  end
+
+  private
+
+  def normalize_slug
+    self.slug = slug.strip.presence if slug.is_a?(String)
+  end
+
+  def slug_not_reserved
+    return if slug.blank?
+    return if RESERVED_SLUGS.exclude?(slug)
+
+    errors.add(:slug, :reserved)
   end
 end

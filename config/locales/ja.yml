@@ -12,6 +12,8 @@ ja:
       event:
         title: タイトル
         status: ステータス
+        held_on: 開催日
+        slug: スラッグ
       entry:
         user: 登録者
         event: イベント
@@ -34,6 +36,11 @@ ja:
         comment: コメント
     errors:
       models:
+        event:
+          attributes:
+            slug:
+              invalid: は半角英数字とハイフンのみ使えます
+              reserved: は予約済みのパスなので使えません
         entry:
           attributes:
             category:

@@ -1,5 +1,8 @@
 <% content_for :title, @event.title %>
 <h1 class="page-title"><%= @event.title %></h1>
+<% if @event.held_on %>
+  <p class="mt-2 text-center text-sm text-stone-500"><%= l(@event.held_on, format: :long) %></p>
+<% end %>
 
 <% if @event.results_published? %>
   <h2 class="mt-8 text-center section-title">投票結果</h2>
