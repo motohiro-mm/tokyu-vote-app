@@ -123,7 +123,7 @@ RSpec.describe Vote do
       rows = described_class.ranking_by_entry(event, category)
 
       expect(rows.map(&:vote_count)).to eq [ 1 ]
-      expect(rows.first.name).to eq entry.user.name
+      expect(rows.first.name).to eq entry.user_name
     end
   end
 
@@ -140,6 +140,18 @@ RSpec.describe Vote do
       expect(rows.map(&:name).first).to eq "もとひろ"
       expect(rows.map(&:vote_count)).to eq [ 4, 3 ]
       expect(rows.first.entry_titles).to eq [ "唐揚げ", "ポテトサラダ" ]
+    end
+
+    it "ユーザーの現在の名前を変えても、登録時の名前とランキングの表示名は変わらない" do
+      cook = create(:user, name: "もとひろ")
+      entry = create(:entry, user: cook, event: event, category: category, title: "唐揚げ")
+      vote_for(entry, 1)
+
+      cook.update!(name: "あたらしい名前")
+
+      expect(entry.reload.user_name).to eq "もとひろ"
+      expect(described_class.ranking_by_entry(event, category).first.name).to eq "もとひろ"
+      expect(described_class.ranking_by_user(event, category).first.name).to eq "もとひろ"
     end
 
     it "部門をまたいでは合算しない" do

@@ -53,6 +53,18 @@ RSpec.describe Entry do
     expect(build(:entry)).to be_valid
   end
 
+  it "登録時にユーザーの名前を写し、渡した名前やその後の改名では変わらない" do
+    user = create(:user, name: "もとひろ")
+    entry = create(:entry, user: user, user_name: "別人")
+
+    expect(entry.user_name).to eq "もとひろ"
+
+    user.update!(name: "あたらしい名前")
+
+    expect { entry.update!(user_name: "さらに別人") }.to raise_error(ActiveRecord::ReadonlyAttributeError)
+    expect(entry.reload.user_name).to eq "もとひろ"
+  end
+
   it "削除すると投じられた票も消える" do
     entry = create(:entry)
     create(:vote, entry: entry)

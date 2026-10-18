@@ -14,6 +14,7 @@ ja:
         status: ステータス
       entry:
         user: 登録者
+        user_name: 登録者名
         event: イベント
         category: 部門
         title: 作品名

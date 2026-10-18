@@ -31,6 +31,16 @@ RSpec.describe CategoryResult do
     expect(targets.first.comments).to eq([ "おいしかった", "また食べたい" ])
   end
 
+  it "コメント対象の名前は登録時のものを使い、改名後も変わらない" do
+    cook = create(:user, name: "もとひろ")
+    entry = create(:entry, user: cook, event: event, category: food, title: "唐揚げ")
+    create(:vote, entry: entry, comment: "おいしかった")
+
+    cook.update!(name: "あたらしい名前")
+
+    expect(described_class.new(event, food).targets.first.name).to eq "もとひろ"
+  end
+
   it "ほかの部門やイベントのエントリーを混ぜない" do
     drink = create(:category, category_name: :drink)
     create(:entry, event: event, category: drink)

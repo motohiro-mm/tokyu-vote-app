@@ -13,6 +13,30 @@ RSpec.describe "エントリー", type: :request do
     }.to change(Entry, :count).by(1)
   end
 
+  it "登録時の名前を記録し、パラメータでは指定できない" do
+    user.update!(name: "もとひろ")
+
+    post event_entries_path(event, category: "food"), params: { entry: { title: "唐揚げ", user_name: "別人" } }
+
+    expect(Entry.last.user_name).to eq "もとひろ"
+  end
+
+  it "一覧と詳細は登録時の名前を出し、改名後も追従しない" do
+    cook = create(:user, name: "もとひろ")
+    entry = create(:entry, event: event, category: food, user: cook, title: "唐揚げ")
+    cook.update!(name: "あたらしい名前")
+
+    get event_entries_path(event, category: "food")
+
+    expect(response.body).to include("もとひろ")
+    expect(response.body).not_to include("あたらしい名前")
+
+    get event_entry_path(event, entry, category: "food")
+
+    expect(response.body).to include("もとひろ")
+    expect(response.body).not_to include("あたらしい名前")
+  end
+
   it "登録すると登録完了画面へ送る" do
     post event_entries_path(event, category: "food"), params: { entry: { title: "唐揚げ" } }
 

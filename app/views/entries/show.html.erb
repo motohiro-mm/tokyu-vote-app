@@ -6,7 +6,7 @@
     <%= image_tag @entry.image, class: "mb-4 w-full rounded object-cover" %>
   <% end %>
   <p class="text-lg font-bold break-words">「<%= @entry.title %>」</p>
-  <p class="mt-1 text-stone-600"><%= @entry.user.name %></p>
+  <p class="mt-1 text-stone-600"><%= @entry.user_name %></p>
   <% if @entry.description.present? %>
     <p class="mt-3 whitespace-pre-wrap break-words text-stone-700"><%= @entry.description %></p>
   <% end %>

@@ -29,10 +29,10 @@ class CategoryResult
   def entry_targets
     comments = comments_by(Vote.in_category(event, category), :entry_id)
 
-    event.entries.where(category: category).includes(:user).with_attached_image.order(:id).map do |entry|
+    event.entries.where(category: category).with_attached_image.order(:id).map do |entry|
       Target.new(
         title: entry.title,
-        name: entry.user.name,
+        name: entry.user_name,
         image: (entry.image if entry.image.attached?),
         comments: comments.fetch(entry.id, [])
       )

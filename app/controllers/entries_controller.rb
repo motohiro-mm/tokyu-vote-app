@@ -9,8 +9,8 @@ class EntriesController < ApplicationController
   end
 
   def index
-    @entries = @event.entries.where(category: @category).includes(:user).with_attached_image.order(:id)
-    @voted_entries = Vote.cast_by(current_user, @event, @category).includes(entry: :user).map(&:entry)
+    @entries = @event.entries.where(category: @category).with_attached_image.order(:id)
+    @voted_entries = Vote.cast_by(current_user, @event, @category).includes(:entry).map(&:entry)
     @voted_entry_ids = @voted_entries.map(&:id)
     @remaining_votes = Vote.remaining_for(current_user, @event, @category)
   end
@@ -51,6 +51,7 @@ class EntriesController < ApplicationController
   end
 
   def entry_params
+    # user_name は登録時にモデルが current_user.name を写す。参加者は指定も変更もできない
     params.expect(entry: [ :title, :description, :image ])
   end
 end

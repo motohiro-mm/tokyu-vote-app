@@ -11,13 +11,25 @@ class Entry < ApplicationRecord
   has_many :votes, dependent: :destroy
   has_one_attached :image
 
+  # ログインのたびに users.name は GitHub の nickname で上書きされる。
+  # 飯王・酒王の過去の表示が書き換わらないよう、登録した時点の名前を残す。参加者は変更できない。
+  attr_readonly :user_name
+
+  before_validation :snapshot_user_name, on: :create
+
   validates :title, presence: true
+  validates :user_name, presence: true
   validates :description, length: { maximum: 300 }
   validate :category_must_not_be_talk
   validate :image_must_be_supported_format
   validate :image_must_be_within_size_limit
 
   private
+
+  # 渡された user_name は使わない。登録者（画面では current_user）のその時点の名前だけを写す
+  def snapshot_user_name
+    self.user_name = user.name if user
+  end
 
   def category_must_not_be_talk
     errors.add(:category, :not_allowed_for_entry) if category&.talk?
