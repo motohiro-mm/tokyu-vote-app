@@ -1,8 +1,11 @@
-<% content_for :title, "投票先を選ぶ" %>
-<h1 class="text-xl font-bold">投票先を選ぶ</h1>
-<p class="mt-2 text-sm text-stone-500"><%= @category.label %></p>
+<% content_for :title, "#{@category.label}に投票する" %>
+<div class="flex items-center justify-between gap-4">
+  <h1 class="page-title text-left"><%= @category.label %>に投票する</h1>
+  <%# 会場で候補が増えていくため、その場で一覧を取り直せるようにする %>
+  <%= link_to "更新", request.fullpath, class: "btn-secondary shrink-0", data: { turbo_action: "replace" } %>
+</div>
 
-<div class="mt-4 rounded border border-stone-200 bg-white px-5 py-4">
+<div class="card mt-4">
   <p>投票できる数: <span class="font-bold"><%= @remaining_votes %></span> 票</p>
 
   <% if @voted_entries.present? %>
@@ -20,7 +23,7 @@
 <% else %>
   <ul class="mt-6 space-y-3">
     <% @entries.each do |entry| %>
-      <li class="flex items-center gap-4 rounded border border-stone-200 bg-white px-5 py-4">
+      <li class="card flex items-center gap-4">
         <% if entry.image.attached? %>
           <%= image_tag entry.image, class: "h-16 w-16 rounded object-cover" %>
         <% end %>
@@ -31,15 +34,21 @@
             <p class="mt-1 text-xs break-words text-stone-500"><%= entry.description %></p>
           <% end %>
         </div>
-        <% if @voted_entry_ids.include?(entry.id) %>
-          <span class="shrink-0 rounded bg-emerald-100 px-4 py-2 text-sm text-emerald-800">投票済み</span>
+        <% if entry.user_id == current_user.id %>
+          <span class="shrink-0 text-sm text-stone-500">自分の作品</span>
+        <% elsif @voted_entry_ids.include?(entry.id) %>
+          <span class="badge-done">投票済み</span>
         <% else %>
           <%= link_to "選択する", event_entry_path(@event, entry, category: @category.category_name),
-                      class: "shrink-0 rounded bg-stone-900 px-4 py-2 text-sm text-white" %>
+                      class: "btn-primary shrink-0" %>
         <% end %>
       </li>
     <% end %>
   </ul>
 <% end %>
 
-<%= link_to "戻る", event_votes_categories_path(@event), class: "mt-6 inline-block text-sm underline" %>
+<div class="mt-8 text-center">
+
+  <%= link_to "戻る", event_votes_categories_path(@event), class: "btn-secondary" %>
+
+</div>

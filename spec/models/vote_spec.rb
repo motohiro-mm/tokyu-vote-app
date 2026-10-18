@@ -14,6 +14,15 @@ RSpec.describe Vote do
     count.times { create(:vote, user: create(:user), entry: entry) }
   end
 
+  it "自分のエントリーには投票できない" do
+    entry = create(:entry, event: event, category: category, user: user)
+
+    vote = build(:vote, user: user, entry: entry)
+
+    expect(vote).to be_invalid
+    expect(vote.errors[:base]).to include("自分のエントリーには投票できません")
+  end
+
   it "同じエントリーには2票目を投じられない" do
     entry = entry_in
     create(:vote, user: user, entry: entry)
@@ -130,14 +139,16 @@ RSpec.describe Vote do
   describe ".ranking_by_user" do
     it "同じ人が同じ部門に出したエントリーの得票数を合算する" do
       user = create(:user, name: "もとひろ")
-      vote_for(create(:entry, user: user, event: event, category: category), 2)
-      vote_for(create(:entry, user: user, event: event, category: category), 2)
+      vote_for(create(:entry, user: user, event: event, category: category, title: "唐揚げ"), 2)
+      vote_for(create(:entry, user: user, event: event, category: category, title: "ポテトサラダ"), 2)
+      create(:entry, user: user, event: event, category: category, title: "票の無い一品")
       vote_for(create(:entry, event: event, category: category), 3)
 
       rows = described_class.ranking_by_user(event, category)
 
       expect(rows.map(&:name).first).to eq "もとひろ"
       expect(rows.map(&:vote_count)).to eq [ 4, 3 ]
+      expect(rows.first.entry_titles).to eq [ "唐揚げ", "ポテトサラダ" ]
     end
 
     it "部門をまたいでは合算しない" do

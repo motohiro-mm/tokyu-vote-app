@@ -11,13 +11,13 @@ RSpec.describe CategoryResult do
     expect(titles).to eq([ "飯王（単品王）", "飯王（合算王）" ])
   end
 
-  it "LT王は単品王だけを出す" do
+  it "LT王は合算王を出さず、見出しも部門名だけにする" do
     titles = described_class.new(event, talk_category).rankings.map(&:first)
 
-    expect(titles).to eq([ "LT王（単品王）" ])
+    expect(titles).to eq([ "LT王" ])
   end
 
-  it "エントリーごとに空でないコメントをまとめる" do
+  it "エントリーごとに空でないコメントをまとめ、コメントの無いエントリーは出さない" do
     entry = create(:entry, event: event, category: food, title: "唐揚げ")
     create(:entry, event: event, category: food, title: "ポテトサラダ")
     create(:vote, entry: entry, comment: "おいしかった")
@@ -27,9 +27,8 @@ RSpec.describe CategoryResult do
 
     targets = described_class.new(event, food).targets
 
-    expect(targets.map(&:title)).to eq([ "唐揚げ", "ポテトサラダ" ])
+    expect(targets.map(&:title)).to eq([ "唐揚げ" ])
     expect(targets.first.comments).to eq([ "おいしかった", "また食べたい" ])
-    expect(targets.second.comments).to be_empty
   end
 
   it "ほかの部門やイベントのエントリーを混ぜない" do

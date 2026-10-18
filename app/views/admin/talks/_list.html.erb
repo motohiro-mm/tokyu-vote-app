@@ -1,0 +1,44 @@
+<div class="card mt-6">
+  <div class="flex items-baseline justify-between gap-4">
+    <h2 class="section-title">LTの一覧</h2>
+    <% if event.accepting_talks? %>
+      <%= link_to "LTを登録", new_admin_event_talk_path(event), class: "btn-primary" %>
+    <% end %>
+  </div>
+
+  <% if event.accepting_talks? %>
+    <%= form_with url: admin_event_talk_imports_path(event), class: "mt-4 rounded-lg bg-tokyu-blue-light px-4 py-3" do |f| %>
+      <p class="text-sm font-bold">CSV で一括登録</p>
+      <p class="mt-1 text-xs text-stone-500">
+        1 行目をヘッダ <code class="rounded bg-white px-1"><%= TalkCsvImport::HEADERS.values.join(",") %></code> にした UTF-8 の CSV
+      </p>
+      <div class="mt-2 flex flex-wrap items-center justify-between gap-3">
+        <%= f.file_field :file, accept: "text/csv,.csv", class: "input-file mt-0 w-auto" %>
+        <%= f.submit "登録する", class: "btn-secondary" %>
+      </div>
+    <% end %>
+  <% else %>
+    <p class="mt-3 text-sm text-stone-500">
+      LTの登録は <%= Event.status_label(:preparing) %>・<%= Event.status_label(:open) %> のあいだだけできます。
+    </p>
+  <% end %>
+
+  <% if talks.empty? %>
+    <p class="mt-4 text-sm text-stone-500">LTが登録されていません。</p>
+  <% else %>
+    <ul class="mt-4 divide-y divide-stone-200">
+      <% talks.each do |talk| %>
+        <li class="flex items-center gap-4 py-3">
+          <div class="min-w-0 flex-1">
+            <p class="font-bold break-words"><%= talk.title %></p>
+            <p class="text-sm text-stone-500"><%= talk.user_name %></p>
+          </div>
+          <% if talk.canceled? %>
+            <span class="shrink-0 rounded-full bg-stone-200 px-2 py-1 text-xs text-stone-700"><%= talk.status_label %></span>
+          <% end %>
+          <%= link_to "編集", edit_admin_event_talk_path(event, talk), class: "shrink-0 text-sm text-link" %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+</div>

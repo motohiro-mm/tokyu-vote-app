@@ -3,12 +3,15 @@
 module Votable
   extend ActiveSupport::Concern
 
-  # 1ユーザーが1イベント × 1部門に投じられる票数の上限
   MAX_VOTES_PER_CATEGORY = 3
 
   TOP_RANKS = 3
 
-  RankingRow = Data.define(:rank, :name, :title, :vote_count)
+  RankingRow = Data.define(:rank, :name, :title, :vote_count, :entry_titles) do
+    def initialize(entry_titles: [], **rest)
+      super
+    end
+  end
 
   included do
     belongs_to :user
@@ -35,24 +38,22 @@ module Votable
         previous_count = source[:vote_count]
         next if rank > TOP_RANKS
 
-        RankingRow.new(rank: rank, name: source[:name], title: source[:title], vote_count: source[:vote_count])
+        RankingRow.new(rank: rank, name: source[:name], title: source[:title], vote_count: source[:vote_count],
+                       entry_titles: source.fetch(:entry_titles, []))
       end
     end
   end
 
   private
 
-  # 投票対象。各モデルで定義する
   def vote_target
     raise NotImplementedError
   end
 
-  # 同じユーザーが同じイベント・同じ部門に投じた票。各モデルで定義する
   def votes_in_same_category
     raise NotImplementedError
   end
 
-  # 同じユーザーが同じ対象に投じた票。各モデルで定義する
   def votes_for_same_target
     raise NotImplementedError
   end

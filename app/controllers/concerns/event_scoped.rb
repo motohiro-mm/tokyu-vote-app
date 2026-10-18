@@ -21,7 +21,6 @@ module EventScoped
     end
   end
 
-  # エントリーと投票を受け付けるのは公開中だけ
   def require_open_event
     return if @event.open?
 

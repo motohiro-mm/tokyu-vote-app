@@ -1,0 +1,28 @@
+# 検証環境。本番と同じサーバーに同居させるため、service 名とボリューム名を本番と変えて
+# コンテナと SQLite・画像の置き場が衝突しないようにする。
+service: tokyu_vote_app_staging
+
+servers:
+  web:
+    - 160.251.167.83
+
+# kamal-proxy がホスト名で振り分け、Let's Encrypt の証明書を自動取得する
+proxy:
+  ssl: true
+  host: stg-tokyu-ranking.3arc.dev
+
+volumes:
+  - "tokyu_vote_app_staging_storage:/rails/storage"
+
+env:
+  # env.secret の配列は共通設定とマージされず上書きされるため、共通分もここに列挙する
+  secret:
+    - RAILS_MASTER_KEY
+    - GITHUB_CLIENT_ID
+    - GITHUB_CLIENT_SECRET
+    - STAGING_BASIC_AUTH_PASSWORD
+  clear:
+    # Basic 認証と noindex を付ける（ApplicationController 参照）
+    APP_ENV_LABEL: staging
+    # Host ヘッダー検証（config/environments/production.rb）
+    APP_HOST: stg-tokyu-ranking.3arc.dev

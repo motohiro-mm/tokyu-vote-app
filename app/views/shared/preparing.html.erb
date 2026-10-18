@@ -1,3 +1,8 @@
 <% content_for :title, "準備中" %>
-<h1 class="text-xl font-bold">準備中です</h1>
-<p class="mt-2 text-stone-600">このイベントはまだ公開されていません。開始までお待ちください。</p>
+<div class="text-center">
+  <h1 class="page-title">現在準備中です</h1>
+  <p class="mt-4 leading-relaxed text-stone-700">
+    <%= @event.title %>は現在準備中です。<br>
+    エントリー・投票は<%= Event.model_name.human %>開始後にご利用いただけます。
+  </p>
+</div>

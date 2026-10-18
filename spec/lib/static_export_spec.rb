@@ -37,7 +37,7 @@ RSpec.describe StaticExport do
     described_class.new(out).run
 
     expect(page("events/#{event.id}/food.html")).to include("飯王（単品王）", "唐揚げ", "おいしかった")
-    expect(page("events/#{event.id}/talk.html")).to include("LT王（単品王）", "Ruby の話", "よかった")
+    expect(page("events/#{event.id}/talk.html")).to include("LT王", "Ruby の話", "よかった")
   end
 
   it "投票・ログイン・管理の導線と検証環境のバナーを含めない" do
@@ -63,6 +63,7 @@ RSpec.describe StaticExport do
   it "エントリーの画像を書き出し、ページから参照する" do
     entry = create(:entry, event: event, category: food)
     entry.image.attach(io: StringIO.new(png), filename: "karaage.png", content_type: "image/png")
+    create(:vote, entry: entry, comment: "おいしかった")
 
     described_class.new(out).run
 

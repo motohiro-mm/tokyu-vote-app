@@ -40,5 +40,8 @@
 # Claude Code のスキル（各自のローカル設定）
 /.claude/skills/
 
+# Kamal の環境別の秘密情報（.kamal/secrets-common は共通設定なのでコミットする）
+/.kamal/secrets.*
+
 # 静的書き出しの出力先
 /public_export/
