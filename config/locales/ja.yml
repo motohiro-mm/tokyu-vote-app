@@ -50,6 +50,7 @@ ja:
             base:
               vote_limit_exceeded: 1つの部門に投票できるのは3票までです
               already_voted: 同じエントリーには投票できません
+              own_entry: 自分のエントリーには投票できません
         talk_vote:
           attributes:
             base:

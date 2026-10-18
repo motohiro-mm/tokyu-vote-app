@@ -14,6 +14,15 @@ RSpec.describe Vote do
     count.times { create(:vote, user: create(:user), entry: entry) }
   end
 
+  it "自分のエントリーには投票できない" do
+    entry = create(:entry, event: event, category: category, user: user)
+
+    vote = build(:vote, user: user, entry: entry)
+
+    expect(vote).to be_invalid
+    expect(vote.errors[:base]).to include("自分のエントリーには投票できません")
+  end
+
   it "同じエントリーには2票目を投じられない" do
     entry = entry_in
     create(:vote, user: user, entry: entry)

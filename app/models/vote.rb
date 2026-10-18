@@ -3,6 +3,8 @@ class Vote < ApplicationRecord
 
   belongs_to :entry
 
+  validate :not_own_entry, on: :create
+
   delegate :event, :category, to: :entry
 
   scope :in_category, ->(event, category) {
@@ -44,5 +46,12 @@ class Vote < ApplicationRecord
 
   def votes_for_same_target
     Vote.where(user_id: user_id, entry_id: entry_id)
+  end
+
+  def not_own_entry
+    return if user_id.nil? || entry.nil?
+    return unless entry.user_id == user_id
+
+    errors.add(:base, :own_entry)
   end
 end
