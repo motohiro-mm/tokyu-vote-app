@@ -3,7 +3,7 @@
 
 <div class="card mb-6">
   <% if @entry.image.attached? %>
-    <%= image_tag @entry.image, class: "mb-4 w-full rounded-xl border-2 border-tokyu-ink object-cover" %>
+    <%= image_tag @entry.image, alt: @entry.title, class: "mb-4 w-full rounded-xl border-2 border-tokyu-ink object-cover" %>
   <% end %>
   <p class="mb-2 text-lg font-bold break-words">「<%= @entry.title %>」</p>
   <p class="mb-4 text-tokyu-ink-soft last:mb-0"><%= @entry.user.name %></p>
