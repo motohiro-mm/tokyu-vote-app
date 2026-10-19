@@ -1,46 +1,76 @@
 @import "tailwindcss";
 
-/* イベントのロゴ（水色の背景にピンクの文字）から取った色。他の色はロゴに合わせて抑える */
+/* Tokyu.rb のロゴから取った色とフォント */
 @theme {
+  --font-sans: "M PLUS Rounded 1c", "Hiragino Maru Gothic ProN", sans-serif;
+  /* 英字のロゴタイプと数字 */
+  --font-display: "Fredoka", "M PLUS Rounded 1c", sans-serif;
+
   --color-tokyu-blue: #00b1d9;
   --color-tokyu-blue-dark: #0088a8;
   --color-tokyu-blue-light: #e6f7fb;
   --color-tokyu-pink: #e7008b;
-  --color-tokyu-pink-dark: #c30174;
+  /* 白文字を載せるボタン用。ロゴのピンクだと白文字が読みにくい */
+  --color-tokyu-pink-dark: #c8007a;
   --color-tokyu-pink-light: #fde7f2;
+  --color-tokyu-ink: #231916;
+  --color-tokyu-ink-soft: #5c4a44;
+  --color-tokyu-meat: #c55d33;
+  --color-tokyu-meat-light: #f6e3da;
+  --color-tokyu-bone: #dce1e4;
   /* 管理画面のヘッダー。参加者向けの水色と一目で区別できる濃さにしている */
   --color-tokyu-navy: #0b4f66;
+
+  --shadow-sticker: 0 4px 0 var(--color-tokyu-ink);
+  --shadow-sticker-lg: 0 8px 0 var(--color-tokyu-ink);
+}
+
+@utility bg-dots {
+  background-color: var(--color-tokyu-blue-light);
+  background-image: radial-gradient(color-mix(in srgb, var(--color-tokyu-blue) 35%, transparent) 1.5px, transparent 1.5px);
+  background-size: 24px 24px;
 }
 
 @layer components {
+  /* 見出しの下にピンクの短いバーを引く */
   .page-title {
-    @apply text-center text-2xl font-bold text-tokyu-pink;
+    @apply relative pb-4 text-center text-2xl font-extrabold text-tokyu-ink after:absolute after:bottom-0 after:left-1/2 after:h-1.5 after:w-20 after:-translate-x-1/2 after:rounded-full after:bg-tokyu-pink sm:text-3xl;
+  }
+  /* 左寄せの見出しはバーも左に寄せる */
+  .page-title.text-left {
+    @apply after:left-0 after:translate-x-0;
   }
   .section-title {
-    @apply font-bold text-tokyu-blue-dark;
+    @apply text-lg font-extrabold text-tokyu-ink;
   }
   .card {
-    @apply rounded-xl border border-tokyu-blue/20 bg-white p-5 shadow-sm;
+    @apply rounded-2xl border-3 border-tokyu-ink bg-white p-4 shadow-sticker sm:p-6;
   }
   .card-link {
-    @apply block rounded-xl border border-tokyu-blue/20 bg-white px-5 py-4 shadow-sm hover:border-tokyu-blue hover:bg-tokyu-blue-light;
+    @apply block rounded-2xl border-3 border-tokyu-ink bg-white px-6 py-4 shadow-sticker transition hover:bg-tokyu-blue-light active:translate-y-1 active:shadow-none;
   }
   .btn-primary {
-    @apply inline-block rounded-full bg-tokyu-blue px-5 py-2 text-sm font-bold text-white hover:bg-tokyu-blue-dark;
+    @apply inline-flex min-h-12 cursor-pointer items-center justify-center rounded-full border-3 border-tokyu-ink bg-tokyu-pink-dark px-6 text-sm font-extrabold text-white shadow-sticker transition hover:brightness-110 active:translate-y-1 active:shadow-none;
   }
   .btn-secondary {
-    @apply inline-block rounded-full border border-tokyu-blue bg-white px-5 py-2 text-sm font-bold text-tokyu-blue-dark hover:bg-tokyu-blue-light;
+    @apply inline-flex min-h-12 cursor-pointer items-center justify-center rounded-full border-3 border-tokyu-ink bg-white px-6 text-sm font-extrabold text-tokyu-ink shadow-sticker transition hover:bg-tokyu-blue-light active:translate-y-1 active:shadow-none;
   }
   .text-link {
-    @apply text-tokyu-pink-dark underline hover:text-tokyu-pink;
+    @apply font-bold text-tokyu-pink-dark underline hover:text-tokyu-ink;
+  }
+  .label {
+    @apply mb-2 block text-sm font-bold;
   }
   .input {
-    @apply mt-1 w-full rounded-md border border-stone-300 bg-white px-3 py-2 focus:border-tokyu-blue focus:outline-none focus:ring-2 focus:ring-tokyu-blue/30;
+    @apply min-h-12 w-full rounded-xl border-3 border-tokyu-ink bg-white px-4 py-2 focus:outline-none focus:ring-4 focus:ring-tokyu-blue/40;
   }
   .input-file {
-    @apply mt-1 block w-full text-sm text-stone-500 file:mr-3 file:rounded-full file:border-0 file:bg-tokyu-blue file:px-4 file:py-2 file:text-sm file:font-bold file:text-white hover:file:bg-tokyu-blue-dark;
+    @apply block w-full text-sm text-tokyu-ink-soft file:mr-4 file:cursor-pointer file:rounded-full file:border-3 file:border-tokyu-ink file:bg-white file:px-4 file:py-2 file:text-sm file:font-extrabold file:text-tokyu-ink hover:file:bg-tokyu-blue-light;
   }
   .badge-done {
-    @apply shrink-0 rounded-full bg-tokyu-pink-light px-4 py-2 text-sm font-bold text-tokyu-pink-dark;
+    @apply shrink-0 rounded-full border-2 border-tokyu-pink-dark bg-tokyu-pink-light px-4 py-2 text-sm font-extrabold text-tokyu-pink-dark;
+  }
+  .alert-error {
+    @apply rounded-xl border-3 border-red-700 bg-red-50 px-4 py-2 text-sm text-red-800;
   }
 }
