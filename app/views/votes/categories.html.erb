@@ -1,19 +1,19 @@
 <% content_for :title, "投票する" %>
-<h1 class="page-title">投票する</h1>
+<h1 class="page-title mb-6">投票する</h1>
 
-<ul class="mt-6 space-y-3">
+<ul class="mb-8 space-y-4">
   <% @categories.each do |category| %>
     <li>
       <%= link_to category.talk? ? event_talks_path(@event) : event_entries_path(@event, category: category.category_name),
                   class: "card-link" do %>
-        <span class="block font-bold"><%= category.label %>に投票する</span>
-        <span class="mt-1 block text-sm text-stone-500"><%= category.description %></span>
+        <span class="mb-2 block font-bold"><%= category.label %>に投票する</span>
+        <span class="block text-sm text-tokyu-ink-soft"><%= category.description %></span>
       <% end %>
     </li>
   <% end %>
 </ul>
 
-<div class="mt-8 text-center">
+<div class="text-center">
 
   <%= link_to "戻る", event_path(@event), class: "btn-secondary" %>
 

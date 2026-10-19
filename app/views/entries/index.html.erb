@@ -1,41 +1,41 @@
 <% content_for :title, "#{@category.label}に投票する" %>
-<div class="flex items-center justify-between gap-4">
+<div class="mb-6 flex items-center justify-between gap-4">
   <h1 class="page-title text-left"><%= @category.label %>に投票する</h1>
   <%# 会場で候補が増えていくため、その場で一覧を取り直せるようにする %>
   <%= link_to "更新", request.fullpath, class: "btn-secondary shrink-0", data: { turbo_action: "replace" } %>
 </div>
 
-<div class="card mt-4">
-  <p>投票できる数: <span class="font-bold"><%= @remaining_votes %></span> 票</p>
+<div class="mb-8 rounded-2xl border-3 border-tokyu-ink bg-tokyu-meat-light p-4 sm:p-6">
+  <p class="mb-4 last:mb-0">投票できる数 <span class="font-display text-3xl font-bold text-tokyu-pink-dark"><%= @remaining_votes %></span> 票</p>
 
   <% if @voted_entries.present? %>
-    <p class="mt-3 text-sm text-stone-600">あなたが投票したのは以下のエントリーです</p>
-    <ul class="mt-1 text-sm">
+    <p class="mb-2 text-sm text-tokyu-ink-soft">あなたが投票したのは以下のエントリーです</p>
+    <ul class="space-y-2 text-sm font-bold">
       <% @voted_entries.each do |entry| %>
-        <li class="py-1"><%= entry.user.name %> さんの「<%= entry.title %>」</li>
+        <li><%= entry.user.name %> さんの「<%= entry.title %>」</li>
       <% end %>
     </ul>
   <% end %>
 </div>
 
 <% if @entries.empty? %>
-  <p class="mt-6 text-stone-600">エントリーされていません。</p>
+  <p class="mb-8 text-tokyu-ink-soft">エントリーされていません。</p>
 <% else %>
-  <ul class="mt-6 space-y-3">
+  <ul class="mb-8 space-y-4">
     <% @entries.each do |entry| %>
       <li class="card flex items-center gap-4">
         <% if entry.image.attached? %>
-          <%= image_tag entry.image, class: "h-16 w-16 rounded object-cover" %>
+          <%= image_tag entry.image, class: "size-16 shrink-0 rounded-xl border-2 border-tokyu-ink object-cover" %>
         <% end %>
         <div class="min-w-0 flex-1">
-          <p class="font-bold break-words"><%= entry.title %></p>
-          <p class="text-sm text-stone-500"><%= entry.user.name %></p>
+          <p class="mb-2 font-bold break-words"><%= entry.title %></p>
+          <p class="mb-2 text-sm text-tokyu-ink-soft last:mb-0"><%= entry.user.name %></p>
           <% if entry.description.present? %>
-            <p class="mt-1 text-xs break-words text-stone-500"><%= entry.description %></p>
+            <p class="text-xs break-words text-tokyu-ink-soft"><%= entry.description %></p>
           <% end %>
         </div>
         <% if entry.user_id == current_user.id %>
-          <span class="shrink-0 text-sm text-stone-500">自分の作品</span>
+          <span class="shrink-0 text-sm text-tokyu-ink-soft">自分の作品</span>
         <% elsif @voted_entry_ids.include?(entry.id) %>
           <span class="badge-done">投票済み</span>
         <% else %>
@@ -47,7 +47,7 @@
   </ul>
 <% end %>
 
-<div class="mt-8 text-center">
+<div class="text-center">
 
   <%= link_to "戻る", event_votes_categories_path(@event), class: "btn-secondary" %>
 
