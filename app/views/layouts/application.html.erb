@@ -9,6 +9,16 @@
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
+    <% description = "TokyuRuby会議のエントリー・投票アプリ" %>
+    <meta name="description" content="<%= description %>">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="TokyuRubyVote">
+    <meta property="og:title" content="TokyuRubyVote">
+    <meta property="og:description" content="<%= description %>">
+    <meta property="og:url" content="<%= request.original_url %>">
+    <meta property="og:image" content="<%= "#{request.base_url}/ogp.png" %>">
+    <meta name="twitter:card" content="summary_large_image">
+
     <%= yield :head %>
 
     <link rel="icon" href="/icon.png" type="image/png">
