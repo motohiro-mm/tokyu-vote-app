@@ -1,8 +1,8 @@
 <% content_for :title, "登録が完了しました" %>
-<h1 class="page-title">登録が完了しました</h1>
-<p class="mt-2 text-center text-stone-600">ご参加ありがとうございます！</p>
+<h1 class="page-title mb-2">登録が完了しました</h1>
+<p class="mb-6 text-center text-tokyu-ink-soft">ご参加ありがとうございます！</p>
 
-<div class="mt-6 space-y-3 text-center">
+<div class="space-y-4 text-center">
   <%= link_to "続けて#{@category.label}に登録する", new_event_entry_path(@event, category: @category.category_name),
               class: "card-link" %>
   <%= link_to "TOPへ戻る", event_path(@event),

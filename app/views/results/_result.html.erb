@@ -1,11 +1,11 @@
-<div class="card mt-6">
-  <h2 class="section-title">ランキング</h2>
-  <div class="mt-4 space-y-6">
+<div class="card mb-8">
+  <h2 class="section-title mb-4">ランキング</h2>
+  <div class="space-y-6">
     <% result.rankings.each do |title, rows| %>
       <%= render "results/ranking", title: title, rows: rows %>
     <% end %>
   </div>
 </div>
 
-<h2 class="mt-8 section-title">コメント</h2>
+<h2 class="section-title mb-4">コメント</h2>
 <%= render "results/targets", targets: result.targets, image_src: image_src %>
