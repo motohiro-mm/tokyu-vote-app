@@ -6,14 +6,15 @@ RSpec.describe "Content Security Policy", type: :request do
 
   before { sign_in(user) }
 
-  it "report-only で CSP ヘッダを返し、script-src と style-src は self と nonce だけを許す" do
+  it "report-only で CSP ヘッダを返し、script-src は self と nonce、style-src はそれに Google Fonts を足したものだけを許す" do
     get event_path(event)
 
     header = response.headers["Content-Security-Policy-Report-Only"]
     expect(header).to include("default-src 'self'")
     expect(header).to include("object-src 'none'")
     expect(header).to match(/script-src 'self' 'nonce-[^']+'/)
-    expect(header).to match(/style-src 'self' 'nonce-[^']+'/)
+    expect(header).to match(%r{style-src 'self' https://fonts.googleapis.com 'nonce-[^']+'})
+    expect(header).to include("font-src 'self' https://fonts.gstatic.com")
     expect(response.headers["Content-Security-Policy"]).to be_nil
   end
 

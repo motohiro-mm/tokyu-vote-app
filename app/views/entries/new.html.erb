@@ -1,21 +1,21 @@
 <% content_for :title, "#{@category.label}に登録" %>
-<h1 class="page-title"><%= @category.label %>に登録</h1>
+<h1 class="page-title mb-6"><%= @category.label %>に登録</h1>
 
 <% if @my_entries.present? %>
-  <div class="card mt-4 text-sm">
-    <p class="font-bold">登録済みの作品</p>
-    <ul class="mt-1 text-stone-600">
+  <div class="card mb-6 text-sm">
+    <p class="mb-2 font-bold">登録済みの作品</p>
+    <ul class="space-y-2 text-tokyu-ink-soft">
       <% @my_entries.each do |entry| %>
-        <li class="py-1"><%= entry.title %></li>
+        <li><%= entry.title %></li>
       <% end %>
     </ul>
   </div>
 <% end %>
 
 <%= form_with model: @entry, url: event_entries_path(@event, category: @category.category_name),
-              class: "mt-6 space-y-4" do |f| %>
+              class: "space-y-6" do |f| %>
   <% if @entry.errors.any? %>
-    <ul class="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800">
+    <ul class="alert-error">
       <% @entry.errors.full_messages.each do |message| %>
         <li><%= message %></li>
       <% end %>
@@ -23,24 +23,24 @@
   <% end %>
 
   <div>
-    <%= f.label :title, @category.title_label, class: "block text-sm font-bold" %>
+    <%= f.label :title, @category.title_label, class: "label" %>
     <%= f.text_field :title, class: "input" %>
   </div>
 
   <div>
-    <%= f.label :description, "説明（アピールポイント）【任意】", class: "block text-sm font-bold" %>
-    <span class="text-xs text-stone-500">300文字まで</span>
+    <%= f.label :description, "説明（アピールポイント）【任意】", class: "label" %>
+    <span class="mb-2 block text-xs text-tokyu-ink-soft">300文字まで</span>
     <%= f.text_area :description, rows: 5, class: "input" %>
   </div>
 
   <div>
-    <%= f.label :image, "画像【任意】", class: "block text-sm font-bold" %>
-    <span class="text-xs text-stone-500">JPEG / PNG、<%= Entry::IMAGE_MAX_SIZE / 1.megabyte %>MB まで</span>
-    <%= f.file_field :image, accept: Entry::IMAGE_CONTENT_TYPES.join(","), class: "input-file mt-2" %>
+    <%= f.label :image, "画像【任意】", class: "label" %>
+    <span class="mb-2 block text-xs text-tokyu-ink-soft">JPEG / PNG、<%= Entry::IMAGE_MAX_SIZE / 1.megabyte %>MB まで</span>
+    <%= f.file_field :image, accept: Entry::IMAGE_CONTENT_TYPES.join(","), class: "input-file" %>
   </div>
 
-  <div class="mx-auto grid max-w-sm grid-cols-2 gap-4 pt-6">
-    <%= f.submit "登録する", class: "btn-primary w-full" %>
+  <div class="mx-auto grid max-w-sm grid-cols-2 gap-4">
     <%= link_to "戻る", event_entries_categories_path(@event), class: "btn-secondary w-full text-center" %>
+    <%= f.submit "登録する", class: "btn-primary w-full" %>
   </div>
 <% end %>

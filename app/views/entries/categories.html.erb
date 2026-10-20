@@ -1,7 +1,7 @@
 <% content_for :title, "エントリーする" %>
-<h1 class="page-title">エントリーする</h1>
+<h1 class="page-title mb-6">エントリーする</h1>
 
-<ul class="mt-6 space-y-3">
+<ul class="mb-8 space-y-4">
   <% @categories.each do |category| %>
     <li>
       <%= link_to new_event_entry_path(@event, category: category.category_name),
@@ -12,7 +12,7 @@
   <% end %>
 </ul>
 
-<div class="mt-8 text-center">
+<div class="text-center">
 
   <%= link_to "戻る", event_path(@event), class: "btn-secondary" %>
 

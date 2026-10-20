@@ -1,17 +1,17 @@
 <% content_for :title, "投票が完了しました" %>
-<h1 class="page-title">投票が完了しました</h1>
-<p class="mt-2 text-center text-stone-600">ご投票ありがとうございます！</p>
+<h1 class="page-title mb-2">投票が完了しました</h1>
+<p class="mb-6 text-center text-tokyu-ink-soft">ご投票ありがとうございます！</p>
 
-<div class="mt-6 space-y-3 text-center">
+<div class="space-y-4 text-center">
   <% if @remaining_votes.positive? %>
     <%= link_to "続けて#{@category.label}に投票する（残り #{@remaining_votes} 票）",
                 event_entries_path(@event, category: @category.category_name),
-                class: "card-link" %>
+                class: "btn-primary min-h-14 w-full text-base" %>
   <% else %>
-    <p class="rounded-lg bg-white px-4 py-3 text-sm text-stone-600">
+    <p class="rounded-2xl border-3 border-tokyu-ink bg-tokyu-meat-light px-4 py-4 text-sm font-bold">
       <%= @category.label %>の3票分すべての投票が完了しました。
     </p>
   <% end %>
   <%= link_to "TOPへ戻る", event_path(@event),
-              class: "card-link" %>
+              class: "btn-secondary min-h-14 w-full text-base" %>
 </div>

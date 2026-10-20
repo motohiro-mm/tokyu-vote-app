@@ -1,26 +1,26 @@
 <% content_for :title, "投票する" %>
-<h1 class="page-title">投票する</h1>
+<h1 class="page-title mb-6">投票する</h1>
 
-<div class="card mt-4">
-  <p class="text-lg font-bold break-words">「<%= @talk.title %>」</p>
-  <p class="mt-1 text-stone-600"><%= @talk.user_name %></p>
+<div class="card mb-6">
+  <p class="mb-2 text-lg font-bold break-words">「<%= @talk.title %>」</p>
+  <p class="text-tokyu-ink-soft"><%= @talk.user_name %></p>
 </div>
 
-<div class="card mt-6">
+<div class="card mb-8">
   <% if @voted %>
-    <p class="text-sm text-tokyu-pink-dark">このLTには投票済みです。</p>
+    <p class="text-sm font-bold text-tokyu-pink-dark">このLTには投票済みです。</p>
   <% elsif !@event.open? %>
-    <p class="text-sm text-stone-500">投票を受け付けていません。</p>
+    <p class="text-sm text-tokyu-ink-soft">投票を受け付けていません。</p>
   <% elsif @remaining_votes <= 0 %>
-    <p class="text-sm text-stone-500"><%= @category.label %>の票を使い切りました。</p>
+    <p class="text-sm text-tokyu-ink-soft"><%= @category.label %>の票を使い切りました。</p>
   <% else %>
     <%= form_with model: @talk_vote, url: event_talk_votes_path(@event) do |f| %>
       <%= f.hidden_field :talk_id, value: @talk.id %>
-      <%= f.label :comment, "コメントを記入する【任意】", class: "block text-sm font-bold" %>
-      <span class="text-xs text-stone-500">300文字まで</span>
+      <%= f.label :comment, "コメントを記入する【任意】", class: "label" %>
+      <span class="mb-2 block text-xs text-tokyu-ink-soft">300文字まで</span>
       <%= f.text_area :comment, rows: 5,
-                      class: "input mt-2" %>
-      <div class="mt-4 text-center">
+                      class: "input mb-6" %>
+      <div class="text-center">
         <%= f.submit "投票する（残り #{@remaining_votes} 票）",
                    class: "btn-primary" %>
       </div>
@@ -28,7 +28,7 @@
   <% end %>
 </div>
 
-<div class="mt-8 text-center">
+<div class="text-center">
 
   <%= link_to "戻る", event_talks_path(@event), class: "btn-secondary" %>
 

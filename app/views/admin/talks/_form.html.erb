@@ -1,6 +1,6 @@
-<%= form_with model: [ :admin, @event, talk ], class: "mt-6 space-y-4" do |f| %>
+<%= form_with model: [ :admin, @event, talk ], class: "space-y-6" do |f| %>
   <% if talk.errors.any? %>
-    <ul class="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800">
+    <ul class="alert-error">
       <% talk.errors.full_messages.each do |message| %>
         <li><%= message %></li>
       <% end %>
@@ -8,19 +8,19 @@
   <% end %>
 
   <div>
-    <%= f.label :user_name, class: "block text-sm font-bold" %>
+    <%= f.label :user_name, class: "label" %>
     <%= f.text_field :user_name, class: "input" %>
   </div>
 
   <div>
-    <%= f.label :title, class: "block text-sm font-bold" %>
+    <%= f.label :title, class: "label" %>
     <%= f.text_field :title, class: "input" %>
   </div>
 
   <% if talk.persisted? %>
     <div>
-      <%= f.label :status, class: "block text-sm font-bold" %>
-      <span class="text-xs text-stone-500">変更できるのは<%= Event.model_name.human %>が <%= Event.status_label(:preparing) %> のあいだだけ</span>
+      <%= f.label :status, class: "label" %>
+      <span class="mb-2 block text-xs text-tokyu-ink-soft">変更できるのは<%= Event.model_name.human %>が <%= Event.status_label(:preparing) %> のあいだだけ</span>
       <%= f.select :status,
                    Talk.statuses.keys.map { |status| [ Talk.status_label(status), status ] },
                    {},
@@ -28,8 +28,8 @@
     </div>
   <% end %>
 
-  <div class="mx-auto grid max-w-sm grid-cols-2 gap-4 pt-6">
-    <%= f.submit submit_label, class: "btn-primary w-full" %>
+  <div class="mx-auto grid max-w-sm grid-cols-2 gap-4">
     <%= link_to "#{Event.model_name.human}に戻る", admin_event_path(@event), class: "btn-secondary w-full text-center" %>
+    <%= f.submit submit_label, class: "btn-primary w-full" %>
   </div>
 <% end %>

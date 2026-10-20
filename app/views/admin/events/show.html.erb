@@ -1,17 +1,17 @@
 <% content_for :title, @event.title %>
-<h1 class="page-title"><%= @event.title %></h1>
+<h1 class="page-title mb-6"><%= @event.title %></h1>
 
-<div class="card mt-6">
-  <h2 class="section-title"><%= Event.human_attribute_name(:status) %></h2>
-  <p class="mt-1 text-sm text-stone-500">
+<div class="card mb-6">
+  <h2 class="section-title mb-2"><%= Event.human_attribute_name(:status) %></h2>
+  <p class="mb-4 text-sm text-tokyu-ink-soft">
     現在: <%= @event.status_label %>
   </p>
 
-  <%= form_with model: [ :admin, @event ], method: :patch, class: "mt-4 flex flex-wrap items-center gap-3" do |f| %>
+  <%= form_with model: [ :admin, @event ], method: :patch, class: "flex flex-wrap items-center gap-4" do |f| %>
     <%= f.select :status,
                  Event.statuses.keys.map { |status| [ Event.status_label(status), status ] },
                  {},
-                 class: "input mt-0 w-auto" %>
+                 class: "input w-auto" %>
     <%# 集計中にすると投票が止まり、結果公開にすると参加者に見え、終了にするとトップページから消えるため、押し間違いを一度止める %>
     <%= f.submit "変更する", class: "btn-primary", data: { turbo_confirm: "#{Event.human_attribute_name(:status)}を変更します。よろしいですか？" } %>
   <% end %>
@@ -19,26 +19,26 @@
 
 <%= render "admin/talks/list", event: @event, talks: @talks %>
 
-<div class="card mt-6">
-  <h2 class="section-title">集計</h2>
+<div class="card mb-8">
+  <h2 class="section-title mb-2">集計</h2>
   <% if @rankings %>
-    <p class="mt-1 text-sm text-stone-500">
+    <p class="mb-4 text-sm text-tokyu-ink-soft">
       参加者には <%= Event.status_label(:closed) %> にするまで見えません。
     </p>
 
-    <div class="mt-4 space-y-6">
+    <div class="space-y-6">
       <% @rankings.each do |title, rows| %>
         <%= render "results/ranking", title: title, rows: rows %>
       <% end %>
     </div>
   <% else %>
-    <p class="mt-1 text-sm text-stone-500">
+    <p class="text-sm text-tokyu-ink-soft">
       <%= Event.human_attribute_name(:status) %>を <%= Event.status_label(:counting) %> にすると表示されます。
     </p>
   <% end %>
 </div>
 
-<div class="mt-8 text-center">
+<div class="text-center">
 
   <%= link_to "一覧に戻る", admin_events_path, class: "btn-secondary" %>
 

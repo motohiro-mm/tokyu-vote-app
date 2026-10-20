@@ -9,17 +9,29 @@
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
+    <% description = "TokyuRuby会議のエントリー・投票アプリ" %>
+    <meta name="description" content="<%= description %>">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="TokyuRubyVote">
+    <meta property="og:title" content="TokyuRubyVote">
+    <meta property="og:description" content="<%= description %>">
+    <meta property="og:url" content="<%= request.original_url %>">
+    <meta property="og:image" content="<%= "#{request.base_url}/ogp.png" %>">
+    <meta name="twitter:card" content="summary_large_image">
+
     <%= yield :head %>
 
     <link rel="icon" href="/icon.png" type="image/png">
-    <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icon.png">
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=M+PLUS+Rounded+1c:wght@400;700;800&display=swap">
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="flex min-h-screen flex-col bg-tokyu-blue-light text-stone-800">
+  <body class="flex min-h-screen flex-col bg-dots font-sans text-tokyu-ink">
     <%# 本番と見分けがつかないと投票の取り違えが起きるため、staging 環境では必ず出す %>
     <% if staging? %>
       <div class="bg-red-600 py-1 text-center text-sm text-white">
@@ -29,14 +41,14 @@
 
     <%= render "shared/header" %>
 
-    <main class="mx-auto w-full max-w-3xl flex-1 px-5 py-8">
+    <main class="mx-auto mb-12 w-full max-w-3xl flex-1 px-4 sm:px-6">
       <%= render "shared/flash" %>
       <%= yield %>
     </main>
 
-    <footer class="bg-white py-6 text-center text-xs text-stone-500">
-      <%= link_to "利用規約", terms_path, class: "hover:underline" %>
-      <span class="mx-2">/</span>
+    <footer class="border-t-3 border-tokyu-ink bg-white py-6 text-center text-xs">
+      <%= link_to "利用規約", terms_path, class: "mr-2 hover:underline" %>
+      <span class="mr-2">/</span>
       <%= link_to "プライバシーポリシー", privacy_path, class: "hover:underline" %>
     </footer>
   </body>
