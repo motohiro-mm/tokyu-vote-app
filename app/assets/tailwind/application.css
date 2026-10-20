@@ -64,6 +64,11 @@
   .input {
     @apply min-h-12 w-full rounded-xl border-3 border-tokyu-ink bg-white px-4 py-2 focus:outline-none focus:ring-4 focus:ring-tokyu-blue/40;
   }
+  /* ブラウザ標準の矢印は枠に寄りすぎるので、自前の矢印に差し替える */
+  select.input {
+    @apply cursor-pointer appearance-none bg-[length:16px] bg-[position:right_16px_center] bg-no-repeat pr-12;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23231916' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  }
   .input-file {
     @apply block w-full text-sm text-tokyu-ink-soft file:mr-4 file:cursor-pointer file:rounded-full file:border-3 file:border-tokyu-ink file:bg-white file:px-4 file:py-2 file:text-sm file:font-extrabold file:text-tokyu-ink hover:file:bg-tokyu-blue-light;
   }
