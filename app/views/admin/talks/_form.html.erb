@@ -29,7 +29,7 @@
   <% end %>
 
   <div class="mx-auto grid max-w-sm grid-cols-2 gap-4">
-    <%= f.submit submit_label, class: "btn-primary w-full" %>
     <%= link_to "#{Event.model_name.human}に戻る", admin_event_path(@event), class: "btn-secondary w-full text-center" %>
+    <%= f.submit submit_label, class: "btn-primary w-full" %>
   </div>
 <% end %>
