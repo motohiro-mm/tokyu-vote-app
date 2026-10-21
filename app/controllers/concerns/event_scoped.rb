@@ -4,6 +4,7 @@ module EventScoped
 
   included do
     before_action :set_event
+    before_action :require_current_event
     before_action :check_event_status
   end
 
@@ -11,6 +12,13 @@ module EventScoped
 
   def set_event
     @event = Event.find(params[:event_id])
+  end
+
+  # 一般向けは今のイベントだけ。それ以外は無いものとして扱う
+  def require_current_event
+    return if @event == Event.current
+
+    raise ActiveRecord::RecordNotFound
   end
 
   # 準備中と集計中は中身を見せず、状態を説明する画面で止める

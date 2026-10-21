@@ -16,14 +16,13 @@ RSpec.describe "結果画面", type: :request do
     expect(response.body).to include("飯王（単品王）", "飯王（合算王）", "唐揚げ", "おいしかった")
   end
 
-  it "終了したイベントでも結果を見られる" do
+  it "終了したイベントの結果は見つからない" do
     event.finished!
-    create(:vote, entry: create(:entry, event: event, category: food, title: "唐揚げ"))
+    create(:entry, event: event, category: food, title: "唐揚げ")
 
     get event_results_path(event, category: "food")
 
-    expect(response).to have_http_status(:ok)
-    expect(response.body).to include("唐揚げ")
+    expect(response).to have_http_status(:not_found)
   end
 
   it "投票者の名前は出さない" do

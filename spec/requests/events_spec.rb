@@ -80,15 +80,12 @@ RSpec.describe "イベント画面", type: :request do
     expect(response.body).to include("開催中のイベントはありません")
   end
 
-  it "終了したイベントはURLを知っていれば結果への導線を見られる" do
-    create(:category, category_name: :food)
+  it "終了したイベントは見つからない" do
     event.finished!
 
     get event_path(event)
 
-    expect(response).to have_http_status(:ok)
-    expect(response.body).to include(event_results_path(event, category: "food"))
-    expect(response.body).not_to include(event_votes_categories_path(event))
+    expect(response).to have_http_status(:not_found)
   end
 
   it "回次のURLでそのイベントの画面を開く" do
