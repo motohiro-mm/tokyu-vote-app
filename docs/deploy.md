@@ -206,3 +206,19 @@ unzip -l <ファイル名>.zip
 ```bash
 bin/kamal app exec -d production --reuse 'rm storage/backups/<ファイル名>.zip'
 ```
+
+### 3. 手元で戻して確かめる
+
+コピーした zip を development で戻し、DB と画像を確かめる（`lib/backup_restore.rb`）。開発サーバーは止めてから実行する。戻し先は今の primary DB（`storage/development.sqlite3`）と、zip 内の `active_storage/<サービス名>/` に対応する Disk サービスの root（本番の zip は `local` なので `storage/`）。`db/production.sqlite3` という名前のままではなく、手元の primary DB の場所へ置く。
+
+```bash
+bin/rails "backup:restore[<ファイル名>.zip]"
+```
+
+`users` や `events` に行があると上書きせず止まる。捨ててよいときだけ `FORCE=1` を付ける。production（staging を含む）では実行しない（明示的に許可するときだけ `ALLOW_BACKUP_RESTORE=1`）。
+
+```bash
+FORCE=1 bin/rails "backup:restore[<ファイル名>.zip]"
+```
+
+`integrity_check: ok` と Active Storage の件数が出る。ファイルが無い、または checksum が一致しない blob があると件数を出して終了コードは 0 以外になる。`backup:zip` 実行時の件数、欠けていた blob と突き合わせる。
