@@ -29,6 +29,9 @@ gem "omniauth-rails_csrf_protection"
 # LT候補の CSV 一括登録。Ruby 3.4 から csv は bundled gem になり、Gemfile に書かないと読み込めない
 gem "csv"
 
+# backup:zip で DB と画像を 1 つの zip にまとめる。本番イメージに zip コマンドは入っていない
+gem "rubyzip", require: false
+
 # バリデーションエラーなど Rails 同梱メッセージの日本語訳
 gem "rails-i18n"
 
