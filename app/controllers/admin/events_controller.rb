@@ -20,17 +20,14 @@ class Admin::EventsController < Admin::BaseController
   end
 
   def show
-    @talks = talks
-    @rankings = rankings if @event.counting_started?
+    load_show
   end
 
   def update
-    if @event.update(status_param)
-      redirect_to admin_event_path(@event), notice: "#{Event.human_attribute_name(:status)}を変更しました。"
+    if status_change?
+      change_status
     else
-      @talks = talks
-      @rankings = rankings if @event.counting_started?
-      render :show, status: :unprocessable_entity
+      update_edition
     end
   end
 
@@ -49,10 +46,39 @@ class Admin::EventsController < Admin::BaseController
   end
 
   def event_params
-    params.expect(event: [ :title ])
+    params.expect(event: [ :title, :held_on, :slug ])
   end
 
   def status_param
     params.expect(event: [ :status ])
+  end
+
+  # ステータス変更のフォームだけが status を送る。開催情報の更新では必須にしない
+  def status_change?
+    params[:event].respond_to?(:key?) && params[:event].key?(:status)
+  end
+
+  def change_status
+    if @event.update(status_param)
+      redirect_to admin_event_path(@event), notice: "#{Event.human_attribute_name(:status)}を変更しました。"
+    else
+      load_show
+      render :show, status: :unprocessable_entity
+    end
+  end
+
+  def update_edition
+    @event.assign_attributes(event_params)
+    if @event.save(context: :edition)
+      redirect_to admin_event_path(@event), notice: "#{Event.model_name.human}を更新しました。"
+    else
+      load_show
+      render :show, status: :unprocessable_entity
+    end
+  end
+
+  def load_show
+    @talks = talks
+    @rankings = rankings if @event.counting_started?
   end
 end
