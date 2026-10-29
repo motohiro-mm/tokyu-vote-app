@@ -3,8 +3,8 @@
 <p class="mt-2 text-center text-stone-600">ご参加ありがとうございます！</p>
 
 <div class="mt-6 space-y-3 text-center">
-  <%= link_to "続けて#{@category.label}に登録する", new_event_entry_path(@event, category: @category.category_name),
+  <%= link_to "続けて#{@category.label}に登録する", new_event_entry_path(@event.slug, category: @category.category_name),
               class: "card-link" %>
-  <%= link_to "TOPへ戻る", event_path(@event),
+  <%= link_to "TOPへ戻る", event_path(@event.slug),
               class: "card-link" %>
 </div>

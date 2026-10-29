@@ -4,7 +4,7 @@
 <ul class="mt-6 space-y-3">
   <% @categories.each do |category| %>
     <li>
-      <%= link_to new_event_entry_path(@event, category: category.category_name),
+      <%= link_to new_event_entry_path(@event.slug, category: category.category_name),
                   class: "card-link" do %>
         <span class="font-bold"><%= category.label %>に登録する</span>
       <% end %>
@@ -14,6 +14,6 @@
 
 <div class="mt-8 text-center">
 
-  <%= link_to "戻る", event_path(@event), class: "btn-secondary" %>
+  <%= link_to "戻る", event_path(@event.slug), class: "btn-secondary" %>
 
 </div>

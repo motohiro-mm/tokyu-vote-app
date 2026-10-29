@@ -1,3 +1,8 @@
 <% content_for :title, "TokyuRubyVote" %>
-<h1 class="page-title">開催中の<%= Event.model_name.human %>はありません</h1>
-<p class="mt-2 text-center text-stone-600">次の開催をお楽しみに！</p>
+<% if @current_event %>
+  <h1 class="page-title">開催情報を準備中です</h1>
+  <p class="mt-2 text-center text-stone-600">公開までしばらくお待ちください。</p>
+<% else %>
+  <h1 class="page-title">開催中の<%= Event.model_name.human %>はありません</h1>
+  <p class="mt-2 text-center text-stone-600">次の開催をお楽しみに！</p>
+<% end %>

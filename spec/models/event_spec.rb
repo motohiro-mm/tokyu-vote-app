@@ -73,7 +73,7 @@ RSpec.describe Event do
     expect(event.errors.of_kind?(:held_on, :blank)).to be true
   end
 
-  it "スラッグは英数字とハイフンだけで、予約パスは使えない" do
+  it "スラッグは英数字とハイフンだけを使う" do
     event = build(:event, slug: "tokyu-17")
     expect(event).to be_valid
 
@@ -82,7 +82,6 @@ RSpec.describe Event do
     expect(event.errors.of_kind?(:slug, :invalid)).to be true
 
     event.slug = "login"
-    expect(event).not_to be_valid
-    expect(event.errors.of_kind?(:slug, :reserved)).to be true
+    expect(event).to be_valid
   end
 end

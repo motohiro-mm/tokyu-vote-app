@@ -1,6 +1,4 @@
 class Event < ApplicationRecord
-  # /:slug が既存の画面を奪わないための予約語。routes.rb の制約と揃える
-  RESERVED_SLUGS = %w[login logout terms privacy up admin auth events].freeze
   # 回次の公開キー。例: "17" や "tokyu-17"。英数字とハイフン以外は URL にしない
   SLUG_FORMAT = /\A[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*\z/
 
@@ -26,12 +24,6 @@ class Event < ApplicationRecord
   validates :held_on, presence: true, on: %i[create edition]
   validates :slug, presence: true, on: %i[create edition]
   validates :slug, uniqueness: { allow_nil: true }, format: { with: SLUG_FORMAT, allow_nil: true }
-  validate :slug_not_reserved
-
-  def self.public_slug?(value)
-    slug = value.to_s.delete_prefix("/").delete_suffix("/")
-    slug.match?(SLUG_FORMAT) && RESERVED_SLUGS.exclude?(slug)
-  end
 
   def self.status_label(status)
     I18n.t("enums.event.status.#{status}")
@@ -59,12 +51,5 @@ class Event < ApplicationRecord
 
   def normalize_slug
     self.slug = slug.strip.presence if slug.is_a?(String)
-  end
-
-  def slug_not_reserved
-    return if slug.blank?
-    return if RESERVED_SLUGS.exclude?(slug)
-
-    errors.add(:slug, :reserved)
   end
 end

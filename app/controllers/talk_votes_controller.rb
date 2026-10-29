@@ -8,9 +8,9 @@ class TalkVotesController < ApplicationController
     talk_vote = current_user.talk_votes.build(talk: talk, comment: talk_vote_params[:comment])
 
     if talk_vote.save
-      redirect_to event_talk_votes_completions_path(@event)
+      redirect_to event_talk_votes_completions_path(@event.slug)
     else
-      redirect_to event_talk_path(@event, talk), alert: talk_vote.errors.full_messages.to_sentence
+      redirect_to event_talk_path(@event.slug, talk), alert: talk_vote.errors.full_messages.to_sentence
     end
   end
 

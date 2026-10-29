@@ -170,7 +170,7 @@ namespace :demo do
     end
 
     puts "できました: #{event.title}（#{event.status_label}）"
-    puts "ログイン画面 #{demo_base_url}/login から #{admin.name} を選ぶと管理画面の集計、誰でも #{demo_base_url}/events/#{event.id} から結果を見られます"
+    puts "ログイン画面 #{demo_base_url}/login から #{admin.name} を選ぶと管理画面の集計、誰でも #{demo_base_url}/events/#{event.slug} から結果を見られます"
     puts "静的書き出しは bin/rails export:static"
   end
 end

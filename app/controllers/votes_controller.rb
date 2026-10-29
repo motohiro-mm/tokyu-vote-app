@@ -12,9 +12,9 @@ class VotesController < ApplicationController
     vote = current_user.votes.build(entry: entry, comment: vote_params[:comment])
 
     if vote.save
-      redirect_to event_votes_completions_path(@event, category: entry.category.category_name)
+      redirect_to event_votes_completions_path(@event.slug, category: entry.category.category_name)
     else
-      redirect_to event_entry_path(@event, entry, category: entry.category.category_name),
+      redirect_to event_entry_path(@event.slug, entry, category: entry.category.category_name),
                   alert: vote.errors.full_messages.to_sentence
     end
   end

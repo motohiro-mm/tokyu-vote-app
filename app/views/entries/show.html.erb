@@ -20,7 +20,7 @@
   <% elsif @remaining_votes <= 0 %>
     <p class="text-sm text-stone-500">この部門の票を使い切りました。</p>
   <% else %>
-    <%= form_with model: @vote, url: event_votes_path(@event) do |f| %>
+    <%= form_with model: @vote, url: event_votes_path(@event.slug) do |f| %>
       <%= f.hidden_field :entry_id, value: @entry.id %>
       <%= f.label :comment, "コメントを記入する【任意】", class: "block text-sm font-bold" %>
       <span class="text-xs text-stone-500">300文字まで</span>
@@ -36,7 +36,7 @@
 
 <div class="mt-8 text-center">
 
-  <%= link_to "戻る", event_entries_path(@event, category: @category.category_name),
+  <%= link_to "戻る", event_entries_path(@event.slug, category: @category.category_name),
             class: "btn-secondary" %>
 
 </div>

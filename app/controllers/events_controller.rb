@@ -5,11 +5,13 @@ class EventsController < ApplicationController
     @categories = Category.order(:id)
   end
 
+  def unknown_path
+    raise ActiveRecord::RecordNotFound
+  end
+
   private
 
-    def set_event
-      # クエリの slug や id では切り替えない。パスに載った方だけで決める
-      slug = request.path_parameters[:slug]
-      @event = slug.present? ? Event.find_by!(slug: slug) : Event.find(params[:id])
-    end
+  def set_event
+    @event = Event.find_by!(slug: request.path_parameters[:slug] || request.path_parameters[:event_slug])
+  end
 end

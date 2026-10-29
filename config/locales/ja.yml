@@ -40,7 +40,6 @@ ja:
           attributes:
             slug:
               invalid: は半角英数字とハイフンのみ使えます
-              reserved: は予約済みのパスなので使えません
         entry:
           attributes:
             category:

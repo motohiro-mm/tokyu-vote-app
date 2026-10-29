@@ -13,6 +13,6 @@ class ResultsController < ApplicationController
   def require_results_published
     return if @event.results_published?
 
-    redirect_to event_path(@event), alert: "結果はまだ公開されていません。"
+    redirect_to event_path(@event.slug), alert: "結果はまだ公開されていません。"
   end
 end

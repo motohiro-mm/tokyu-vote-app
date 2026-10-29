@@ -7,24 +7,24 @@ RSpec.describe "イベント画面", type: :request do
   before { sign_in(user) }
 
   it "エントリーと投票の2つの導線を出す" do
-    get event_path(event)
+    get event_path(event.slug)
 
-    expect(response.body).to include(event_entries_categories_path(event))
-    expect(response.body).to include(event_votes_categories_path(event))
+    expect(response.body).to include(event_entries_categories_path(event.slug))
+    expect(response.body).to include(event_votes_categories_path(event.slug))
   end
 
   it "結果公開では投票の導線を出さない" do
     event.closed!
 
-    get event_path(event)
+    get event_path(event.slug)
 
-    expect(response.body).not_to include(event_votes_categories_path(event))
+    expect(response.body).not_to include(event_votes_categories_path(event.slug))
   end
 
   it "準備中は専用の画面で止める" do
     event.preparing!
 
-    get event_path(event)
+    get event_path(event.slug)
 
     expect(response).to have_http_status(:forbidden)
     expect(response.body).to include("準備中です")
@@ -33,7 +33,7 @@ RSpec.describe "イベント画面", type: :request do
   it "集計中は専用の画面で止める" do
     event.counting!
 
-    get event_path(event)
+    get event_path(event.slug)
 
     expect(response).to have_http_status(:forbidden)
     expect(response.body).to include("集計中です")
@@ -43,7 +43,7 @@ RSpec.describe "イベント画面", type: :request do
     event
     delete logout_path
 
-    get event_path(event)
+    get event_path(event.slug)
 
     expect(response).to redirect_to login_path
   end
@@ -53,7 +53,7 @@ RSpec.describe "イベント画面", type: :request do
 
     get root_path
 
-    expect(response).to redirect_to event_path(event)
+    expect(response).to redirect_to event_path(event.slug)
   end
 
   it "終了したイベントは飛ばして最新のイベントへ送る" do
@@ -62,13 +62,22 @@ RSpec.describe "イベント画面", type: :request do
 
     get root_path
 
-    expect(response).to redirect_to event_path(event)
+    expect(response).to redirect_to event_path(event.slug)
   end
 
   it "イベントが無ければ案内を出す" do
     get root_path
 
     expect(response.body).to include("開催中のイベントはありません")
+  end
+
+  it "既存のイベントにスラッグがない場合は準備中と表示する" do
+    event.update_columns(slug: nil)
+
+    get root_path
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("開催情報を準備中です")
   end
 
   it "終了したイベントしか無ければ案内を出す" do
@@ -80,55 +89,20 @@ RSpec.describe "イベント画面", type: :request do
     expect(response.body).to include("開催中のイベントはありません")
   end
 
-  it "終了したイベントは見つからない" do
-    event.finished!
-
-    get event_path(event)
-
-    expect(response).to have_http_status(:not_found)
-  end
-
   it "回次のURLでそのイベントの画面を開く" do
     event.update!(slug: "17", held_on: Date.new(2026, 10, 18), title: "第17回の投票")
 
-    get "/17"
+    get "/events/17", params: { slug: "99" }
 
     expect(response).to have_http_status(:ok)
     expect(response.body).to include("第17回の投票")
     expect(response.body).to include(I18n.l(Date.new(2026, 10, 18), format: :long))
-    expect(response.body).to include(event_entries_categories_path(event))
-  end
-
-  it "数値IDのURLでも同じ画面を開く" do
-    event.update!(slug: "17", title: "第17回の投票")
-
-    get event_path(event)
-
-    expect(response).to have_http_status(:ok)
-    expect(response.body).to include("第17回の投票")
+    expect(response.body).to include(event_entries_categories_path(event.slug))
   end
 
   it "存在しない回次は見つからない" do
-    get "/99"
-
+    get "/events/99"
     expect(response).to have_http_status(:not_found)
-  end
-
-  it "予約パスは回次URLにしない" do
-    event.update!(slug: "17", title: "第17回の投票")
-
-    get "/login"
-    expect(response).to have_http_status(:ok)
-    expect(response.body).not_to include("第17回の投票")
-
-    get "/up"
-    expect(response).to have_http_status(:ok)
-    expect(response.body).not_to include("第17回の投票")
-
-    %w[logout terms privacy admin auth events].each do |path|
-      get "/#{path}"
-      expect(response.body).not_to include("第17回の投票")
-    end
   end
 
   it "利用規約とプライバシーポリシーはログイン不要" do

@@ -5,7 +5,7 @@ RSpec.describe "LT王への投票", type: :request do
   let(:user) { create(:user) }
 
   def cast(talk, comment: "よかった")
-    post event_talk_votes_path(event), params: { talk_vote: { talk_id: talk.id, comment: comment } }
+    post event_talk_votes_path(event.slug), params: { talk_vote: { talk_id: talk.id, comment: comment } }
   end
 
   before { sign_in(user) }

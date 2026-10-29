@@ -7,7 +7,7 @@ RSpec.describe "投票", type: :request do
   let(:user) { create(:user) }
 
   def cast(entry, comment: "おいしい")
-    post event_votes_path(event), params: { vote: { entry_id: entry.id, comment: comment } }
+    post event_votes_path(event.slug), params: { vote: { entry_id: entry.id, comment: comment } }
   end
 
   before { sign_in(user) }

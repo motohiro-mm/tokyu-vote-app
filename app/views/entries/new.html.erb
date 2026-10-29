@@ -12,7 +12,7 @@
   </div>
 <% end %>
 
-<%= form_with model: @entry, url: event_entries_path(@event, category: @category.category_name),
+<%= form_with model: @entry, url: event_entries_path(@event.slug, category: @category.category_name),
               class: "mt-6 space-y-4" do |f| %>
   <% if @entry.errors.any? %>
     <ul class="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800">
@@ -41,6 +41,6 @@
 
   <div class="mx-auto grid max-w-sm grid-cols-2 gap-4 pt-6">
     <%= f.submit "登録する", class: "btn-primary w-full" %>
-    <%= link_to "戻る", event_entries_categories_path(@event), class: "btn-secondary w-full text-center" %>
+    <%= link_to "戻る", event_entries_categories_path(@event.slug), class: "btn-secondary w-full text-center" %>
   </div>
 <% end %>
