@@ -51,6 +51,26 @@ RSpec.describe "画面の導線", type: :request do
     expect(response.body).to include("あなたが投票したのは以下のエントリーです").and include("唐揚げ")
   end
 
+  it "自分のエントリーには選択するを出さない" do
+    own = create(:entry, event: event, category: food, user: user, title: "唐揚げ")
+    other = create(:entry, event: event, category: food, title: "ポテトサラダ")
+
+    get event_entries_path(event.slug, category: "food")
+
+    expect(response.body).to include("自分の作品")
+    expect(response.body).not_to include(event_entry_path(event.slug, own, category: "food"))
+    expect(response.body).to include(event_entry_path(event.slug, other, category: "food"))
+  end
+
+  it "自分のエントリーの詳細では投票フォームを出さない" do
+    entry = create(:entry, event: event, category: food, user: user)
+
+    get event_entry_path(event.slug, entry, category: "food")
+
+    expect(response.body).to include("自分のエントリーには投票できません")
+    expect(response.body).not_to include("投票する（残り")
+  end
+
   it "投票済みのエントリーには選択するを出さない" do
     voted = create(:entry, event: event, category: food, title: "唐揚げ")
     other = create(:entry, event: event, category: food, title: "ポテトサラダ")

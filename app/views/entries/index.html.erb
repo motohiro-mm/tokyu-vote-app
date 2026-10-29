@@ -34,7 +34,9 @@
             <p class="mt-1 text-xs break-words text-stone-500"><%= entry.description %></p>
           <% end %>
         </div>
-        <% if @voted_entry_ids.include?(entry.id) %>
+        <% if entry.user_id == current_user.id %>
+          <span class="shrink-0 text-sm text-stone-500">自分の作品</span>
+        <% elsif @voted_entry_ids.include?(entry.id) %>
           <span class="badge-done">投票済み</span>
         <% else %>
           <%= link_to "選択する", event_entry_path(@event.slug, entry, category: @category.category_name),
