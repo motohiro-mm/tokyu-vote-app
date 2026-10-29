@@ -39,7 +39,7 @@
         <% elsif @voted_entry_ids.include?(entry.id) %>
           <span class="badge-done">投票済み</span>
         <% else %>
-          <%= link_to "選択する", event_entry_path(@event, entry, category: @category.category_name),
+          <%= link_to "選択する", event_entry_path(@event.slug, entry, category: @category.category_name),
                       class: "btn-primary shrink-0" %>
         <% end %>
       </li>
@@ -49,6 +49,6 @@
 
 <div class="mt-8 text-center">
 
-  <%= link_to "戻る", event_votes_categories_path(@event), class: "btn-secondary" %>
+  <%= link_to "戻る", event_votes_categories_path(@event.slug), class: "btn-secondary" %>
 
 </div>

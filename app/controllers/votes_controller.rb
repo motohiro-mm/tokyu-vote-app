@@ -17,7 +17,7 @@ class VotesController < ApplicationController
       vote.save!
     end
 
-    redirect_to event_votes_completions_path(@event, category: entry.category.category_name)
+    redirect_to event_votes_completions_path(@event.slug, category: entry.category.category_name)
   rescue ActiveRecord::RecordInvalid
     redirect_to_entry_with_alert(entry, vote)
   rescue ActiveRecord::RecordNotUnique
@@ -40,7 +40,7 @@ class VotesController < ApplicationController
   end
 
   def redirect_to_entry_with_alert(entry, vote)
-    redirect_to event_entry_path(@event, entry, category: entry.category.category_name),
+    redirect_to event_entry_path(@event.slug, entry, category: entry.category.category_name),
                 alert: vote.errors.full_messages.to_sentence
   end
 end

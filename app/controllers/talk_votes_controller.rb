@@ -13,7 +13,7 @@ class TalkVotesController < ApplicationController
       talk_vote.save!
     end
 
-    redirect_to event_talk_votes_completions_path(@event)
+    redirect_to event_talk_votes_completions_path(@event.slug)
   rescue ActiveRecord::RecordInvalid
     redirect_to_talk_with_alert(talk, talk_vote)
   rescue ActiveRecord::RecordNotUnique
@@ -34,6 +34,6 @@ class TalkVotesController < ApplicationController
   end
 
   def redirect_to_talk_with_alert(talk, talk_vote)
-    redirect_to event_talk_path(@event, talk), alert: talk_vote.errors.full_messages.to_sentence
+    redirect_to event_talk_path(@event.slug, talk), alert: talk_vote.errors.full_messages.to_sentence
   end
 end

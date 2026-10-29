@@ -5,7 +5,7 @@ RSpec.describe "LT王への投票", type: :request do
   let(:user) { create(:user) }
 
   def cast(talk, comment: "よかった")
-    post event_talk_votes_path(event), params: { talk_vote: { talk_id: talk.id, comment: comment } }
+    post event_talk_votes_path(event.slug), params: { talk_vote: { talk_id: talk.id, comment: comment } }
   end
 
   before { sign_in(user) }
@@ -82,7 +82,7 @@ RSpec.describe "LT王への投票", type: :request do
       targets = Array.new(2) { create(:talk, event: event) }
 
       payloads = targets.map do |talk|
-        [ event_talk_votes_path(event), { talk_vote: { talk_id: talk.id, comment: "同時" } } ]
+        [ event_talk_votes_path(event.slug), { talk_vote: { talk_id: talk.id, comment: "同時" } } ]
       end
 
       sessions = post_concurrently(payloads)
@@ -96,8 +96,8 @@ RSpec.describe "LT王への投票", type: :request do
       talk = create(:talk, event: event)
 
       sessions = post_concurrently([
-        [ event_talk_votes_path(event), { talk_vote: { talk_id: talk.id, comment: "同時1" } } ],
-        [ event_talk_votes_path(event), { talk_vote: { talk_id: talk.id, comment: "同時2" } } ]
+        [ event_talk_votes_path(event.slug), { talk_vote: { talk_id: talk.id, comment: "同時1" } } ],
+        [ event_talk_votes_path(event.slug), { talk_vote: { talk_id: talk.id, comment: "同時2" } } ]
       ])
 
       expect(TalkVote.where(user: user, talk: talk).count).to eq(1)

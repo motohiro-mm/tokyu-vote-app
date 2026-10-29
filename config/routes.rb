@@ -10,7 +10,7 @@ Rails.application.routes.draw do
   get "/terms", to: "pages#terms"
   get "/privacy", to: "pages#privacy"
 
-  resources :events, only: [ :show ] do
+  resources :events, only: [ :show ], param: :slug do
     # resources より先に宣言しないと、categories や completions が :id として吸われる
     get "entries/categories", to: "entries#categories"
     get "entries/completions", to: "entries#completions"
@@ -24,6 +24,9 @@ Rails.application.routes.draw do
     resources :talk_votes, only: [ :create ]
     resources :results, only: [ :index ]
   end
+
+  # 過去回の旧URLもアーカイブへ渡す。現在の回の未定義パスは404。
+  get "/events/:event_slug/*path", to: "events#unknown_path"
 
   namespace :admin do
     resources :events, only: [ :index, :new, :create, :show, :update ] do

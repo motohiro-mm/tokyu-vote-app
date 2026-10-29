@@ -9,24 +9,24 @@ RSpec.describe "画面の導線", type: :request do
   before { sign_in(user) }
 
   it "投票の部門選択にはLT王を並べ、talks へ送る" do
-    get event_votes_categories_path(event)
+    get event_votes_categories_path(event.slug)
 
-    expect(response.body).to include(event_entries_path(event, category: "food"))
-    expect(response.body).to include(event_talks_path(event))
+    expect(response.body).to include(event_entries_path(event.slug, category: "food"))
+    expect(response.body).to include(event_talks_path(event.slug))
   end
 
   it "投票すると投票完了画面へ送り、残票を出す" do
     entry = create(:entry, event: event, category: food)
 
-    post event_votes_path(event), params: { vote: { entry_id: entry.id } }
+    post event_votes_path(event.slug), params: { vote: { entry_id: entry.id } }
 
-    expect(response).to redirect_to event_votes_completions_path(event, category: "food")
+    expect(response).to redirect_to event_votes_completions_path(event.slug, category: "food")
     follow_redirect!
     expect(response.body).to include("投票が完了しました").and include("残り 2 票")
   end
 
   it "票を使い切ると続けて投票する導線を出さない" do
-    3.times { post event_votes_path(event), params: { vote: { entry_id: create(:entry, event: event, category: food).id } } }
+    3.times { post event_votes_path(event.slug), params: { vote: { entry_id: create(:entry, event: event, category: food).id } } }
 
     follow_redirect!
     expect(response.body).to include("3票分すべての投票が完了しました")
@@ -35,18 +35,18 @@ RSpec.describe "画面の導線", type: :request do
   it "LT王に投票すると専用の完了画面へ送る" do
     talk = create(:talk, event: event)
 
-    post event_talk_votes_path(event), params: { talk_vote: { talk_id: talk.id } }
+    post event_talk_votes_path(event.slug), params: { talk_vote: { talk_id: talk.id } }
 
-    expect(response).to redirect_to event_talk_votes_completions_path(event)
+    expect(response).to redirect_to event_talk_votes_completions_path(event.slug)
     follow_redirect!
     expect(response.body).to include("投票が完了しました")
   end
 
   it "投票先を選ぶ画面に投票済みのエントリーを出す" do
     entry = create(:entry, event: event, category: food, title: "唐揚げ")
-    post event_votes_path(event), params: { vote: { entry_id: entry.id } }
+    post event_votes_path(event.slug), params: { vote: { entry_id: entry.id } }
 
-    get event_entries_path(event, category: "food")
+    get event_entries_path(event.slug, category: "food")
 
     expect(response.body).to include("あなたが投票したのは以下のエントリーです").and include("唐揚げ")
   end
@@ -55,17 +55,17 @@ RSpec.describe "画面の導線", type: :request do
     own = create(:entry, event: event, category: food, user: user, title: "唐揚げ")
     other = create(:entry, event: event, category: food, title: "ポテトサラダ")
 
-    get event_entries_path(event, category: "food")
+    get event_entries_path(event.slug, category: "food")
 
     expect(response.body).to include("自分の作品")
-    expect(response.body).not_to include(event_entry_path(event, own, category: "food"))
-    expect(response.body).to include(event_entry_path(event, other, category: "food"))
+    expect(response.body).not_to include(event_entry_path(event.slug, own, category: "food"))
+    expect(response.body).to include(event_entry_path(event.slug, other, category: "food"))
   end
 
   it "自分のエントリーの詳細では投票フォームを出さない" do
     entry = create(:entry, event: event, category: food, user: user)
 
-    get event_entry_path(event, entry, category: "food")
+    get event_entry_path(event.slug, entry, category: "food")
 
     expect(response.body).to include("自分のエントリーには投票できません")
     expect(response.body).not_to include("投票する（残り")
@@ -74,20 +74,20 @@ RSpec.describe "画面の導線", type: :request do
   it "投票済みのエントリーには選択するを出さない" do
     voted = create(:entry, event: event, category: food, title: "唐揚げ")
     other = create(:entry, event: event, category: food, title: "ポテトサラダ")
-    post event_votes_path(event), params: { vote: { entry_id: voted.id } }
+    post event_votes_path(event.slug), params: { vote: { entry_id: voted.id } }
 
-    get event_entries_path(event, category: "food")
+    get event_entries_path(event.slug, category: "food")
 
     expect(response.body).to include("投票済み")
-    expect(response.body).not_to include(event_entry_path(event, voted, category: "food"))
-    expect(response.body).to include(event_entry_path(event, other, category: "food"))
+    expect(response.body).not_to include(event_entry_path(event.slug, voted, category: "food"))
+    expect(response.body).to include(event_entry_path(event.slug, other, category: "food"))
   end
 
   it "投票済みのエントリーの詳細では投票フォームを出さない" do
     entry = create(:entry, event: event, category: food)
-    post event_votes_path(event), params: { vote: { entry_id: entry.id } }
+    post event_votes_path(event.slug), params: { vote: { entry_id: entry.id } }
 
-    get event_entry_path(event, entry, category: "food")
+    get event_entry_path(event.slug, entry, category: "food")
 
     expect(response.body).to include("このエントリーには投票済みです")
     expect(response.body).not_to include("投票する（残り")
@@ -96,29 +96,29 @@ RSpec.describe "画面の導線", type: :request do
   it "投票済みのLTには選択するを出さない" do
     voted = create(:talk, event: event)
     other = create(:talk, event: event)
-    post event_talk_votes_path(event), params: { talk_vote: { talk_id: voted.id } }
+    post event_talk_votes_path(event.slug), params: { talk_vote: { talk_id: voted.id } }
 
-    get event_talks_path(event)
+    get event_talks_path(event.slug)
 
     expect(response.body).to include("投票済み")
-    expect(response.body).not_to include(event_talk_path(event, voted))
-    expect(response.body).to include(event_talk_path(event, other))
+    expect(response.body).not_to include(event_talk_path(event.slug, voted))
+    expect(response.body).to include(event_talk_path(event.slug, other))
   end
 
   it "投票の完了画面はLT王を受け付けない" do
-    get event_votes_completions_path(event, category: "talk")
+    get event_votes_completions_path(event.slug, category: "talk")
 
     expect(response).to have_http_status(:not_found)
   end
 
   it "投票の完了画面は未知の部門名を受け付けない" do
-    get event_votes_completions_path(event, category: "beer")
+    get event_votes_completions_path(event.slug, category: "beer")
 
     expect(response).to have_http_status(:not_found)
   end
 
   it "エントリーの完了画面はLT王を受け付けない" do
-    get event_entries_completions_path(event, category: "talk")
+    get event_entries_completions_path(event.slug, category: "talk")
 
     expect(response).to have_http_status(:not_found)
   end
@@ -126,7 +126,7 @@ RSpec.describe "画面の導線", type: :request do
   it "準備中は部門選択も完了画面も開けない" do
     event.preparing!
 
-    get event_votes_categories_path(event)
+    get event_votes_categories_path(event.slug)
 
     expect(response).to have_http_status(:forbidden)
   end

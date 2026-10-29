@@ -7,7 +7,7 @@ RSpec.describe "Content Security Policy", type: :request do
   before { sign_in(user) }
 
   it "report-only で CSP ヘッダを返し、script-src と style-src は self と nonce だけを許す" do
-    get event_path(event)
+    get event_path(event.slug)
 
     header = response.headers["Content-Security-Policy-Report-Only"]
     expect(header).to include("default-src 'self'")
@@ -18,7 +18,7 @@ RSpec.describe "Content Security Policy", type: :request do
   end
 
   it "importmap のインラインスクリプトにヘッダと同じ nonce が付く" do
-    get event_path(event)
+    get event_path(event.slug)
 
     nonce = response.headers["Content-Security-Policy-Report-Only"][/'nonce-([^']+)'/, 1]
     expect(response.body).to include(%(<script type="importmap" data-turbo-track="reload" nonce="#{nonce}">))
@@ -26,9 +26,9 @@ RSpec.describe "Content Security Policy", type: :request do
   end
 
   it "nonce はリクエストごとに変わる" do
-    get event_path(event)
+    get event_path(event.slug)
     first = response.headers["Content-Security-Policy-Report-Only"][/'nonce-([^']+)'/, 1]
-    get event_path(event)
+    get event_path(event.slug)
     second = response.headers["Content-Security-Policy-Report-Only"][/'nonce-([^']+)'/, 1]
 
     expect(first).not_to eq(second)

@@ -30,4 +30,58 @@ RSpec.describe Event do
 
     expect(accepting).to eq %w[preparing open]
   end
+
+  it "スラッグは重複できない" do
+    create(:event, slug: "17")
+    duplicate = build(:event, slug: "17")
+
+    expect(duplicate).not_to be_valid
+    expect(duplicate.errors.of_kind?(:slug, :taken)).to be true
+  end
+
+  it "スラッグのユニーク索引で同じ値は保存できない" do
+    create(:event, slug: "17")
+    other = create(:event)
+
+    expect { other.update_columns(slug: "17") }.to raise_error(ActiveRecord::RecordNotUnique)
+  end
+
+  it "スラッグが空の既存行は複数あってもステータスを変更できる" do
+    first = create(:event)
+    second = create(:event)
+    first.update_columns(slug: nil, held_on: nil)
+    second.update_columns(slug: nil, held_on: nil)
+
+    expect(first.update(status: :open)).to be true
+    expect(second.update(status: :counting)).to be true
+  end
+
+  it "新規では開催日とスラッグが必須" do
+    event = build(:event, slug: nil, held_on: nil)
+
+    expect(event).not_to be_valid
+    expect(event.errors.of_kind?(:slug, :blank)).to be true
+    expect(event.errors.of_kind?(:held_on, :blank)).to be true
+  end
+
+  it "管理画面の更新では開催日とスラッグが必須" do
+    event = create(:event)
+    event.assign_attributes(slug: nil, held_on: nil)
+
+    expect(event.valid?(:edition)).to be false
+    expect(event.errors.of_kind?(:slug, :blank)).to be true
+    expect(event.errors.of_kind?(:held_on, :blank)).to be true
+  end
+
+  it "スラッグは英数字とハイフンだけを使う" do
+    event = build(:event, slug: "tokyu-17")
+    expect(event).to be_valid
+
+    event.slug = "第17回"
+    expect(event).not_to be_valid
+    expect(event.errors.of_kind?(:slug, :invalid)).to be true
+
+    event.slug = "login"
+    expect(event).to be_valid
+  end
 end

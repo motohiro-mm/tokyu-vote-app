@@ -15,6 +15,17 @@
     <%= f.text_field :title, class: "input" %>
   </div>
 
+  <div>
+    <%= f.label :held_on, class: "block text-sm font-bold" %>
+    <%= f.date_field :held_on, class: "input" %>
+  </div>
+
+  <div>
+    <%= f.label :slug, class: "block text-sm font-bold" %>
+    <%= f.text_field :slug, class: "input", placeholder: "17", spellcheck: false %>
+    <p class="mt-1 text-sm text-stone-500">公開URLになります。半角英数字とハイフンのみ。例: 17 なら /events/17</p>
+  </div>
+
   <div class="mx-auto grid max-w-sm grid-cols-2 gap-4 pt-6">
     <%= f.submit "作成する", class: "btn-primary w-full" %>
     <%= link_to "一覧に戻る", admin_events_path, class: "btn-secondary w-full text-center" %>

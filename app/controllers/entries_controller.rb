@@ -31,7 +31,7 @@ class EntriesController < ApplicationController
     @entry = @event.entries.build(entry_params.merge(category: @category, user: current_user))
 
     if @entry.save
-      redirect_to event_entries_completions_path(@event, category: @category.category_name)
+      redirect_to event_entries_completions_path(@event.slug, category: @category.category_name)
     else
       @my_entries = my_entries
       render :new, status: :unprocessable_entity

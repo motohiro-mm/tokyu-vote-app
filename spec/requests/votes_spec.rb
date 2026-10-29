@@ -7,7 +7,7 @@ RSpec.describe "投票", type: :request do
   let(:user) { create(:user) }
 
   def cast(entry, comment: "おいしい")
-    post event_votes_path(event), params: { vote: { entry_id: entry.id, comment: comment } }
+    post event_votes_path(event.slug), params: { vote: { entry_id: entry.id, comment: comment } }
   end
 
   before { sign_in(user) }
@@ -105,7 +105,7 @@ RSpec.describe "投票", type: :request do
       2.times { cast(create(:entry, event: event, category: food)) }
       targets = Array.new(2) { create(:entry, event: event, category: food) }
       payloads = targets.map do |entry|
-        [ event_votes_path(event), { vote: { entry_id: entry.id, comment: "同時" } } ]
+        [ event_votes_path(event.slug), { vote: { entry_id: entry.id, comment: "同時" } } ]
       end
 
       sessions = post_concurrently(payloads)
@@ -119,8 +119,8 @@ RSpec.describe "投票", type: :request do
       entry = create(:entry, event: event, category: food)
 
       sessions = post_concurrently([
-        [ event_votes_path(event), { vote: { entry_id: entry.id, comment: "同時1" } } ],
-        [ event_votes_path(event), { vote: { entry_id: entry.id, comment: "同時2" } } ]
+        [ event_votes_path(event.slug), { vote: { entry_id: entry.id, comment: "同時1" } } ],
+        [ event_votes_path(event.slug), { vote: { entry_id: entry.id, comment: "同時2" } } ]
       ])
 
       expect(Vote.where(user: user, entry: entry).count).to eq(1)

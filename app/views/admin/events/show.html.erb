@@ -2,17 +2,49 @@
 <h1 class="page-title"><%= @event.title %></h1>
 
 <div class="card mt-6">
+  <h2 class="section-title">開催情報</h2>
+
+  <%= form_with model: [ :admin, @event ], method: :patch, html: { id: "event_edition" }, class: "mt-4 space-y-4" do |f| %>
+    <% if @event.errors.any? %>
+      <ul class="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800">
+        <% @event.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    <% end %>
+
+    <div>
+      <%= f.label :title, class: "block text-sm font-bold" %>
+      <%= f.text_field :title, class: "input" %>
+    </div>
+
+    <div>
+      <%= f.label :held_on, class: "block text-sm font-bold" %>
+      <%= f.date_field :held_on, class: "input" %>
+    </div>
+
+    <div>
+      <%= f.label :slug, class: "block text-sm font-bold" %>
+      <%= f.text_field :slug, class: "input", placeholder: "17", spellcheck: false %>
+      <p class="mt-1 text-sm text-stone-500">公開URLになります。半角英数字とハイフンのみ。例: 17 なら /events/17</p>
+    </div>
+
+    <%= f.submit "保存する", class: "btn-primary" %>
+  <% end %>
+</div>
+
+<div class="card mt-6">
   <h2 class="section-title"><%= Event.human_attribute_name(:status) %></h2>
   <p class="mt-1 text-sm text-stone-500">
     現在: <%= @event.status_label %>
   </p>
 
-  <%= form_with model: [ :admin, @event ], method: :patch, class: "mt-4 flex flex-wrap items-center gap-3" do |f| %>
+  <%= form_with model: [ :admin, @event ], method: :patch, html: { id: "event_status" }, class: "mt-4 flex flex-wrap items-center gap-3" do |f| %>
     <%= f.select :status,
                  Event.statuses.keys.map { |status| [ Event.status_label(status), status ] },
                  {},
                  class: "input mt-0 w-auto" %>
-    <%# 集計中にすると投票が止まり、結果公開にすると参加者に見え、終了にするとトップページから消えるため、押し間違いを一度止める %>
+    <%# 集計中にすると投票が止まり、結果公開にすると参加者に見え、終了にすると一般の人からは見えなくなるため、押し間違いを一度止める %>
     <%= f.submit "変更する", class: "btn-primary", data: { turbo_confirm: "#{Event.human_attribute_name(:status)}を変更します。よろしいですか？" } %>
   <% end %>
 </div>
