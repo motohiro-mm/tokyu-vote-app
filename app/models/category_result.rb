@@ -21,7 +21,7 @@ class CategoryResult
   end
 
   def targets
-    (category.talk? ? talk_targets : entry_targets).select { |target| target.comments.any? }
+    @targets ||= (category.talk? ? talk_targets : entry_targets).select { |target| target.comments.any? }
   end
 
   private

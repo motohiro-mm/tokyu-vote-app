@@ -1,0 +1,14 @@
+<% content_for :title, @event.title %>
+<h1 class="text-xl font-bold"><%= @event.title %></h1>
+
+<h2 class="mt-8 font-bold">投票結果</h2>
+<ul class="mt-2 space-y-3">
+  <% @categories.each do |category| %>
+    <li>
+      <%= link_to "#{category.label}の結果を見る", "#{category.category_name}.html",
+                  class: "block rounded border border-stone-200 bg-white px-5 py-4 hover:bg-stone-100" %>
+    </li>
+  <% end %>
+</ul>
+
+<%= link_to "イベント一覧に戻る", "#{@root}index.html", class: "mt-6 inline-block text-sm underline" %>

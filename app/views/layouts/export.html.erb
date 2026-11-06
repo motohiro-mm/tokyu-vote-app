@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <title><%= content_for(:title) || "TokyuRubyVote" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="application-name" content="TokyuRubyVote">
+
+    <link rel="icon" href="<%= @root %>icon.png" type="image/png">
+    <link rel="icon" href="<%= @root %>icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="<%= @root %>icon.png">
+
+    <%= tag.link rel: "stylesheet", href: "#{@root}assets/tailwind.css" %>
+  </head>
+
+  <%# 撤収後に残す結果の閲覧用。ログイン・投票・管理の導線と検証環境のバナーは焼き付けない %>
+  <body class="bg-stone-50 text-stone-900 min-h-screen">
+    <header class="border-b border-stone-200 bg-white">
+      <div class="mx-auto w-full max-w-3xl px-5 py-3">
+        <%= link_to "TokyuRubyVote", "#{@root}index.html", class: "font-bold" %>
+      </div>
+    </header>
+
+    <main class="mx-auto w-full max-w-3xl px-5 py-8">
+      <%= yield %>
+    </main>
+  </body>
+</html>
