@@ -26,8 +26,9 @@ RSpec.describe "イベント管理", type: :request do
     expect(response.body).to include("開催日を入力してください", "スラッグを入力してください")
   end
 
-  it "管理者は開催日とスラッグを更新できる" do
+  it "スラッグ未設定のイベントに開催日とスラッグを設定できる" do
     sign_in(admin)
+    event.update_columns(slug: nil)
 
     patch admin_event_path(event), params: {
       event: { title: "TokyuRuby会議17", held_on: "2026-11-01", slug: "17" }
@@ -43,13 +44,62 @@ RSpec.describe "イベント管理", type: :request do
   it "スラッグが重複すると更新できない" do
     create(:event, slug: "17")
     sign_in(admin)
+    event.update_columns(slug: nil)
 
     patch admin_event_path(event), params: {
       event: { title: event.title, held_on: "2026-10-18", slug: "17" }
     }
 
     expect(response).to have_http_status(:unprocessable_entity)
-    expect(event.reload.slug).not_to eq "17"
+    expect(event.reload.slug).to be_nil
+  end
+
+  it "設定済みのスラッグと公開URLを表示し、編集できない" do
+    sign_in(admin)
+    event.update_columns(slug: "17")
+
+    get admin_event_path(event)
+
+    expect(response.parsed_body.at_css('input[name="event[slug]"][disabled]')["value"]).to eq "17"
+    expect(response.body).to include(event_url(slug: "17"), "設定後は変更できません")
+  end
+
+  it "未設定のスラッグは管理画面で入力できる" do
+    sign_in(admin)
+    event.update_columns(slug: nil)
+
+    get admin_event_path(event)
+
+    expect(response.parsed_body.at_css('input[name="event[slug]"]')["disabled"]).to be_nil
+  end
+
+  it "設定済みのスラッグを直接変更・削除できない" do
+    sign_in(admin)
+    event.update_columns(slug: "17")
+
+    [ "18", "" ].each do |slug|
+      patch admin_event_path(event), params: { event: { title: "変更後", held_on: "2026-11-01", slug: slug } }
+
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response.body).to include("スラッグは一度設定すると変更できません", event_url(slug: "17"))
+      expect(event.reload.slug).to eq "17"
+    end
+  end
+
+  it "スラッグを変えずにタイトルと開催日を更新できる" do
+    sign_in(admin)
+    event.update_columns(slug: "17")
+
+    patch admin_event_path(event), params: { event: { title: "変更後", held_on: "2026-11-01", slug: "17" } }
+
+    expect(response).to redirect_to(admin_event_path(event))
+    expect(event.reload.attributes.values_at("slug", "title", "held_on")).to eq [ "17", "変更後", Date.new(2026, 11, 1) ]
+
+    patch admin_event_path(event), params: { event: { title: "フォームから更新", held_on: "2026-11-02" } }
+
+    expect(response).to redirect_to(admin_event_path(event))
+    expect(event.reload.slug).to eq "17"
+    expect(event.title).to eq "フォームから更新"
   end
 
   it "タイトルが空なら作成できず、フォームに戻す" do

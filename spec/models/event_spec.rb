@@ -46,6 +46,25 @@ RSpec.describe Event do
     expect { other.update_columns(slug: "17") }.to raise_error(ActiveRecord::RecordNotUnique)
   end
 
+  it "保存済みのスラッグは変更も削除もできない" do
+    event = create(:event, slug: "17")
+
+    [ "18", "", nil ].each do |slug|
+      expect(event.update(slug: slug)).to be false
+      expect(event.errors.of_kind?(:slug, :immutable)).to be true
+      expect(event.reload.slug).to eq "17"
+    end
+  end
+
+  it "未設定のスラッグを設定でき、設定後も他の項目を更新できる" do
+    event = create(:event)
+    event.update_columns(slug: nil)
+
+    expect(event.update(slug: "17")).to be true
+    expect(event.update(slug: "17", title: "新しいタイトル", held_on: Date.new(2026, 11, 1))).to be true
+    expect(event.reload.attributes.values_at("slug", "title", "held_on")).to eq [ "17", "新しいタイトル", Date.new(2026, 11, 1) ]
+  end
+
   it "スラッグが空の既存行は複数あってもステータスを変更できる" do
     first = create(:event)
     second = create(:event)

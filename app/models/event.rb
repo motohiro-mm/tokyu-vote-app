@@ -24,6 +24,7 @@ class Event < ApplicationRecord
   validates :held_on, presence: true, on: %i[create edition]
   validates :slug, presence: true, on: %i[create edition]
   validates :slug, uniqueness: { allow_nil: true }, format: { with: SLUG_FORMAT, allow_nil: true }
+  validate :slug_cannot_change_once_set
 
   def self.status_label(status)
     I18n.t("enums.event.status.#{status}")
@@ -51,5 +52,9 @@ class Event < ApplicationRecord
 
   def normalize_slug
     self.slug = slug.strip.presence if slug.is_a?(String)
+  end
+
+  def slug_cannot_change_once_set
+    errors.add(:slug, :immutable) if slug_in_database.present? && will_save_change_to_slug?
   end
 end

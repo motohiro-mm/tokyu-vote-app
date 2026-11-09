@@ -40,6 +40,7 @@ ja:
           attributes:
             slug:
               invalid: は半角英数字とハイフンのみ使えます
+              immutable: は一度設定すると変更できません
         entry:
           attributes:
             category:

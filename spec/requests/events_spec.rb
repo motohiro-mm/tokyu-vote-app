@@ -90,7 +90,7 @@ RSpec.describe "イベント画面", type: :request do
   end
 
   it "回次のURLでそのイベントの画面を開く" do
-    event.update!(slug: "17", held_on: Date.new(2026, 10, 18), title: "第17回の投票")
+    event = create(:event, status: :open, slug: "17", held_on: Date.new(2026, 10, 18), title: "第17回の投票")
 
     get "/events/17", params: { slug: "99" }
 
