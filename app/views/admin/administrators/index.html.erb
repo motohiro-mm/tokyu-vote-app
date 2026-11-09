@@ -1,0 +1,28 @@
+<% content_for :title, "管理者の一覧" %>
+<h1 class="page-title mb-6">管理者の一覧</h1>
+
+<div class="card mb-8">
+  <p class="mb-4 text-sm text-tokyu-ink-soft">
+    管理者を追加するときは、GitHub Actions の「Grant admin」ワークフローを使ってください。
+  </p>
+
+  <ul class="divide-y-2 divide-tokyu-bone">
+    <% @administrators.each do |user| %>
+      <li class="flex items-center justify-between gap-4 py-4">
+        <span class="min-w-0 truncate font-bold"><%= user.name %></span>
+        <% if user == current_user %>
+          <span class="shrink-0 text-sm text-tokyu-ink-soft">自分</span>
+        <% else %>
+          <%= button_to "解除する", admin_administrator_path(user), method: :delete, class: "btn-secondary shrink-0",
+                      form: { data: { turbo_confirm: "#{user.name} の管理者権限を解除します。よろしいですか？" } } %>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+</div>
+
+<div class="text-center">
+
+  <%= link_to "戻る", admin_events_path, class: "btn-secondary" %>
+
+</div>
