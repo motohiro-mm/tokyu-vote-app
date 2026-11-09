@@ -26,7 +26,7 @@ Rails.application.routes.draw do
   end
 
   namespace :admin do
-    resources :events, only: [ :index, :new, :create, :show, :update ] do
+    resources :events, only: [ :index, :new, :create, :show, :edit, :update ] do
       resources :talks, only: [ :new, :create, :edit, :update ]
       resources :talk_imports, only: [ :create ]
     end
