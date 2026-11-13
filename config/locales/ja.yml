@@ -23,6 +23,7 @@ ja:
         event: イベント
         user_name: 登壇者名
         title: LTタイトル
+        description: 説明
         status: ステータス
       vote:
         user: 投票者

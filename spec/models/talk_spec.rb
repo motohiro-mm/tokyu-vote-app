@@ -1,6 +1,11 @@
 require "rails_helper"
 
 RSpec.describe Talk do
+  it "説明は300文字まで" do
+    expect(build(:talk, description: "あ" * 300)).to be_valid
+    expect(build(:talk, description: "あ" * 301)).to be_invalid
+  end
+
   it "votable は発表予定のものだけを返す" do
     event = create(:event)
     scheduled = create(:talk, event: event)

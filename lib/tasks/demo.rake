@@ -43,6 +43,7 @@ namespace :demo do
     [ "Rubyの話", "SQLiteの話", "Kamalの話", "Hotwireの話" ].each_with_index do |title, i|
       event.talks.find_or_create_by!(title: title) do |talk|
         talk.user_name = "とうだんしゃ#{i + 1}"
+        talk.description = "#{title}について紹介します。"
       end
     end
 

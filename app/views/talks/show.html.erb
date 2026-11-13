@@ -4,6 +4,9 @@
 <div class="card mb-6">
   <p class="mb-2 text-lg font-bold break-words">「<%= @talk.title %>」</p>
   <p class="text-tokyu-ink-soft"><%= @talk.user_name %></p>
+  <% if @talk.description.present? %>
+    <p class="whitespace-pre-wrap break-words"><%= @talk.description %></p>
+  <% end %>
 </div>
 
 <div class="card mb-8">

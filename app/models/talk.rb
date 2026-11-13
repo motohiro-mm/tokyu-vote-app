@@ -12,6 +12,7 @@ class Talk < ApplicationRecord
 
   validates :user_name, presence: true
   validates :title, presence: true
+  validates :description, length: { maximum: 300 }
   validate :status_changeable_only_before_voting, if: :status_changed?
 
   def self.status_label(status)

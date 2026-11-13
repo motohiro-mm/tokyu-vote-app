@@ -37,7 +37,10 @@ class TalkCsvImport
     end
 
     rows.each_with_index do |row, index|
-      talk = @event.talks.build(user_name: row[HEADERS[:user_name]]&.strip, title: row[HEADERS[:title]]&.strip)
+      talk = @event.talks.build(
+        user_name: row[HEADERS[:user_name]]&.strip, title: row[HEADERS[:title]]&.strip,
+        description: row["説明"]&.strip.presence
+      )
       @errors << "#{index + 2} 行目: #{talk.errors.full_messages.to_sentence}" if talk.invalid?
       @talks << talk
     end

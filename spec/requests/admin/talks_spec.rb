@@ -45,6 +45,14 @@ RSpec.describe "LT候補の管理", type: :request do
     expect(response).to redirect_to admin_event_path(event)
   end
 
+  it "説明付きでも空欄でも登録できる" do
+    post admin_event_talks_path(event), params: { talk: { user_name: "登壇者", title: "説明あり", description: "紹介文" } }
+    post admin_event_talks_path(event), params: { talk: { user_name: "登壇者", title: "説明なし", description: "" } }
+
+    expect(event.talks.find_by!(title: "説明あり").description).to eq "紹介文"
+    expect(event.talks.find_by!(title: "説明なし").description).to be_blank
+  end
+
   it "タイトルが空なら登録できず、フォームに戻す" do
     post admin_event_talks_path(event), params: { talk: { user_name: "とうだんしゃ", title: "" } }
 
@@ -62,6 +70,16 @@ RSpec.describe "LT候補の管理", type: :request do
 
     expect(response).to redirect_to admin_event_path(event)
     expect(talk.reload).to have_attributes(user_name: "とうだんしゃ", title: "Rails の話")
+  end
+
+  it "投票開始後も説明を更新できる" do
+    event.open!
+    talk = create(:talk, event: event)
+
+    patch admin_event_talk_path(event, talk), params: { talk: { description: "更新した説明" } }
+
+    expect(response).to redirect_to admin_event_path(event)
+    expect(talk.reload.description).to eq "更新した説明"
   end
 
   it "準備中のあいだはキャンセルにできる" do

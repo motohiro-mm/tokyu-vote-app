@@ -27,6 +27,9 @@
         <div class="min-w-0 flex-1">
           <p class="mb-2 font-bold break-words"><%= talk.title %></p>
           <p class="text-sm text-tokyu-ink-soft"><%= talk.user_name %></p>
+          <% if talk.description.present? %>
+            <p class="text-xs break-words text-tokyu-ink-soft"><%= talk.description %></p>
+          <% end %>
         </div>
         <% if @voted_talk_ids.include?(talk.id) %>
           <span class="badge-done">投票済み</span>
