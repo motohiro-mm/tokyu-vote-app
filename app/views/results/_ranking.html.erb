@@ -1,26 +1,26 @@
 <section>
-  <h3 class="text-sm font-bold"><%= title %></h3>
+  <h3 class="mb-2 text-sm font-extrabold"><%= title %></h3>
 
   <% if rows.empty? %>
-    <p class="mt-1 text-sm text-stone-500">まだ票がありません。</p>
+    <p class="text-sm text-tokyu-ink-soft">まだ票がありません。</p>
   <% else %>
-    <ol class="mt-1">
+    <ol>
       <% rows.each do |row| %>
-        <li class="flex items-baseline gap-3 border-b border-stone-100 py-2 text-sm last:border-0">
-          <span class="w-8 shrink-0 text-stone-500"><%= row.rank %>位</span>
+        <li class="flex items-baseline gap-4 border-b-2 border-tokyu-bone py-2 text-sm last:border-0">
+          <span class="w-10 shrink-0 font-display text-base font-bold text-tokyu-pink-dark"><%= row.rank %>位</span>
           <span class="min-w-0 flex-1 break-words">
             <%# 合算王は個々の作品ではなく人を並べるため作品名を持たない %>
             <% if row.title.present? %>
               <span class="block font-bold"><%= row.title %></span>
-              <span class="block text-stone-500"><%= row.name %></span>
+              <span class="block text-tokyu-ink-soft"><%= row.name %></span>
             <% else %>
               <span class="block font-bold"><%= row.name %></span>
               <% if row.entry_titles.any? %>
-                <span class="block text-stone-500"><%= row.entry_titles.join("・") %></span>
+                <span class="block text-tokyu-ink-soft"><%= row.entry_titles.join("・") %></span>
               <% end %>
             <% end %>
           </span>
-          <span class="shrink-0"><%= row.vote_count %>票</span>
+          <span class="shrink-0 font-bold"><%= row.vote_count %>票</span>
         </li>
       <% end %>
     </ol>
