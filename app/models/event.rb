@@ -10,7 +10,8 @@ class Event < ApplicationRecord
   scope :not_finished, -> { where.not(status: :finished) }
 
   def self.current
-    not_finished.order(created_at: :desc).first
+    order = { created_at: :desc, id: :desc }
+    where(status: %i[open counting]).order(order).first || not_finished.order(order).first
   end
 
   has_many :entries, dependent: :destroy

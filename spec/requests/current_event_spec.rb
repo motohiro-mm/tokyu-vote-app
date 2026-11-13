@@ -18,6 +18,52 @@ RSpec.describe "今のイベント以外", type: :request do
     ]
   end
 
+  it "次回の準備中イベントがあっても受付中の回を表示して投票できる" do
+    sign_in(create(:user))
+    current = create(:event, status: :open, title: "受付中の回", slug: "17", created_at: 1.day.ago)
+    entry = create(:entry, event: current, category: Category.find_by!(category_name: :food))
+    create(:event, status: :preparing, slug: "18")
+
+    get root_path
+    expect(response).to redirect_to(event_path(current.slug))
+
+    get event_path(current.slug)
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("受付中の回")
+
+    expect {
+      post event_votes_path(current.slug), params: { vote: { entry_id: entry.id } }
+    }.to change(Vote, :count).by(1)
+  end
+
+  it "次回の準備中イベントがあっても集計中の制限を維持する" do
+    sign_in(create(:user))
+    current = create(:event, status: :counting, slug: "17", created_at: 1.day.ago)
+    entry = create(:entry, event: current, category: Category.find_by!(category_name: :food))
+    create(:event, status: :preparing, slug: "18")
+
+    get root_path
+    expect(response).to redirect_to(event_path(current.slug))
+
+    get event_path(current.slug)
+    expect(response).to have_http_status(:forbidden)
+    expect(response.body).to include("集計中です")
+
+    expect {
+      post event_votes_path(current.slug), params: { vote: { entry_id: entry.id } }
+    }.not_to change(Vote, :count)
+    expect(response).to have_http_status(:forbidden)
+  end
+
+  it "過去回へのHEADもクエリ付きでアーカイブへ送る" do
+    create(:event, status: :closed, slug: "16", created_at: 1.day.ago)
+    create(:event, status: :open, slug: "17")
+    create(:event, status: :preparing, slug: "18")
+
+    head "/events/16/results?category=food"
+    expect(response).to redirect_to("/archives/16/results?category=food")
+  end
+
   it "終了したイベントはログイン前にアーカイブへ送る" do
     event = create(:event, status: :finished, slug: "16")
 

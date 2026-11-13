@@ -1,6 +1,38 @@
 require "rails_helper"
 
 RSpec.describe Event do
+  describe ".current" do
+    it "受付中・集計中を他の状態より優先し、その中で作成日時とIDの降順に選ぶ" do
+      time = 1.day.ago
+      create(:event, status: :open, created_at: time - 1.second)
+      create(:event, status: :open, created_at: time)
+      latest = create(:event, status: :counting, created_at: time)
+      create(:event, status: :preparing)
+      create(:event, status: :closed)
+      create(:event, status: :finished)
+
+      expect(described_class.current).to eq latest
+    end
+
+    it "受付中・集計中がなければ終了済みを除き、作成日時とIDの降順に選ぶ" do
+      time = 1.day.ago
+      create(:event, status: :preparing, created_at: time - 1.second)
+      create(:event, status: :preparing, created_at: time)
+      latest = create(:event, status: :closed, created_at: time)
+      create(:event, status: :finished)
+
+      expect(described_class.current).to eq latest
+    end
+
+    it "終了済みしかない場合とイベントがない場合はnilを返す" do
+      finished = create(:event, status: :finished)
+      expect(described_class.current).to be_nil
+
+      finished.destroy!
+      expect(described_class.current).to be_nil
+    end
+  end
+
   it "削除するとエントリーとLT候補も消える" do
     event = create(:event)
     create(:entry, event: event)
