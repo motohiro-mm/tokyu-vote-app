@@ -19,9 +19,9 @@ Rails.application.routes.draw do
     get "talk_votes/completions", to: "talk_votes#completions"
 
     resources :entries, only: [ :index, :show, :new, :create ]
-    resources :votes, only: [ :create ]
+    resources :votes, only: [ :create, :destroy ]
     resources :talks, only: [ :index, :show ]
-    resources :talk_votes, only: [ :create ]
+    resources :talk_votes, only: [ :create, :destroy ]
     resources :results, only: [ :index ]
   end
 

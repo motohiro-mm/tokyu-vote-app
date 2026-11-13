@@ -128,4 +128,55 @@ RSpec.describe "投票", type: :request do
       expect(sessions.filter_map { |session| session.flash[:alert] }.join).to include("同じエントリーには投票できません")
     end
   end
+
+  describe "取り消し" do
+    let(:entry) { create(:entry, event: event, category: food) }
+
+    it "取り消すとコメントごと票が消え、残票が戻る" do
+      cast(entry, comment: "取り消すコメント")
+      vote = Vote.last
+
+      expect { delete event_vote_path(event, vote) }.to change(Vote, :count).by(-1)
+      expect(Vote.where(comment: "取り消すコメント")).not_to exist
+      expect(Vote.remaining_for(user, event, food)).to eq 3
+      expect(response).to redirect_to event_entry_path(event, entry, category: "food")
+      expect(flash[:notice]).to eq "投票を取り消しました。"
+    end
+
+    it "取り消したあと別のエントリーへ入れ直せる" do
+      3.times { cast(create(:entry, event: event, category: food)) }
+      delete event_vote_path(event, Vote.last)
+
+      expect { cast(entry) }.to change(Vote, :count).by(1)
+    end
+
+    it "他人の票は取り消せない" do
+      other_vote = create(:vote, entry: entry)
+
+      expect { delete event_vote_path(event, other_vote) }.not_to change(Vote, :count)
+      expect(response).to have_http_status(:not_found)
+    end
+
+    it "別のイベントの票は、そのイベントの URL からは取り消せない" do
+      other_event = create(:event, status: :open)
+      vote = create(:vote, user: user, entry: create(:entry, event: other_event, category: food))
+
+      expect { delete event_vote_path(event, vote) }.not_to change(Vote, :count)
+      expect(response).to have_http_status(:not_found)
+    end
+
+    it "締切後は取り消せない" do
+      cast(entry)
+      event.counting!
+
+      expect { delete event_vote_path(event, Vote.last) }.not_to change(Vote, :count)
+    end
+
+    it "投票済みのエントリー画面に取り消しボタンを出す" do
+      cast(entry)
+      get event_entry_path(event, entry, category: "food")
+
+      expect(response.body).to include("投票を取り消す")
+    end
+  end
 end
