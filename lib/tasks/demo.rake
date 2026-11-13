@@ -44,6 +44,7 @@ namespace :demo do
       event.talks.find_or_create_by!(title: title) do |talk|
         talk.user_name = "とうだんしゃ#{i + 1}"
         talk.description = "#{title}について紹介します。"
+        talk.slide_url = "https://example.com/slides/#{i + 1}"
       end
     end
 

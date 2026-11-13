@@ -23,6 +23,12 @@
     <%= f.text_area :description, rows: 5, class: "input" %>
   </div>
 
+  <div>
+    <%= f.label :slide_url, "発表資料URL【任意】", class: "label" %>
+    <span class="mb-2 block text-xs text-tokyu-ink-soft">http または https の URL、2048文字まで</span>
+    <%= f.text_field :slide_url, class: "input" %>
+  </div>
+
   <% if talk.persisted? %>
     <div>
       <%= f.label :status, class: "label" %>

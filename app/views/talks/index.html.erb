@@ -30,6 +30,9 @@
           <% if talk.description.present? %>
             <p class="text-xs break-words text-tokyu-ink-soft"><%= talk.description %></p>
           <% end %>
+          <% if (slide_url = talk.safe_slide_url) %>
+            <%= link_to "発表資料", slide_url, target: "_blank", rel: "noopener noreferrer", class: "text-link" %>
+          <% end %>
         </div>
         <% if @voted_talk_ids.include?(talk.id) %>
           <span class="badge-done">投票済み</span>
