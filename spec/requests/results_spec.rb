@@ -37,11 +37,12 @@ RSpec.describe "結果画面", type: :request do
 
   it "LT王の結果を出す" do
     create(:category, category_name: :talk)
-    create(:talk_vote, talk: create(:talk, event: event, title: "Ruby の話"), comment: "よかった")
+    create(:talk_vote, talk: create(:talk, event: event, title: "Ruby の話", slide_url: "https://example.com/slides"), comment: "よかった")
 
     get event_results_path(event, category: "talk")
 
     expect(response.body).to include("LT王", "Ruby の話", "よかった")
+    expect(response.body).not_to include("発表資料", "https://example.com/slides")
   end
 
   it "イベント画面から各部門の結果へ行ける" do

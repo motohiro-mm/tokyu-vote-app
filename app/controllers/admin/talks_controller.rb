@@ -44,6 +44,6 @@ class Admin::TalksController < Admin::BaseController
   end
 
   def talk_params
-    params.expect(talk: [ :user_name, :title, :status ])
+    params.expect(talk: [ :user_name, :title, :description, :slide_url, :status ])
   end
 end

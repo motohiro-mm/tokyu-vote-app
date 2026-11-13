@@ -23,6 +23,8 @@ ja:
         event: イベント
         user_name: 登壇者名
         title: LTタイトル
+        description: 説明
+        slide_url: 発表資料URL
         status: ステータス
       vote:
         user: 投票者
@@ -43,6 +45,8 @@ ja:
               too_large: は %{max}MB 以下にしてください
         talk:
           attributes:
+            slide_url:
+              invalid_url: は http または https の URL で入力してください
             status:
               not_allowed_after_voting_started: は投票開始後には変更できません
         vote:

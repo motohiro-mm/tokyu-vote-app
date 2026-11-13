@@ -1,0 +1,74 @@
+{
+  "ignored_warnings": [
+    {
+      "warning_type": "Cross-Site Scripting",
+      "warning_code": 4,
+      "fingerprint": "338da82a1e288fea6041f7ca2e791d704d60913b389916e6aa56079a8cdd281b",
+      "check_name": "LinkToHref",
+      "message": "Potentially unsafe model attribute in `link_to` href",
+      "file": "app/views/talks/show.html.erb",
+      "line": 11,
+      "link": "https://brakemanscanner.org/docs/warning_types/link_to_href",
+      "code": "link_to(\"\\u767A\\u8868\\u8CC7\\u6599\", Event.find(params[:event_id]).talks.votable.find(params[:id]).safe_slide_url, :target => \"_blank\", :rel => \"noopener noreferrer\", :class => \"text-link\")",
+      "render_path": [
+        {
+          "type": "controller",
+          "class": "TalksController",
+          "method": "show",
+          "line": 18,
+          "file": "app/controllers/talks_controller.rb",
+          "rendered": {
+            "name": "talks/show",
+            "file": "app/views/talks/show.html.erb"
+          }
+        }
+      ],
+      "location": {
+        "type": "template",
+        "template": "talks/show"
+      },
+      "user_input": "Event.find(params[:event_id]).talks.votable.find(params[:id]).safe_slide_url",
+      "confidence": "Weak",
+      "cwe_id": [
+        79
+      ],
+      "note": "safe_slide_url は URI.parse で http/https とホストを確認し、不正な値は nil を返す。"
+    },
+    {
+      "warning_type": "Cross-Site Scripting",
+      "warning_code": 4,
+      "fingerprint": "4504493f020dc56a4c64c56c39dc51d64ffde68531e306af85d261c932fe3a18",
+      "check_name": "LinkToHref",
+      "message": "Potentially unsafe model attribute in `link_to` href",
+      "file": "app/views/talks/index.html.erb",
+      "line": 34,
+      "link": "https://brakemanscanner.org/docs/warning_types/link_to_href",
+      "code": "link_to(\"\\u767A\\u8868\\u8CC7\\u6599\", (Unresolved Model).new.safe_slide_url, :target => \"_blank\", :rel => \"noopener noreferrer\", :class => \"text-link\")",
+      "render_path": [
+        {
+          "type": "controller",
+          "class": "TalksController",
+          "method": "index",
+          "line": 11,
+          "file": "app/controllers/talks_controller.rb",
+          "rendered": {
+            "name": "talks/index",
+            "file": "app/views/talks/index.html.erb"
+          }
+        }
+      ],
+      "location": {
+        "type": "template",
+        "template": "talks/index"
+      },
+      "user_input": "(Unresolved Model).new.safe_slide_url",
+      "confidence": "Weak",
+      "cwe_id": [
+        79
+      ],
+      "note": "safe_slide_url は URI.parse で http/https とホストを確認し、不正な値は nil を返す。"
+    }
+  ],
+  "updated": "2026-11-13 13:05:02 +0900",
+  "brakeman_version": "8.1.0"
+}

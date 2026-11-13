@@ -105,6 +105,39 @@ RSpec.describe "画面の導線", type: :request do
     expect(response.body).to include(event_talk_path(event, other))
   end
 
+  it "LTの説明を一覧と詳細にエスケープして表示し、空欄なら表示しない" do
+    talk = create(:talk, event: event, description: "1行目\n<script>内容</script>")
+    empty = create(:talk, event: event, description: nil)
+
+    get event_talks_path(event)
+    expect(response.body).to include("<p class=\"text-xs break-words text-tokyu-ink-soft\">1行目\n&lt;script&gt;内容&lt;/script&gt;</p>")
+    expect(response.body.scan('class="text-xs break-words text-tokyu-ink-soft"').size).to eq 1
+
+    get event_talk_path(event, talk)
+    expect(response.body).to include("<p class=\"whitespace-pre-wrap break-words\">1行目\n&lt;script&gt;内容&lt;/script&gt;</p>")
+    get event_talk_path(event, empty)
+    expect(response.body).not_to include('class="whitespace-pre-wrap break-words"')
+  end
+
+  it "発表資料のリンクを一覧と詳細に安全に表示する" do
+    talk = create(:talk, event: event, slide_url: "https://example.com/slides?a=1&b=2")
+    empty = create(:talk, event: event)
+    invalid = create(:talk, event: event)
+    invalid.update_column(:slide_url, "javascript:alert(1)")
+
+    get event_talks_path(event)
+    expect(response.body).to include('href="https://example.com/slides?a=1&amp;b=2"', 'target="_blank"', 'rel="noopener noreferrer"')
+    expect(response.body.scan(">発表資料</a>").size).to eq 1
+    expect(response.body).not_to include("javascript:alert(1)")
+
+    get event_talk_path(event, talk)
+    expect(response.body).to include('href="https://example.com/slides?a=1&amp;b=2"', 'target="_blank"', 'rel="noopener noreferrer"', ">発表資料</a>")
+    [ empty, invalid ].each do |item|
+      get event_talk_path(event, item)
+      expect(response.body).not_to include(">発表資料</a>", "javascript:alert(1)")
+    end
+  end
+
   it "投票の完了画面はLT王を受け付けない" do
     get event_votes_completions_path(event, category: "talk")
 
