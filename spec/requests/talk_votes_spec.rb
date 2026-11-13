@@ -105,4 +105,55 @@ RSpec.describe "LT王への投票", type: :request do
       expect(sessions.filter_map { |session| session.flash[:alert] }.join).to include("同じLTには投票できません")
     end
   end
+
+  describe "取り消し" do
+    let(:talk) { create(:talk, event: event) }
+
+    it "取り消すとコメントごと票が消え、残票が戻る" do
+      cast(talk, comment: "取り消すコメント")
+      talk_vote = TalkVote.last
+
+      expect { delete event_talk_vote_path(event, talk_vote) }.to change(TalkVote, :count).by(-1)
+      expect(TalkVote.where(comment: "取り消すコメント")).not_to exist
+      expect(TalkVote.remaining_for(user, event)).to eq 3
+      expect(response).to redirect_to event_talk_path(event, talk)
+      expect(flash[:notice]).to eq "投票を取り消しました。"
+    end
+
+    it "取り消したあと別のLTへ入れ直せる" do
+      3.times { cast(create(:talk, event: event)) }
+      delete event_talk_vote_path(event, TalkVote.last)
+
+      expect { cast(talk) }.to change(TalkVote, :count).by(1)
+    end
+
+    it "他人の票は取り消せない" do
+      other_vote = create(:talk_vote, talk: talk)
+
+      expect { delete event_talk_vote_path(event, other_vote) }.not_to change(TalkVote, :count)
+      expect(response).to have_http_status(:not_found)
+    end
+
+    it "別のイベントの票は、そのイベントの URL からは取り消せない" do
+      other_event = create(:event, status: :open)
+      talk_vote = create(:talk_vote, user: user, talk: create(:talk, event: other_event))
+
+      expect { delete event_talk_vote_path(event, talk_vote) }.not_to change(TalkVote, :count)
+      expect(response).to have_http_status(:not_found)
+    end
+
+    it "締切後は取り消せない" do
+      cast(talk)
+      event.counting!
+
+      expect { delete event_talk_vote_path(event, TalkVote.last) }.not_to change(TalkVote, :count)
+    end
+
+    it "投票済みのLT画面に取り消しボタンを出す" do
+      cast(talk)
+      get event_talk_path(event, talk)
+
+      expect(response.body).to include("投票を取り消す")
+    end
+  end
 end

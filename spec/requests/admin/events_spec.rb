@@ -23,6 +23,47 @@ RSpec.describe "イベント管理", type: :request do
     expect(response.body).to include("タイトルを入力してください")
   end
 
+  describe "編集" do
+    it "管理者はタイトルを変更できる" do
+      sign_in(admin)
+
+      get edit_admin_event_path(event)
+      expect(response).to have_http_status(:ok)
+
+      patch admin_event_path(event), params: { event: { title: "TokyuRuby会議18" } }
+
+      expect(response).to redirect_to admin_event_path(event)
+      expect(event.reload.title).to eq "TokyuRuby会議18"
+    end
+
+    it "タイトルが空なら更新せず、編集画面に戻す" do
+      sign_in(admin)
+
+      patch admin_event_path(event), params: { event: { title: "" } }
+
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response.body).to include("タイトルを入力してください")
+      expect(event.reload.title).not_to eq ""
+    end
+
+    it "ステータスの変更ではタイトルを変えない" do
+      sign_in(admin)
+
+      patch admin_event_path(event), params: { event: { status: "open", title: "書き換え" } }
+
+      expect(event.reload).to be_open
+      expect(event.title).not_to eq "書き換え"
+    end
+
+    it "管理者でなければ編集画面を開けない" do
+      sign_in(create(:user))
+
+      get edit_admin_event_path(event)
+
+      expect(response).to redirect_to root_path
+    end
+  end
+
   it "ステータス変更のボタンに確認ダイアログを付ける" do
     sign_in(admin)
 

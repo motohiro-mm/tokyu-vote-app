@@ -15,8 +15,17 @@
 <div class="card mb-8">
   <% if @entry.user_id == current_user.id %>
     <p class="text-sm text-tokyu-ink-soft">自分のエントリーには投票できません。</p>
-  <% elsif @voted %>
+  <% elsif @cast_vote %>
     <p class="text-sm font-bold text-tokyu-pink-dark">このエントリーには投票済みです。</p>
+    <% if @cast_vote.comment.present? %>
+      <p class="mt-2 text-sm whitespace-pre-wrap break-words text-tokyu-ink-soft"><%= @cast_vote.comment %></p>
+    <% end %>
+    <% if @event.open? %>
+      <div class="mt-6 text-center">
+        <%= button_to "投票を取り消す", event_vote_path(@event, @cast_vote), method: :delete, class: "btn-secondary",
+                    form: { data: { turbo_confirm: "投票を取り消します。コメントも消えます。よろしいですか？" } } %>
+      </div>
+    <% end %>
   <% elsif !@event.open? %>
     <p class="text-sm text-tokyu-ink-soft">投票を受け付けていません。</p>
   <% elsif @remaining_votes <= 0 %>

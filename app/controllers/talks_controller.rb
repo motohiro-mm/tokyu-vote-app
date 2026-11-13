@@ -13,7 +13,7 @@ class TalksController < ApplicationController
   def show
     @talk = @event.talks.votable.find(params[:id])
     @talk_vote = TalkVote.new(talk: @talk)
-    @voted = current_user.talk_votes.exists?(talk: @talk)
+    @cast_vote = current_user.talk_votes.find_by(talk: @talk)
     @remaining_votes = TalkVote.remaining_for(current_user, @event)
   end
 

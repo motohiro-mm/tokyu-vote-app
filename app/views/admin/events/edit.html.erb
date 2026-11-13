@@ -1,0 +1,4 @@
+<% content_for :title, "#{Event.model_name.human}を編集" %>
+<h1 class="page-title mb-6"><%= Event.model_name.human %>を編集</h1>
+
+<%= render "form", event: @event, back_path: admin_event_path(@event), back_label: "戻る", submit_label: "更新する" %>
