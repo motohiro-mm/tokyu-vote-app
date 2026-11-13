@@ -1,0 +1,19 @@
+<%= form_with model: [ :admin, event ], class: "space-y-6" do |f| %>
+  <% if event.errors.any? %>
+    <ul class="alert-error">
+      <% event.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+    </ul>
+  <% end %>
+
+  <div>
+    <%= f.label :title, class: "label" %>
+    <%= f.text_field :title, class: "input" %>
+  </div>
+
+  <div class="mx-auto grid max-w-sm grid-cols-2 gap-4">
+    <%= link_to back_label, back_path, class: "btn-secondary w-full text-center" %>
+    <%= f.submit submit_label, class: "btn-primary w-full" %>
+  </div>
+<% end %>
