@@ -19,9 +19,9 @@ Rails.application.routes.draw do
     get "talk_votes/completions", to: "talk_votes#completions"
 
     resources :entries, only: [ :index, :show, :new, :create ]
-    resources :votes, only: [ :create ]
+    resources :votes, only: [ :create, :destroy ]
     resources :talks, only: [ :index, :show ]
-    resources :talk_votes, only: [ :create ]
+    resources :talk_votes, only: [ :create, :destroy ]
     resources :results, only: [ :index ]
   end
 
@@ -29,7 +29,7 @@ Rails.application.routes.draw do
   get "/events/:event_slug/*path", to: "events#unknown_path"
 
   namespace :admin do
-    resources :events, only: [ :index, :new, :create, :show, :update ] do
+    resources :events, only: [ :index, :new, :create, :show, :edit, :update ] do
       resources :talks, only: [ :new, :create, :edit, :update ]
       resources :talk_imports, only: [ :create ]
     end

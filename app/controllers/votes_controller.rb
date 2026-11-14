@@ -1,7 +1,7 @@
 class VotesController < ApplicationController
   include EventScoped
 
-  before_action :require_open_event, only: :create
+  before_action :require_open_event, only: [ :create, :destroy ]
 
   def categories
     @categories = Category.order(:id)
@@ -24,6 +24,16 @@ class VotesController < ApplicationController
     # バリデーションを抜けたあとにユニークインデックスへ当たったときは 500 にしない
     vote.errors.add(:base, :already_voted)
     redirect_to_entry_with_alert(entry, vote)
+  end
+
+  # 取り消せば残票が戻るので、同じ部門の別のエントリーへ入れ直すことで投票先を変えられる。
+  # コメントは票の列なので、票と一緒に消える
+  def destroy
+    vote = current_user.votes.joins(:entry).where(entries: { event_id: @event.id }).find(params[:id])
+    vote.destroy!
+
+    redirect_to event_entry_path(@event.slug, vote.entry, category: vote.category.category_name),
+                notice: "投票を取り消しました。"
   end
 
   # LT王の完了画面は talk_votes#completions が持つ。

@@ -1,5 +1,5 @@
 class Admin::EventsController < Admin::BaseController
-  before_action :set_event, only: [ :show, :update ]
+  before_action :set_event, only: [ :show, :edit, :update ]
 
   def index
     @events = Event.order(created_at: :desc)
@@ -23,12 +23,12 @@ class Admin::EventsController < Admin::BaseController
     load_show
   end
 
+  def edit; end
+
+  # 詳細画面のステータス変更と編集画面の開催情報の更新は、同じ PATCH で届く。
+  # 送られてきた項目で振り分け、片方のフォームでもう片方の項目を変えられないようにする
   def update
-    if status_change?
-      change_status
-    else
-      update_edition
-    end
+    status_change? ? change_status : update_details
   end
 
   private
@@ -53,7 +53,6 @@ class Admin::EventsController < Admin::BaseController
     params.expect(event: [ :status ])
   end
 
-  # ステータス変更のフォームだけが status を送る。開催情報の更新では必須にしない
   def status_change?
     params[:event].respond_to?(:key?) && params[:event].key?(:status)
   end
@@ -67,13 +66,12 @@ class Admin::EventsController < Admin::BaseController
     end
   end
 
-  def update_edition
+  def update_details
     @event.assign_attributes(event_params)
     if @event.save(context: :edition)
       redirect_to admin_event_path(@event), notice: "#{Event.model_name.human}を更新しました。"
     else
-      load_show
-      render :show, status: :unprocessable_entity
+      render :edit, status: :unprocessable_entity
     end
   end
 

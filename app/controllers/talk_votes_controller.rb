@@ -1,7 +1,7 @@
 class TalkVotesController < ApplicationController
   include EventScoped
 
-  before_action :require_open_event, only: :create
+  before_action :require_open_event, only: [ :create, :destroy ]
 
   def create
     talk = @event.talks.votable.find(talk_vote_params[:talk_id])
@@ -20,6 +20,15 @@ class TalkVotesController < ApplicationController
     # バリデーションを抜けたあとにユニークインデックスへ当たったときは 500 にしない
     talk_vote.errors.add(:base, :already_voted)
     redirect_to_talk_with_alert(talk, talk_vote)
+  end
+
+  # 取り消せば残票が戻るので、別の LT へ入れ直すことで投票先を変えられる。
+  # コメントは票の列なので、票と一緒に消える
+  def destroy
+    talk_vote = current_user.talk_votes.joins(:talk).where(talks: { event_id: @event.id }).find(params[:id])
+    talk_vote.destroy!
+
+    redirect_to event_talk_path(@event.slug, talk_vote.talk), notice: "投票を取り消しました。"
   end
 
   def completions

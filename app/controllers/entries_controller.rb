@@ -18,7 +18,7 @@ class EntriesController < ApplicationController
   def show
     @entry = @event.entries.where(category: @category).find(params[:id])
     @vote = Vote.new(entry: @entry)
-    @voted = current_user.votes.exists?(entry: @entry)
+    @cast_vote = current_user.votes.find_by(entry: @entry)
     @remaining_votes = Vote.remaining_for(current_user, @event, @category)
   end
 

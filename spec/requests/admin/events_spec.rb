@@ -51,24 +51,38 @@ RSpec.describe "イベント管理", type: :request do
     }
 
     expect(response).to have_http_status(:unprocessable_entity)
+    expect(response.body).to include("イベントを編集", "スラッグはすでに存在します")
+    expect(response.parsed_body.at_css('input[name="event[held_on]"]')["value"]).to eq "2026-10-18"
     expect(event.reload.slug).to be_nil
   end
 
-  it "設定済みのスラッグと公開URLを表示し、編集できない" do
+  it "詳細画面に開催日と公開URLと編集リンクを表示する" do
     sign_in(admin)
-    event.update_columns(slug: "17")
 
     get admin_event_path(event)
 
-    expect(response.parsed_body.at_css('input[name="event[slug]"][disabled]')["value"]).to eq "17"
-    expect(response.body).to include(event_url(slug: "17"), "設定後は変更できません")
+    page = response.parsed_body
+    expect(page.at_css("a[href='#{edit_admin_event_path(event)}']")).to be_present
+    expect(page.at_css("a[href='#{event_path(slug: event.slug)}']").text).to eq event_url(slug: event.slug)
+    expect(page.css("dd").map(&:text)).to include(I18n.l(event.held_on, format: :long))
+    expect(page.at_css('input[name="event[held_on]"]')).to be_nil
+    expect(page.at_css('input[name="event[slug]"]')).to be_nil
+  end
+
+  it "設定済みのスラッグは編集画面で変更できない" do
+    sign_in(admin)
+
+    get edit_admin_event_path(event)
+
+    expect(response.parsed_body.at_css('input[name="event[slug]"][disabled]')["value"]).to eq event.slug
+    expect(response.body).to include("設定後は変更できません")
   end
 
   it "未設定のスラッグは管理画面で入力できる" do
     sign_in(admin)
     event.update_columns(slug: nil)
 
-    get admin_event_path(event)
+    get edit_admin_event_path(event)
 
     expect(response.parsed_body.at_css('input[name="event[slug]"]')["disabled"]).to be_nil
   end
@@ -81,7 +95,8 @@ RSpec.describe "イベント管理", type: :request do
       patch admin_event_path(event), params: { event: { title: "変更後", held_on: "2026-11-01", slug: slug } }
 
       expect(response).to have_http_status(:unprocessable_entity)
-      expect(response.body).to include("スラッグは一度設定すると変更できません", event_url(slug: "17"))
+      expect(response.body).to include("イベントを編集", "スラッグは一度設定すると変更できません")
+      expect(response.parsed_body.at_css('input[name="event[slug]"][disabled]')["value"]).to eq "17"
       expect(event.reload.slug).to eq "17"
     end
   end
@@ -111,6 +126,47 @@ RSpec.describe "イベント管理", type: :request do
     expect(response.body).to include("タイトルを入力してください")
   end
 
+  describe "編集" do
+    it "管理者はタイトルを変更できる" do
+      sign_in(admin)
+
+      get edit_admin_event_path(event)
+      expect(response).to have_http_status(:ok)
+
+      patch admin_event_path(event), params: { event: { title: "TokyuRuby会議18" } }
+
+      expect(response).to redirect_to admin_event_path(event)
+      expect(event.reload.title).to eq "TokyuRuby会議18"
+    end
+
+    it "タイトルが空なら更新せず、編集画面に戻す" do
+      sign_in(admin)
+
+      patch admin_event_path(event), params: { event: { title: "" } }
+
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response.body).to include("タイトルを入力してください")
+      expect(event.reload.title).not_to eq ""
+    end
+
+    it "ステータスの変更ではタイトルを変えない" do
+      sign_in(admin)
+
+      patch admin_event_path(event), params: { event: { status: "open", title: "書き換え" } }
+
+      expect(event.reload).to be_open
+      expect(event.title).not_to eq "書き換え"
+    end
+
+    it "管理者でなければ編集画面を開けない" do
+      sign_in(create(:user))
+
+      get edit_admin_event_path(event)
+
+      expect(response).to redirect_to root_path
+    end
+  end
+
   it "ステータス変更のボタンに確認ダイアログを付ける" do
     sign_in(admin)
 
@@ -121,6 +177,11 @@ RSpec.describe "イベント管理", type: :request do
 
   it "管理者はステータスを変更できる" do
     sign_in(admin)
+    event.update_columns(slug: nil, held_on: nil)
+
+    get admin_event_path(event)
+
+    expect(response.body).to include("未設定（編集画面でスラッグを設定してください）")
 
     patch admin_event_path(event), params: { event: { status: "open" } }
 
@@ -133,6 +194,7 @@ RSpec.describe "イベント管理", type: :request do
     patch admin_event_path(event), params: { event: { status: "archived" } }
 
     expect(response).to have_http_status(:unprocessable_entity)
+    expect(response.parsed_body.at_css(".alert-error")).to be_present
     expect(event.reload).to be_preparing
   end
 
