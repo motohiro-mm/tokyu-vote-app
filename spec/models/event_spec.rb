@@ -30,4 +30,79 @@ RSpec.describe Event do
 
     expect(accepting).to eq %w[preparing open]
   end
+
+  it "スラッグは重複できない" do
+    create(:event, slug: "17")
+    duplicate = build(:event, slug: "17")
+
+    expect(duplicate).not_to be_valid
+    expect(duplicate.errors.of_kind?(:slug, :taken)).to be true
+  end
+
+  it "スラッグのユニーク索引で同じ値は保存できない" do
+    create(:event, slug: "17")
+    other = create(:event)
+
+    expect { other.update_columns(slug: "17") }.to raise_error(ActiveRecord::RecordNotUnique)
+  end
+
+  it "保存済みのスラッグは変更も削除もできない" do
+    event = create(:event, slug: "17")
+
+    [ "18", "", nil ].each do |slug|
+      expect(event.update(slug: slug)).to be false
+      expect(event.errors.of_kind?(:slug, :immutable)).to be true
+      expect(event.reload.slug).to eq "17"
+    end
+  end
+
+  it "未設定のスラッグを設定でき、設定後も他の項目を更新できる" do
+    event = create(:event)
+    event.update_columns(slug: nil)
+
+    expect(event.update(slug: "17")).to be true
+    expect(event.update(slug: "17", title: "新しいタイトル", held_on: Date.new(2026, 11, 1))).to be true
+    expect(event.reload.attributes.values_at("slug", "title", "held_on")).to eq [ "17", "新しいタイトル", Date.new(2026, 11, 1) ]
+  end
+
+  it "スラッグが空の既存行は複数あってもステータスを変更できる" do
+    first = create(:event)
+    second = create(:event)
+    first.update_columns(slug: nil, held_on: nil)
+    second.update_columns(slug: nil, held_on: nil)
+
+    expect(first.update(status: :open)).to be true
+    expect(second.update(status: :counting)).to be true
+  end
+
+  it "新規では開催日とスラッグが必須" do
+    event = build(:event, slug: nil, held_on: nil)
+
+    expect(event).not_to be_valid
+    expect(event.errors.of_kind?(:slug, :blank)).to be true
+    expect(event.errors.of_kind?(:held_on, :blank)).to be true
+  end
+
+  it "管理画面の更新では開催日とスラッグが必須" do
+    event = create(:event)
+    event.assign_attributes(slug: nil, held_on: nil)
+
+    expect(event.valid?(:edition)).to be false
+    expect(event.errors.of_kind?(:slug, :blank)).to be true
+    expect(event.errors.of_kind?(:held_on, :blank)).to be true
+  end
+
+  it "スラッグは英数字とハイフンだけを使う" do
+    event = build(:event, slug: "tokyu-17")
+    expect(event).to be_valid
+
+    [ "第17回", "K-17" ].each do |slug|
+      event.slug = slug
+      expect(event).not_to be_valid
+      expect(event.errors.of_kind?(:slug, :invalid)).to be true
+    end
+
+    event.slug = "login"
+    expect(event).to be_valid
+  end
 end

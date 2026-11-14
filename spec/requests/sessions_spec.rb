@@ -29,7 +29,7 @@ RSpec.describe "ログイン", type: :request do
     event = create(:event, status: :open)
 
     post dev_sessions_path(user_id: create(:user).id)
-    get event_path(event)
+    get event_path(event.slug)
 
     expect(response).to have_http_status(:ok)
   end

@@ -5,7 +5,7 @@ RSpec.describe "LT王への投票", type: :request do
   let(:user) { create(:user) }
 
   def cast(talk, comment: "よかった")
-    post event_talk_votes_path(event), params: { talk_vote: { talk_id: talk.id, comment: comment } }
+    post event_talk_votes_path(event.slug), params: { talk_vote: { talk_id: talk.id, comment: comment } }
   end
 
   before { sign_in(user) }
@@ -82,7 +82,7 @@ RSpec.describe "LT王への投票", type: :request do
       targets = Array.new(2) { create(:talk, event: event) }
 
       payloads = targets.map do |talk|
-        [ event_talk_votes_path(event), { talk_vote: { talk_id: talk.id, comment: "同時" } } ]
+        [ event_talk_votes_path(event.slug), { talk_vote: { talk_id: talk.id, comment: "同時" } } ]
       end
 
       sessions = post_concurrently(payloads)
@@ -96,8 +96,8 @@ RSpec.describe "LT王への投票", type: :request do
       talk = create(:talk, event: event)
 
       sessions = post_concurrently([
-        [ event_talk_votes_path(event), { talk_vote: { talk_id: talk.id, comment: "同時1" } } ],
-        [ event_talk_votes_path(event), { talk_vote: { talk_id: talk.id, comment: "同時2" } } ]
+        [ event_talk_votes_path(event.slug), { talk_vote: { talk_id: talk.id, comment: "同時1" } } ],
+        [ event_talk_votes_path(event.slug), { talk_vote: { talk_id: talk.id, comment: "同時2" } } ]
       ])
 
       expect(TalkVote.where(user: user, talk: talk).count).to eq(1)
@@ -113,16 +113,16 @@ RSpec.describe "LT王への投票", type: :request do
       cast(talk, comment: "取り消すコメント")
       talk_vote = TalkVote.last
 
-      expect { delete event_talk_vote_path(event, talk_vote) }.to change(TalkVote, :count).by(-1)
+      expect { delete event_talk_vote_path(event.slug, talk_vote) }.to change(TalkVote, :count).by(-1)
       expect(TalkVote.where(comment: "取り消すコメント")).not_to exist
       expect(TalkVote.remaining_for(user, event)).to eq 3
-      expect(response).to redirect_to event_talk_path(event, talk)
+      expect(response).to redirect_to event_talk_path(event.slug, talk)
       expect(flash[:notice]).to eq "投票を取り消しました。"
     end
 
     it "取り消したあと別のLTへ入れ直せる" do
       3.times { cast(create(:talk, event: event)) }
-      delete event_talk_vote_path(event, TalkVote.last)
+      delete event_talk_vote_path(event.slug, TalkVote.last)
 
       expect { cast(talk) }.to change(TalkVote, :count).by(1)
     end
@@ -130,15 +130,15 @@ RSpec.describe "LT王への投票", type: :request do
     it "他人の票は取り消せない" do
       other_vote = create(:talk_vote, talk: talk)
 
-      expect { delete event_talk_vote_path(event, other_vote) }.not_to change(TalkVote, :count)
+      expect { delete event_talk_vote_path(event.slug, other_vote) }.not_to change(TalkVote, :count)
       expect(response).to have_http_status(:not_found)
     end
 
     it "別のイベントの票は、そのイベントの URL からは取り消せない" do
-      other_event = create(:event, status: :open)
+      other_event = create(:event, status: :finished)
       talk_vote = create(:talk_vote, user: user, talk: create(:talk, event: other_event))
 
-      expect { delete event_talk_vote_path(event, talk_vote) }.not_to change(TalkVote, :count)
+      expect { delete event_talk_vote_path(event.slug, talk_vote) }.not_to change(TalkVote, :count)
       expect(response).to have_http_status(:not_found)
     end
 
@@ -146,14 +146,16 @@ RSpec.describe "LT王への投票", type: :request do
       cast(talk)
       event.counting!
 
-      expect { delete event_talk_vote_path(event, TalkVote.last) }.not_to change(TalkVote, :count)
+      expect { delete event_talk_vote_path(event.slug, TalkVote.last) }.not_to change(TalkVote, :count)
     end
 
     it "投票済みのLT画面に取り消しボタンを出す" do
+      create(:category, category_name: :talk)
       cast(talk)
-      get event_talk_path(event, talk)
+      get event_talk_path(event.slug, talk)
 
-      expect(response.body).to include("投票を取り消す")
+      action = event_talk_vote_path(event.slug, TalkVote.last)
+      expect(response.parsed_body.at_css("form[action='#{action}'] button").text).to eq "投票を取り消す"
     end
   end
 end

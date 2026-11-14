@@ -17,7 +17,7 @@ class VotesController < ApplicationController
       vote.save!
     end
 
-    redirect_to event_votes_completions_path(@event, category: entry.category.category_name)
+    redirect_to event_votes_completions_path(@event.slug, category: entry.category.category_name)
   rescue ActiveRecord::RecordInvalid
     redirect_to_entry_with_alert(entry, vote)
   rescue ActiveRecord::RecordNotUnique
@@ -32,7 +32,7 @@ class VotesController < ApplicationController
     vote = current_user.votes.joins(:entry).where(entries: { event_id: @event.id }).find(params[:id])
     vote.destroy!
 
-    redirect_to event_entry_path(@event, vote.entry, category: vote.category.category_name),
+    redirect_to event_entry_path(@event.slug, vote.entry, category: vote.category.category_name),
                 notice: "投票を取り消しました。"
   end
 
@@ -50,7 +50,7 @@ class VotesController < ApplicationController
   end
 
   def redirect_to_entry_with_alert(entry, vote)
-    redirect_to event_entry_path(@event, entry, category: entry.category.category_name),
+    redirect_to event_entry_path(@event.slug, entry, category: entry.category.category_name),
                 alert: vote.errors.full_messages.to_sentence
   end
 end

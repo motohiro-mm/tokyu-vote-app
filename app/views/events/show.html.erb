@@ -1,21 +1,26 @@
 <% content_for :title, @event.title %>
-<h1 class="page-title mb-8"><%= @event.title %></h1>
+<div class="mb-8">
+  <h1 class="page-title"><%= @event.title %></h1>
+  <% if @event.held_on %>
+    <p class="mt-2 text-center text-sm text-tokyu-ink-soft"><%= l(@event.held_on, format: :long) %></p>
+  <% end %>
+</div>
 
 <% if @event.results_published? %>
   <h2 class="section-title mb-4 text-center">投票結果</h2>
   <ul class="space-y-4">
     <% @categories.each do |category| %>
       <li>
-        <%= link_to "#{category.label}の結果を見る", event_results_path(@event, category: category.category_name),
+        <%= link_to "#{category.label}の結果を見る", event_results_path(@event.slug, category: category.category_name),
                     class: "card-link text-center font-bold" %>
       </li>
     <% end %>
   </ul>
 <% else %>
   <div class="space-y-4">
-    <%= link_to "#{Category.for_entries.joined_label}にエントリーする", event_entries_categories_path(@event),
+    <%= link_to "#{Category.for_entries.joined_label}にエントリーする", event_entries_categories_path(@event.slug),
                 class: "card-link text-center text-lg font-bold" %>
-    <%= link_to "#{Category.joined_label}に投票する", event_votes_categories_path(@event),
+    <%= link_to "#{Category.joined_label}に投票する", event_votes_categories_path(@event.slug),
                 class: "card-link text-center text-lg font-bold" %>
   </div>
 <% end %>
