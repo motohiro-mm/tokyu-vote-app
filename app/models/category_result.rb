@@ -1,7 +1,7 @@
 # 管理画面・参加者向けの結果画面・静的書き出しで同じ内容を出すため、1イベント × 1部門の結果をここで組み立てる。
 class CategoryResult
   # 結果画面に並べる投票対象。Entry と Talk で持っている項目が違うため揃えて渡す
-  Target = Data.define(:title, :name, :image, :comments)
+  Target = Data.define(:title, :name, :images, :comments)
 
   attr_reader :event, :category
 
@@ -33,7 +33,7 @@ class CategoryResult
       Target.new(
         title: entry.title,
         name: entry.user.name,
-        image: (entry.image if entry.image.attached?),
+        images: entry.display_images,
         comments: comments.fetch(entry.id, [])
       )
     end
@@ -43,7 +43,7 @@ class CategoryResult
     comments = comments_by(TalkVote.in_event(event), :talk_id)
 
     event.talks.votable.order(:id).map do |talk|
-      Target.new(title: talk.title, name: talk.user_name, image: nil, comments: comments.fetch(talk.id, []))
+      Target.new(title: talk.title, name: talk.user_name, images: [], comments: comments.fetch(talk.id, []))
     end
   end
 

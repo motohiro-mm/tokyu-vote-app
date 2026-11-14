@@ -39,8 +39,9 @@ ja:
             category:
               not_allowed_for_entry: にLT王は指定できません
             image:
-              invalid_content_type: は JPEG / PNG のみ登録できます
-              too_large: は %{max}MB 以下にしてください
+              invalid_content_type: は JPEG / PNG / HEIF（HEIC）のみ登録できます
+              too_large: は1枚%{max}MB以下にしてください
+              too_many: は%{max}枚まで登録できます
         talk:
           attributes:
             status:

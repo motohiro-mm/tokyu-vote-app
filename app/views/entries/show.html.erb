@@ -2,8 +2,8 @@
 <h1 class="page-title mb-6">投票する</h1>
 
 <div class="card mb-6">
-  <% if @entry.image.attached? %>
-    <%= image_tag @entry.image, alt: @entry.title, class: "mb-4 w-full rounded-xl border-2 border-tokyu-ink object-cover" %>
+  <% @entry.display_images.each do |image| %>
+    <%= image_tag image, alt: @entry.title, loading: "lazy", class: "mb-4 w-full rounded-xl border-2 border-tokyu-ink object-cover" %>
   <% end %>
   <p class="mb-2 text-lg font-bold break-words">「<%= @entry.title %>」</p>
   <p class="mb-4 text-tokyu-ink-soft last:mb-0"><%= @entry.user.name %></p>

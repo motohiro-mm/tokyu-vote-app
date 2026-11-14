@@ -16,7 +16,7 @@ class EntriesController < ApplicationController
   end
 
   def show
-    @entry = @event.entries.where(category: @category).find(params[:id])
+    @entry = @event.entries.where(category: @category).with_attached_image.find(params[:id])
     @vote = Vote.new(entry: @entry)
     @cast_vote = current_user.votes.find_by(entry: @entry)
     @remaining_votes = Vote.remaining_for(current_user, @event, @category)
@@ -51,6 +51,6 @@ class EntriesController < ApplicationController
   end
 
   def entry_params
-    params.expect(entry: [ :title, :description, :image ])
+    params.expect(entry: [ :title, :description, image: [] ])
   end
 end
