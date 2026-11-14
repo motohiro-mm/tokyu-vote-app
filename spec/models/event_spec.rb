@@ -96,9 +96,11 @@ RSpec.describe Event do
     event = build(:event, slug: "tokyu-17")
     expect(event).to be_valid
 
-    event.slug = "第17回"
-    expect(event).not_to be_valid
-    expect(event.errors.of_kind?(:slug, :invalid)).to be true
+    [ "第17回", "K-17" ].each do |slug|
+      event.slug = slug
+      expect(event).not_to be_valid
+      expect(event.errors.of_kind?(:slug, :invalid)).to be true
+    end
 
     event.slug = "login"
     expect(event).to be_valid

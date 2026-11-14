@@ -8,12 +8,12 @@ RSpec.describe "イベント管理", type: :request do
     sign_in(admin)
 
     expect {
-      post admin_events_path, params: { event: { title: "TokyuRuby会議99", held_on: "2026-10-18", slug: "99" } }
+      post admin_events_path, params: { event: { title: "TokyuRuby会議99", held_on: "2026-10-18", slug: " Tokyu-99 " } }
     }.to change(Event, :count).by(1)
     expect(response).to redirect_to admin_event_path(Event.last)
     expect(Event.last).to be_preparing
     expect(Event.last.held_on).to eq Date.new(2026, 10, 18)
-    expect(Event.last.slug).to eq "99"
+    expect(Event.last.slug).to eq "tokyu-99"
   end
 
   it "開催日とスラッグが無いと作成できない" do
@@ -31,23 +31,23 @@ RSpec.describe "イベント管理", type: :request do
     event.update_columns(slug: nil)
 
     patch admin_event_path(event), params: {
-      event: { title: "TokyuRuby会議17", held_on: "2026-11-01", slug: "17" }
+      event: { title: "TokyuRuby会議17", held_on: "2026-11-01", slug: "Tokyu-17" }
     }
 
     expect(response).to redirect_to(admin_event_path(event))
     event.reload
     expect(event.title).to eq "TokyuRuby会議17"
     expect(event.held_on).to eq Date.new(2026, 11, 1)
-    expect(event.slug).to eq "17"
+    expect(event.slug).to eq "tokyu-17"
   end
 
-  it "スラッグが重複すると更新できない" do
-    create(:event, slug: "17")
+  it "小文字化したスラッグが重複すると更新できない" do
+    create(:event, slug: "tokyu-17")
     sign_in(admin)
     event.update_columns(slug: nil)
 
     patch admin_event_path(event), params: {
-      event: { title: event.title, held_on: "2026-10-18", slug: "17" }
+      event: { title: event.title, held_on: "2026-10-18", slug: "Tokyu-17" }
     }
 
     expect(response).to have_http_status(:unprocessable_entity)
@@ -85,6 +85,7 @@ RSpec.describe "イベント管理", type: :request do
     get edit_admin_event_path(event)
 
     expect(response.parsed_body.at_css('input[name="event[slug]"]')["disabled"]).to be_nil
+    expect(response.body).to include("英大文字は小文字に変換されます", "/events/17")
   end
 
   it "設定済みのスラッグを直接変更・削除できない" do

@@ -51,7 +51,7 @@ class Event < ApplicationRecord
   private
 
   def normalize_slug
-    self.slug = slug.strip.presence if slug.is_a?(String)
+    self.slug = slug.strip.downcase(:ascii).presence if slug.is_a?(String)
   end
 
   def slug_cannot_change_once_set
