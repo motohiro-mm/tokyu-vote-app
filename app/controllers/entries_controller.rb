@@ -9,14 +9,14 @@ class EntriesController < ApplicationController
   end
 
   def index
-    @entries = @event.entries.where(category: @category).includes(:user).with_attached_image.order(:id)
+    @entries = @event.entries.where(category: @category).includes(:user).with_attached_images.order(:id)
     @voted_entries = Vote.cast_by(current_user, @event, @category).includes(entry: :user).map(&:entry)
     @voted_entry_ids = @voted_entries.map(&:id)
     @remaining_votes = Vote.remaining_for(current_user, @event, @category)
   end
 
   def show
-    @entry = @event.entries.where(category: @category).with_attached_image.find(params[:id])
+    @entry = @event.entries.where(category: @category).with_attached_images.find(params[:id])
     @vote = Vote.new(entry: @entry)
     @cast_vote = current_user.votes.find_by(entry: @entry)
     @remaining_votes = Vote.remaining_for(current_user, @event, @category)
@@ -51,6 +51,6 @@ class EntriesController < ApplicationController
   end
 
   def entry_params
-    params.expect(entry: [ :title, :description, image: [] ])
+    params.expect(entry: [ :title, :description, images: [] ])
   end
 end

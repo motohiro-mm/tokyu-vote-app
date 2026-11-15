@@ -9,18 +9,17 @@ class Entry < ApplicationRecord
   belongs_to :category
 
   has_many :votes, dependent: :destroy
-  # 既存の添付データをそのまま読めるよう、保存時の添付名は image を使う。
-  has_many_attached :image do |attachment|
+  has_many_attached :images do |attachment|
     attachment.variant :display, format: :jpeg, resize_to_limit: [ 1600, 1600 ]
   end
 
   validates :title, presence: true
   validates :description, length: { maximum: 300 }
   validate :category_must_not_be_talk
-  validate :validate_images, if: -> { attachment_changes.key?("image") }
+  validate :validate_images
 
   def display_images
-    image.sort_by(&:id).map do |attachment|
+    images.sort_by(&:id).map do |attachment|
       HEIF_CONTENT_TYPES.include?(attachment.content_type) ? attachment.variant(:display) : attachment
     end
   end
@@ -32,12 +31,12 @@ class Entry < ApplicationRecord
   end
 
   def validate_images
-    errors.add(:image, :too_many, max: IMAGE_MAX_COUNT) if image.size > IMAGE_MAX_COUNT
-    if image.blobs.any? { |blob| !IMAGE_CONTENT_TYPES.include?(blob.content_type) }
-      errors.add(:image, :invalid_content_type)
+    errors.add(:images, :too_many, max: IMAGE_MAX_COUNT) if images.size > IMAGE_MAX_COUNT
+    if images.blobs.any? { |blob| !IMAGE_CONTENT_TYPES.include?(blob.content_type) }
+      errors.add(:images, :invalid_content_type)
     end
-    if image.blobs.any? { |blob| blob.byte_size > IMAGE_MAX_SIZE }
-      errors.add(:image, :too_large, max: IMAGE_MAX_SIZE / 1.megabyte)
+    if images.blobs.any? { |blob| blob.byte_size > IMAGE_MAX_SIZE }
+      errors.add(:images, :too_large, max: IMAGE_MAX_SIZE / 1.megabyte)
     end
   end
 end

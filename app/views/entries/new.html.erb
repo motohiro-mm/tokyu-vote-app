@@ -34,11 +34,11 @@
   </div>
 
   <div>
-    <%= f.label :image, "画像【任意】", class: "label" %>
+    <%= f.label :images, "画像【任意】", class: "label" %>
     <span id="entry-images-hint" class="mb-2 block text-xs text-tokyu-ink-soft">
       JPEG / PNG / HEIF（HEIC）、1枚<%= Entry::IMAGE_MAX_SIZE / 1.megabyte %>MBまで、最大<%= Entry::IMAGE_MAX_COUNT %>枚
     </span>
-    <%= f.file_field :image, multiple: true, include_hidden: false, class: "input-file",
+    <%= f.file_field :images, multiple: true, include_hidden: false, class: "input-file",
                      accept: (Entry::IMAGE_CONTENT_TYPES + %w[.heic .heif]).join(","),
                      aria: { describedby: "entry-images-hint" } %>
   </div>

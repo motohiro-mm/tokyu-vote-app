@@ -18,7 +18,7 @@ RSpec.describe "エントリー", type: :request do
     names = %w[entry.heic second.png third.png fourth.png fifth.png]
     photos = [ fixture_file_upload(names.first, "application/octet-stream") ]
     photos.concat(names.drop(1).map { |name| Rack::Test::UploadedFile.new(png, "image/png", true, original_filename: name) })
-    post event_entries_path(event, category: "food"), params: { entry: { title: "唐揚げ", image: photos } }
+    post event_entries_path(event, category: "food"), params: { entry: { title: "唐揚げ", images: photos } }
     expect(response).to redirect_to(event_entries_completions_path(event, category: "food"))
     entry = event.entries.find_by!(title: "唐揚げ")
 
@@ -53,7 +53,7 @@ RSpec.describe "エントリー", type: :request do
     get new_event_entry_path(event, category: "food")
 
     expect(response.body).to include("作品名（食べ物の名前）", "1枚5MBまで、最大5枚")
-    input = Nokogiri::HTML(response.body).at_css('input[type="file"][name="entry[image][]"][multiple]')
+    input = Nokogiri::HTML(response.body).at_css('input[type="file"][name="entry[images][]"][multiple]')
     expect(input["accept"]).to include(".heic", ".heif")
   end
 
