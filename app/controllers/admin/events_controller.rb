@@ -1,5 +1,5 @@
 class Admin::EventsController < Admin::BaseController
-  before_action :set_event, only: [ :show, :update ]
+  before_action :set_event, only: [ :show, :edit, :update ]
 
   def index
     @events = Event.order(created_at: :desc)
@@ -24,14 +24,12 @@ class Admin::EventsController < Admin::BaseController
     @rankings = rankings if @event.counting_started?
   end
 
+  def edit; end
+
+  # 詳細画面のステータス変更と編集画面のタイトル変更は、同じ PATCH で届く。
+  # 送られてきた項目で振り分け、片方のフォームでもう片方の項目を変えられないようにする
   def update
-    if @event.update(status_param)
-      redirect_to admin_event_path(@event), notice: "#{Event.human_attribute_name(:status)}を変更しました。"
-    else
-      @talks = talks
-      @rankings = rankings if @event.counting_started?
-      render :show, status: :unprocessable_entity
-    end
+    status_change? ? change_status : update_details
   end
 
   private
@@ -54,5 +52,27 @@ class Admin::EventsController < Admin::BaseController
 
   def status_param
     params.expect(event: [ :status ])
+  end
+
+  def status_change?
+    params[:event].respond_to?(:key?) && params[:event].key?(:status)
+  end
+
+  def change_status
+    if @event.update(status_param)
+      redirect_to admin_event_path(@event), notice: "#{Event.human_attribute_name(:status)}を変更しました。"
+    else
+      @talks = talks
+      @rankings = rankings if @event.counting_started?
+      render :show, status: :unprocessable_entity
+    end
+  end
+
+  def update_details
+    if @event.update(event_params)
+      redirect_to admin_event_path(@event), notice: "#{Event.model_name.human}を更新しました。"
+    else
+      render :edit, status: :unprocessable_entity
+    end
   end
 end

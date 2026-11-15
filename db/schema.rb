@@ -74,7 +74,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_13_040320) do
     t.integer "user_id", null: false
     t.index ["talk_id"], name: "index_talk_votes_on_talk_id"
     t.index ["user_id", "talk_id"], name: "index_talk_votes_on_user_id_and_talk_id", unique: true
-    t.index ["user_id"], name: "index_talk_votes_on_user_id"
   end
 
   create_table "talks", force: :cascade do |t|
@@ -87,7 +86,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_13_040320) do
     t.text "description"
     t.string "slide_url"
     t.index ["event_id", "status"], name: "index_talks_on_event_id_and_status"
-    t.index ["event_id"], name: "index_talks_on_event_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -109,7 +107,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_13_040320) do
     t.integer "user_id", null: false
     t.index ["entry_id"], name: "index_votes_on_entry_id"
     t.index ["user_id", "entry_id"], name: "index_votes_on_user_id_and_entry_id", unique: true
-    t.index ["user_id"], name: "index_votes_on_user_id"
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"

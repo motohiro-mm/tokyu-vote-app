@@ -1,5 +1,8 @@
 <% content_for :title, @event.title %>
-<h1 class="page-title mb-6"><%= @event.title %></h1>
+<h1 class="page-title mb-2"><%= @event.title %></h1>
+<p class="mb-6 text-center">
+  <%= link_to "#{Event.model_name.human}を編集", edit_admin_event_path(@event), class: "text-sm text-link" %>
+</p>
 
 <div class="card mb-6">
   <h2 class="section-title mb-2"><%= Event.human_attribute_name(:status) %></h2>
