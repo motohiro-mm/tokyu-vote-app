@@ -6,28 +6,43 @@
 <h1 class="page-title">マイページ</h1>
 <p class="mt-2 mb-8 text-center text-sm [overflow-wrap:anywhere] text-tokyu-ink-soft"><%= current_user.name %></p>
 
-<h2 class="section-title mb-4">自分の投票</h2>
-<% if @votes_by_event.empty? %>
-  <p class="card text-tokyu-ink-soft">まだ投票していません。</p>
-<% else %>
-  <div class="space-y-6">
-    <% @votes_by_event.each do |event, votes| %>
-      <section class="card space-y-4 [overflow-wrap:anywhere]">
-        <h3 class="section-title"><%= event.title %></h3>
-        <% votes.group_by { |vote| vote.fetch(:category) }.each do |category, targets| %>
-          <div>
-            <h4 class="mb-1 text-sm font-extrabold text-tokyu-ink-soft"><%= category %></h4>
-            <ul class="divide-y divide-tokyu-bone">
-              <% targets.each do |target| %>
-                <li class="py-2">
-                  <p class="font-bold"><%= target.fetch(:title) %></p>
-                  <p class="text-sm text-tokyu-ink-soft"><%= target.fetch(:name) %></p>
-                </li>
-              <% end %>
-            </ul>
-          </div>
+<% [
+  [ "自分の投票", @votes_by_event, "まだ投票していません。" ],
+  [ "自分の登録アイテム", @entries_by_event, "まだアイテムを登録していません。" ]
+].each do |heading, events, empty_message| %>
+  <section class="mb-8 last:mb-0">
+    <h2 class="section-title mb-4"><%= heading %></h2>
+    <% if events.empty? %>
+      <p class="card text-tokyu-ink-soft"><%= empty_message %></p>
+    <% else %>
+      <div class="space-y-6">
+        <% events.each do |event, items| %>
+          <article class="card space-y-4 [overflow-wrap:anywhere]">
+            <h3 class="section-title"><%= event.title %></h3>
+            <% items.group_by { |item| item.fetch(:category) }.each do |category, targets| %>
+              <div>
+                <h4 class="mb-1 text-sm font-extrabold text-tokyu-ink-soft"><%= category %></h4>
+                <ul class="divide-y divide-tokyu-bone">
+                  <% targets.each do |target| %>
+                    <li class="py-2">
+                      <p class="font-bold"><%= link_to_if target[:path], target.fetch(:title), target[:path], class: "text-link" %></p>
+                      <% if target[:name] %>
+                        <p class="text-sm text-tokyu-ink-soft"><%= target[:name] %></p>
+                      <% end %>
+                      <% if target[:comment].present? %>
+                        <div class="mt-2 rounded-lg bg-tokyu-blue-light px-3 py-2">
+                          <p class="mb-1 text-xs font-bold text-tokyu-ink-soft">自分のコメント</p>
+                          <p class="text-sm whitespace-pre-wrap"><%= target[:comment] %></p>
+                        </div>
+                      <% end %>
+                    </li>
+                  <% end %>
+                </ul>
+              </div>
+            <% end %>
+          </article>
         <% end %>
-      </section>
+      </div>
     <% end %>
-  </div>
+  </section>
 <% end %>
