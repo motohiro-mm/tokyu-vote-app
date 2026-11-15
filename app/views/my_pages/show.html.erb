@@ -1,0 +1,33 @@
+<% content_for :title, "マイページ" %>
+<% content_for :head do %>
+  <meta name="turbo-cache-control" content="no-cache">
+<% end %>
+
+<h1 class="page-title">マイページ</h1>
+<p class="mt-2 mb-8 text-center text-sm [overflow-wrap:anywhere] text-tokyu-ink-soft"><%= current_user.name %></p>
+
+<h2 class="section-title mb-4">自分の投票</h2>
+<% if @votes_by_event.empty? %>
+  <p class="card text-tokyu-ink-soft">まだ投票していません。</p>
+<% else %>
+  <div class="space-y-6">
+    <% @votes_by_event.each do |event, votes| %>
+      <section class="card space-y-4 [overflow-wrap:anywhere]">
+        <h3 class="section-title"><%= event.title %></h3>
+        <% votes.group_by { |vote| vote.fetch(:category) }.each do |category, targets| %>
+          <div>
+            <h4 class="mb-1 text-sm font-extrabold text-tokyu-ink-soft"><%= category %></h4>
+            <ul class="divide-y divide-tokyu-bone">
+              <% targets.each do |target| %>
+                <li class="py-2">
+                  <p class="font-bold"><%= target.fetch(:title) %></p>
+                  <p class="text-sm text-tokyu-ink-soft"><%= target.fetch(:name) %></p>
+                </li>
+              <% end %>
+            </ul>
+          </div>
+        <% end %>
+      </section>
+    <% end %>
+  </div>
+<% end %>

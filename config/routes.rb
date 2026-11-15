@@ -3,6 +3,7 @@ Rails.application.routes.draw do
 
   get "/login", to: "sessions#new"
   delete "/logout", to: "sessions#destroy"
+  get "/mypage", to: "my_pages#show"
   # /auth/github への POST は OmniAuth のミドルウェアが受け、GitHub から戻ってきたらここに来る
   get "/auth/:provider/callback", to: "sessions#create", as: :auth_callback
   get "/auth/failure", to: "sessions#failure"
