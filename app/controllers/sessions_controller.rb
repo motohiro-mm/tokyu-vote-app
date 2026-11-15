@@ -11,8 +11,9 @@ class SessionsController < ApplicationController
   # GitHub から戻ってきたとき。OmniAuth が検証済みの auth hash を env に入れている
   def create
     user = User.find_or_create_from_auth_hash!(request.env["omniauth.auth"])
+    return_to = session.delete(:event_return_to) || root_path
     log_in(user)
-    redirect_to root_path, notice: "ログインしました。"
+    redirect_to return_to, allow_other_host: false, notice: "ログインしました。"
   end
 
   # GitHub 側で拒否されたときや、認可コードの検証に失敗したとき

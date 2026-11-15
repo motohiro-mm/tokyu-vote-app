@@ -5,23 +5,31 @@ module EventScoped
   included do
     skip_before_action :require_login
     before_action :set_event
-    before_action :require_current_event
-    before_action :require_login
+    before_action :redirect_finished_event
+    before_action :require_event_login
     before_action :check_event_status
   end
 
   private
 
   def set_event
-    @event = Event.find_by!(slug: params[:event_slug])
+    @event = Event.find_by!(slug: request.path_parameters[:event_slug])
   end
 
-  def require_current_event
-    return if @event == Event.current
+  def redirect_finished_event
+    return unless @event.finished?
 
     raise ActiveRecord::RecordNotFound unless request.get? || request.head?
 
     redirect_to request.fullpath.sub(%r{\A/events/}, "/archives/")
+  end
+
+  def require_event_login
+    return if current_user
+
+    path = request.fullpath
+    session[:event_return_to] = path if request.get? && path.bytesize <= 1.kilobyte
+    redirect_to login_path
   end
 
   # 準備中と集計中は中身を見せず、状態を説明する画面で止める

@@ -4,7 +4,8 @@ class Dev::SessionsController < ApplicationController
   skip_before_action :require_login
 
   def create
+    return_to = session.delete(:event_return_to) || root_path
     log_in(User.find(params[:user_id]))
-    redirect_to root_path
+    redirect_to return_to, allow_other_host: false
   end
 end

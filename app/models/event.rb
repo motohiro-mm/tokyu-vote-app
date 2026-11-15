@@ -2,16 +2,8 @@ class Event < ApplicationRecord
   # 回次の公開キー。例: "17" や "tokyu-17"。英数字とハイフン以外は URL にしない
   SLUG_FORMAT = /\A[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*\z/
 
-  # finished は結果公開を終えて役目を終えた状態。トップページで次のイベントが作られるまで
-  # 前回の結果を出し続けないために、closed とは別に持つ
+  # closed は結果公開中、finished は公開先をアーカイブへ切り替えた状態。
   enum :status, { preparing: 0, open: 1, counting: 2, closed: 3, finished: 4 }, validate: true
-
-  # 一般向けに出す候補。終了した回は含めない
-  scope :not_finished, -> { where.not(status: :finished) }
-
-  def self.current
-    not_finished.order(created_at: :desc).first
-  end
 
   has_many :entries, dependent: :destroy
   has_many :talks, dependent: :destroy

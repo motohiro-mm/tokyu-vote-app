@@ -61,6 +61,22 @@ RSpec.describe "ログイン", type: :request do
     expect(user.reload.name).to eq "alice-new"
   end
 
+  it "イベントURLからログインしたらクエリを含めて元の画面へ戻す" do
+    published = create(:event, status: :closed, slug: "16", created_at: 1.day.ago)
+    create(:event, status: :open, slug: "17")
+    create(:category, category_name: :food)
+    path = event_results_path(published.slug, category: "food")
+
+    get path
+    expect(response).to redirect_to(login_path)
+
+    github_login
+    expect(response).to redirect_to(path)
+    follow_redirect!
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("飯王（単品王）")
+  end
+
   it "GitHub 側で失敗するとログイン画面に戻す" do
     OmniAuth.config.mock_auth[:github] = :invalid_credentials
 

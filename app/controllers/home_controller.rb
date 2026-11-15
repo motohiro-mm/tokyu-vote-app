@@ -1,8 +1,9 @@
 class HomeController < ApplicationController
   def index
-    @current_event = Event.current
-    return render :index if @current_event.nil? || @current_event.slug.blank?
+    events = Event.where.not(status: :finished).order(created_at: :desc, id: :desc)
+    @event = events.where(status: %i[open counting]).first || events.first
+    return render :index if @event&.slug.blank?
 
-    redirect_to event_path(@current_event.slug)
+    redirect_to event_path(@event.slug)
   end
 end

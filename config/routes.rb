@@ -25,7 +25,7 @@ Rails.application.routes.draw do
     resources :results, only: [ :index ]
   end
 
-  # 過去回の旧URLもアーカイブへ渡す。現在の回の未定義パスは404。
+  # 終了済みの回の旧URLもアーカイブへ渡す。それ以外の未定義パスは404。
   get "/events/:event_slug/*path", to: "events#unknown_path"
 
   namespace :admin do
