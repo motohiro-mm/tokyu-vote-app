@@ -16,9 +16,9 @@ RSpec.describe "エントリー", type: :request do
   it "フォームから投稿した画像を表示できる" do
     image_path = Rails.root.join("app/assets/images/tokyu-rb-logo.png")
     image = fixture_file_upload(image_path, "image/png")
-    post event_entries_path(event, category: "food"), params: { entry: { title: "唐揚げ", image: image } }
+    post event_entries_path(event.slug, category: "food"), params: { entry: { title: "唐揚げ", image: image } }
 
-    expect(response).to redirect_to event_entries_completions_path(event, category: "food")
+    expect(response).to redirect_to event_entries_completions_path(event.slug, category: "food")
     entry = event.entries.find_by!(title: "唐揚げ")
     get rails_blob_path(entry.image, only_path: true)
     follow_redirect!
