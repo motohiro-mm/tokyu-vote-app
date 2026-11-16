@@ -228,6 +228,56 @@ RSpec.describe "イベント管理", type: :request do
     expect(response.body).not_to include("唐揚げ")
   end
 
+  it "公開中は部門ごとの投票数だけを確認できる" do
+    event.update!(status: :open)
+    food = create(:category, category_name: :food)
+    create(:category, category_name: :drink)
+    create(:category, category_name: :talk)
+    entries = create_list(:entry, 2, event: event, category: food)
+    voter = create(:user)
+    entries.each { |entry| create(:vote, user: voter, entry: entry) }
+    create(:vote, user: create(:user), entry: entries.first)
+    create(:talk_vote, user: voter, talk: create(:talk, event: event))
+    # 別のイベントの票は数えない
+    create(:vote, user: voter, entry: create(:entry, category: food))
+    sign_in(admin)
+
+    get admin_event_path(event)
+
+    counts = response.parsed_body.css("#vote_counts div").map { |row| [ row.at_css("dt").text, row.at_css("dd").text ] }
+    expect(counts).to eq([ %w[飯王 3票], %w[酒王 0票], %w[LT王 1票] ])
+    expect(response.body).not_to include(*entries.map(&:title))
+  end
+
+  it "公開中以外は投票数を出さない" do
+    sign_in(admin)
+
+    (Event.statuses.keys - [ "open" ]).each do |status|
+      event.update!(status: status)
+
+      get admin_event_path(event)
+
+      expect(response.parsed_body.at_css("#vote_counts")).to be_nil
+    end
+  end
+
+  it "公開中にステータス変更が失敗しても、集計は見せずに投票数を出す" do
+    event.update!(status: :open)
+    food = create(:category, category_name: :food)
+    create(:vote, user: create(:user), entry: create(:entry, event: event, category: food, title: "唐揚げ"))
+    # スラッグの形式チェックで保存に失敗させる（スラッグ導入前の古い行を想定）
+    event.update_columns(slug: "bad slug")
+    sign_in(admin)
+
+    patch admin_event_path(event), params: { event: { status: "counting" } }
+
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(response.parsed_body.at_css(".alert-error")).to be_present
+    expect(response.parsed_body.at_css("#vote_counts")).to be_present
+    expect(response.body).not_to include("唐揚げ")
+    expect(event.reload).to be_open
+  end
+
   it "一般ユーザーは管理画面に入れない" do
     sign_in(create(:user))
 
