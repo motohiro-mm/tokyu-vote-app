@@ -28,9 +28,10 @@ class EntriesController < ApplicationController
   end
 
   def create
-    @entry = @event.entries.build(entry_params.merge(category: @category, user: current_user))
+    attributes = entry_params
+    @entry = @event.entries.build(attributes.merge(category: @category, user: current_user))
 
-    if @entry.save
+    if @entry.valid? && image_uploads_valid?(attributes[:images]) && @entry.save
       redirect_to event_entries_completions_path(@event.slug, category: @category.category_name)
     else
       @my_entries = my_entries
@@ -41,6 +42,14 @@ class EntriesController < ApplicationController
   def completions; end
 
   private
+
+  def image_uploads_valid?(images)
+    uploads = Array(images).grep(ActionDispatch::Http::UploadedFile)
+    return true if uploads.all? { |upload| ImageProcessing::Vips.valid_image?(upload) }
+
+    @entry.errors.add(:images, :undecodable)
+    false
+  end
 
   def my_entries
     @event.entries.where(category: @category, user: current_user).order(:id)

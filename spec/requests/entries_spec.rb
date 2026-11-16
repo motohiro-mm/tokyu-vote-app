@@ -62,6 +62,18 @@ RSpec.describe "エントリー", type: :request do
     expect(response.body).to include("登録が完了しました")
   end
 
+  it "読み込めないHEICが含まれる場合は登録しない" do
+    png = fixture_file_upload(Rails.root.join("public/icon.png"), "image/png")
+    damaged = Rack::Test::UploadedFile.new(StringIO.new("damaged camera file"), "image/heic", original_filename: "damaged.heic")
+
+    expect {
+      post event_entries_path(event.slug, category: "food"), params: { entry: { title: "唐揚げ", images: [ png, damaged ] } }
+    }.not_to change(Entry, :count)
+
+    expect(response).to have_http_status(:unprocessable_content)
+    expect(response.body).to include("画像に読み込めないファイルが含まれています")
+  end
+
   it "登録フォームの作品名ラベルに何の名前かを添える" do
     get new_event_entry_path(event.slug, category: "food")
 

@@ -49,6 +49,7 @@ ja:
               not_allowed_for_entry: にLT王は指定できません
             images:
               invalid_content_type: は JPEG / PNG / HEIF（HEIC）のみ登録できます
+              undecodable: に読み込めないファイルが含まれています
               too_large: は1枚%{max}MB以下にしてください
               too_many: は%{max}枚まで登録できます
         talk:
