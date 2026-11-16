@@ -36,6 +36,7 @@ Rails.application.routes.draw do
   get "/events/:event_slug/*path", to: "events#unknown_path"
 
   namespace :admin do
+    resources :administrators, only: [ :index, :destroy ]
     resources :events, only: [ :index, :new, :create, :show, :edit, :update ] do
       resources :talks, only: [ :new, :create, :edit, :update ]
       resources :talk_imports, only: [ :create ]
