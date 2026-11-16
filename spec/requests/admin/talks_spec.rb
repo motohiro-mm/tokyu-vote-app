@@ -45,6 +45,34 @@ RSpec.describe "LT候補の管理", type: :request do
     expect(response).to redirect_to admin_event_path(event)
   end
 
+  it "説明付きでも空欄でも登録できる" do
+    post admin_event_talks_path(event), params: { talk: { user_name: "登壇者", title: "説明あり", description: "紹介文" } }
+    post admin_event_talks_path(event), params: { talk: { user_name: "登壇者", title: "説明なし", description: "" } }
+
+    expect(event.talks.find_by!(title: "説明あり").description).to eq "紹介文"
+    expect(event.talks.find_by!(title: "説明なし").description).to be_blank
+  end
+
+  it "発表資料URL付きでも空欄でも登録できる" do
+    post admin_event_talks_path(event), params: { talk: { user_name: "登壇者", title: "URLあり", slide_url: " https://example.com " } }
+    post admin_event_talks_path(event), params: { talk: { user_name: "登壇者", title: "URLなし", slide_url: "" } }
+
+    expect(event.talks.find_by!(title: "URLあり").slide_url).to eq "https://example.com"
+    expect(event.talks.find_by!(title: "URLなし").slide_url).to be_nil
+  end
+
+  it "不正な発表資料URLは登録・更新できずフォームに戻す" do
+    post admin_event_talks_path(event), params: { talk: { user_name: "登壇者", title: "Ruby", slide_url: "javascript:alert(1)" } }
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(response.body).to include("発表資料URLは http または https の URL で入力してください")
+    expect(event.talks.count).to eq 0
+
+    talk = create(:talk, event: event, slide_url: "https://example.com")
+    patch admin_event_talk_path(event, talk), params: { talk: { slide_url: "ftp://example.com" } }
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(talk.reload.slide_url).to eq "https://example.com"
+  end
+
   it "タイトルが空なら登録できず、フォームに戻す" do
     post admin_event_talks_path(event), params: { talk: { user_name: "とうだんしゃ", title: "" } }
 
@@ -62,6 +90,16 @@ RSpec.describe "LT候補の管理", type: :request do
 
     expect(response).to redirect_to admin_event_path(event)
     expect(talk.reload).to have_attributes(user_name: "とうだんしゃ", title: "Rails の話")
+  end
+
+  it "投票開始後も説明を更新できる" do
+    event.open!
+    talk = create(:talk, event: event)
+
+    patch admin_event_talk_path(event, talk), params: { talk: { description: "更新した説明", slide_url: "https://example.com/slides" } }
+
+    expect(response).to redirect_to admin_event_path(event)
+    expect(talk.reload).to have_attributes(description: "更新した説明", slide_url: "https://example.com/slides")
   end
 
   it "準備中のあいだはキャンセルにできる" do

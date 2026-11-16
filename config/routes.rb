@@ -1,4 +1,11 @@
 Rails.application.routes.draw do
+  # 画像はログインが必要なエントリーフォームで受け付ける。Active Storage の直接アップロードを塞ぐ。
+  scope ActiveStorage.routes_prefix do
+    not_found = ->(_env) { [ 404, {}, [] ] }
+    post "/direct_uploads", to: not_found
+    put "/disk/:encoded_token", to: not_found
+  end
+
   root "home#index"
 
   get "/login", to: "sessions#new"
@@ -11,7 +18,7 @@ Rails.application.routes.draw do
   get "/terms", to: "pages#terms"
   get "/privacy", to: "pages#privacy"
 
-  resources :events, only: [ :show ] do
+  resources :events, only: [ :show ], param: :slug do
     # resources より先に宣言しないと、categories や completions が :id として吸われる
     get "entries/categories", to: "entries#categories"
     get "entries/completions", to: "entries#completions"
@@ -26,7 +33,11 @@ Rails.application.routes.draw do
     resources :results, only: [ :index ]
   end
 
+  # 終了済みの回の旧URLもアーカイブへ渡す。それ以外の未定義パスは404。
+  get "/events/:event_slug/*path", to: "events#unknown_path"
+
   namespace :admin do
+    resources :administrators, only: [ :index, :destroy ]
     resources :events, only: [ :index, :new, :create, :show, :edit, :update ] do
       resources :talks, only: [ :new, :create, :edit, :update ]
       resources :talk_imports, only: [ :create ]

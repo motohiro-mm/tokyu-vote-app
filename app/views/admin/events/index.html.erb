@@ -3,6 +3,9 @@
   <h1 class="page-title text-left"><%= Event.model_name.human %>管理</h1>
   <%= link_to "新規作成", new_admin_event_path, class: "btn-primary" %>
 </div>
+<p class="mb-6 text-right">
+  <%= link_to "管理者の一覧", admin_administrators_path, class: "text-sm text-link" %>
+</p>
 
 <% if @events.empty? %>
   <p class="text-tokyu-ink-soft"><%= Event.model_name.human %>がありません。</p>

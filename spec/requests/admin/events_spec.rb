@@ -8,16 +8,120 @@ RSpec.describe "イベント管理", type: :request do
     sign_in(admin)
 
     expect {
-      post admin_events_path, params: { event: { title: "TokyuRuby会議99" } }
+      post admin_events_path, params: { event: { title: "TokyuRuby会議99", held_on: "2026-10-18", slug: " Tokyu-99 " } }
     }.to change(Event, :count).by(1)
     expect(response).to redirect_to admin_event_path(Event.last)
     expect(Event.last).to be_preparing
+    expect(Event.last.held_on).to eq Date.new(2026, 10, 18)
+    expect(Event.last.slug).to eq "tokyu-99"
+  end
+
+  it "開催日とスラッグが無いと作成できない" do
+    sign_in(admin)
+
+    expect {
+      post admin_events_path, params: { event: { title: "TokyuRuby会議99", held_on: "", slug: "" } }
+    }.not_to change(Event, :count)
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(response.body).to include("開催日を入力してください", "スラッグを入力してください")
+  end
+
+  it "スラッグ未設定のイベントに開催日とスラッグを設定できる" do
+    sign_in(admin)
+    event.update_columns(slug: nil)
+
+    patch admin_event_path(event), params: {
+      event: { title: "TokyuRuby会議17", held_on: "2026-11-01", slug: "Tokyu-17" }
+    }
+
+    expect(response).to redirect_to(admin_event_path(event))
+    event.reload
+    expect(event.title).to eq "TokyuRuby会議17"
+    expect(event.held_on).to eq Date.new(2026, 11, 1)
+    expect(event.slug).to eq "tokyu-17"
+  end
+
+  it "小文字化したスラッグが重複すると更新できない" do
+    create(:event, slug: "tokyu-17")
+    sign_in(admin)
+    event.update_columns(slug: nil)
+
+    patch admin_event_path(event), params: {
+      event: { title: event.title, held_on: "2026-10-18", slug: "Tokyu-17" }
+    }
+
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(response.body).to include("イベントを編集", "スラッグはすでに存在します")
+    expect(response.parsed_body.at_css('input[name="event[held_on]"]')["value"]).to eq "2026-10-18"
+    expect(event.reload.slug).to be_nil
+  end
+
+  it "詳細画面に開催日と公開URLと編集リンクを表示する" do
+    sign_in(admin)
+
+    get admin_event_path(event)
+
+    page = response.parsed_body
+    expect(page.at_css("a[href='#{edit_admin_event_path(event)}']")).to be_present
+    expect(page.at_css("a[href='#{event_path(slug: event.slug)}']").text).to eq event_url(slug: event.slug)
+    expect(page.css("dd").map(&:text)).to include(I18n.l(event.held_on, format: :long))
+    expect(page.at_css('input[name="event[held_on]"]')).to be_nil
+    expect(page.at_css('input[name="event[slug]"]')).to be_nil
+  end
+
+  it "設定済みのスラッグは編集画面で変更できない" do
+    sign_in(admin)
+
+    get edit_admin_event_path(event)
+
+    expect(response.parsed_body.at_css('input[name="event[slug]"][disabled]')["value"]).to eq event.slug
+    expect(response.body).to include("設定後は変更できません")
+  end
+
+  it "未設定のスラッグは管理画面で入力できる" do
+    sign_in(admin)
+    event.update_columns(slug: nil)
+
+    get edit_admin_event_path(event)
+
+    expect(response.parsed_body.at_css('input[name="event[slug]"]')["disabled"]).to be_nil
+    expect(response.body).to include("英大文字は小文字に変換されます", "/events/17")
+  end
+
+  it "設定済みのスラッグを直接変更・削除できない" do
+    sign_in(admin)
+    event.update_columns(slug: "17")
+
+    [ "18", "" ].each do |slug|
+      patch admin_event_path(event), params: { event: { title: "変更後", held_on: "2026-11-01", slug: slug } }
+
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response.body).to include("イベントを編集", "スラッグは一度設定すると変更できません")
+      expect(response.parsed_body.at_css('input[name="event[slug]"][disabled]')["value"]).to eq "17"
+      expect(event.reload.slug).to eq "17"
+    end
+  end
+
+  it "スラッグを変えずにタイトルと開催日を更新できる" do
+    sign_in(admin)
+    event.update_columns(slug: "17")
+
+    patch admin_event_path(event), params: { event: { title: "変更後", held_on: "2026-11-01", slug: "17" } }
+
+    expect(response).to redirect_to(admin_event_path(event))
+    expect(event.reload.attributes.values_at("slug", "title", "held_on")).to eq [ "17", "変更後", Date.new(2026, 11, 1) ]
+
+    patch admin_event_path(event), params: { event: { title: "フォームから更新", held_on: "2026-11-02" } }
+
+    expect(response).to redirect_to(admin_event_path(event))
+    expect(event.reload.slug).to eq "17"
+    expect(event.title).to eq "フォームから更新"
   end
 
   it "タイトルが空なら作成できず、フォームに戻す" do
     sign_in(admin)
 
-    post admin_events_path, params: { event: { title: "" } }
+    post admin_events_path, params: { event: { title: "", held_on: "2026-10-18", slug: "99" } }
 
     expect(response).to have_http_status(:unprocessable_entity)
     expect(response.body).to include("タイトルを入力してください")
@@ -74,6 +178,11 @@ RSpec.describe "イベント管理", type: :request do
 
   it "管理者はステータスを変更できる" do
     sign_in(admin)
+    event.update_columns(slug: nil, held_on: nil)
+
+    get admin_event_path(event)
+
+    expect(response.body).to include("未設定（編集画面でスラッグを設定してください）")
 
     patch admin_event_path(event), params: { event: { status: "open" } }
 
@@ -86,6 +195,7 @@ RSpec.describe "イベント管理", type: :request do
     patch admin_event_path(event), params: { event: { status: "archived" } }
 
     expect(response).to have_http_status(:unprocessable_entity)
+    expect(response.parsed_body.at_css(".alert-error")).to be_present
     expect(event.reload).to be_preparing
   end
 
@@ -116,6 +226,56 @@ RSpec.describe "イベント管理", type: :request do
 
     expect(response.body).to include("ステータスを 集計中 にすると表示されます。")
     expect(response.body).not_to include("唐揚げ")
+  end
+
+  it "公開中は部門ごとの投票数だけを確認できる" do
+    event.update!(status: :open)
+    food = create(:category, category_name: :food)
+    create(:category, category_name: :drink)
+    create(:category, category_name: :talk)
+    entries = create_list(:entry, 2, event: event, category: food)
+    voter = create(:user)
+    entries.each { |entry| create(:vote, user: voter, entry: entry) }
+    create(:vote, user: create(:user), entry: entries.first)
+    create(:talk_vote, user: voter, talk: create(:talk, event: event))
+    # 別のイベントの票は数えない
+    create(:vote, user: voter, entry: create(:entry, category: food))
+    sign_in(admin)
+
+    get admin_event_path(event)
+
+    counts = response.parsed_body.css("#vote_counts div").map { |row| [ row.at_css("dt").text, row.at_css("dd").text ] }
+    expect(counts).to eq([ %w[飯王 3票], %w[酒王 0票], %w[LT王 1票] ])
+    expect(response.body).not_to include(*entries.map(&:title))
+  end
+
+  it "公開中以外は投票数を出さない" do
+    sign_in(admin)
+
+    (Event.statuses.keys - [ "open" ]).each do |status|
+      event.update!(status: status)
+
+      get admin_event_path(event)
+
+      expect(response.parsed_body.at_css("#vote_counts")).to be_nil
+    end
+  end
+
+  it "公開中にステータス変更が失敗しても、集計は見せずに投票数を出す" do
+    event.update!(status: :open)
+    food = create(:category, category_name: :food)
+    create(:vote, user: create(:user), entry: create(:entry, event: event, category: food, title: "唐揚げ"))
+    # スラッグの形式チェックで保存に失敗させる（スラッグ導入前の古い行を想定）
+    event.update_columns(slug: "bad slug")
+    sign_in(admin)
+
+    patch admin_event_path(event), params: { event: { status: "counting" } }
+
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(response.parsed_body.at_css(".alert-error")).to be_present
+    expect(response.parsed_body.at_css("#vote_counts")).to be_present
+    expect(response.body).not_to include("唐揚げ")
+    expect(event.reload).to be_open
   end
 
   it "一般ユーザーは管理画面に入れない" do
