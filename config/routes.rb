@@ -1,4 +1,11 @@
 Rails.application.routes.draw do
+  # 画像はログインが必要なエントリーフォームで受け付ける。Active Storage の直接アップロードを塞ぐ。
+  scope ActiveStorage.routes_prefix do
+    not_found = ->(_env) { [ 404, {}, [] ] }
+    post "/direct_uploads", to: not_found
+    put "/disk/:encoded_token", to: not_found
+  end
+
   root "home#index"
 
   get "/login", to: "sessions#new"

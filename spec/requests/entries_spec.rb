@@ -13,6 +13,19 @@ RSpec.describe "エントリー", type: :request do
     }.to change(Entry, :count).by(1)
   end
 
+  it "フォームから投稿した画像を表示できる" do
+    image_path = Rails.root.join("app/assets/images/tokyu-rb-logo.png")
+    image = fixture_file_upload(image_path, "image/png")
+    post event_entries_path(event, category: "food"), params: { entry: { title: "唐揚げ", image: image } }
+
+    expect(response).to redirect_to event_entries_completions_path(event, category: "food")
+    entry = event.entries.find_by!(title: "唐揚げ")
+    get rails_blob_path(entry.image, only_path: true)
+    follow_redirect!
+    expect(response).to have_http_status(:ok)
+    expect(response.body.b).to eq(image_path.binread)
+  end
+
   it "登録すると登録完了画面へ送る" do
     post event_entries_path(event, category: "food"), params: { entry: { title: "唐揚げ" } }
 
@@ -73,5 +86,32 @@ RSpec.describe "エントリー", type: :request do
     get new_event_entry_path(event, category: "beer")
 
     expect(response).to have_http_status(:not_found)
+  end
+end
+
+RSpec.describe "エントリー画像の直接アップロード", type: :request do
+  let(:contents) { "test" }
+  let(:blob_attributes) do
+    { filename: "test.txt", byte_size: contents.bytesize,
+      checksum: Digest::MD5.base64digest(contents), content_type: "text/plain" }
+  end
+
+  it "アップロード用のURLを発行しない" do
+    expect {
+      post rails_direct_uploads_path, params: { blob: blob_attributes }, as: :json
+    }.not_to change(ActiveStorage::Blob, :count)
+    expect(response).to have_http_status(:not_found)
+  end
+
+  it "発行済みのURLを使ったファイルの保存も拒否する" do
+    blob = ActiveStorage::Blob.create_before_direct_upload!(**blob_attributes)
+    url = ActiveStorage::Current.set(url_options: { host: "www.example.com" }) do
+      blob.service_url_for_direct_upload
+    end
+
+    put url, params: contents, headers: blob.service_headers_for_direct_upload
+
+    expect(response).to have_http_status(:not_found)
+    expect(blob.service.exist?(blob.key)).to be(false)
   end
 end
