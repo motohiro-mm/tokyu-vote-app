@@ -4,6 +4,12 @@
 <div class="card mb-6">
   <p class="mb-2 text-lg font-bold break-words">「<%= @talk.title %>」</p>
   <p class="text-tokyu-ink-soft"><%= @talk.user_name %></p>
+  <% if @talk.description.present? %>
+    <p class="whitespace-pre-wrap break-words"><%= @talk.description %></p>
+  <% end %>
+  <% if (slide_url = @talk.safe_slide_url) %>
+    <%= link_to "発表資料", slide_url, target: "_blank", rel: "noopener noreferrer", class: "text-link" %>
+  <% end %>
 </div>
 
 <div class="card mb-8">

@@ -10,7 +10,7 @@
     <%= form_with url: admin_event_talk_imports_path(event), class: "mb-4 rounded-xl border-2 border-tokyu-ink bg-tokyu-blue-light p-4" do |f| %>
       <p class="mb-2 text-sm font-bold">CSV で一括登録</p>
       <p class="mb-4 text-xs text-tokyu-ink-soft">
-        1 行目をヘッダ <code class="rounded bg-white px-2"><%= TalkCsvImport::HEADERS.values.join(",") %></code> にした UTF-8 の CSV
+        1 行目をヘッダ <code class="rounded bg-white px-2"><%= TalkCsvImport::HEADERS.values.join(",") %></code> にした UTF-8 の CSV（説明・発表資料URL列は任意）
       </p>
       <div class="flex flex-wrap items-center justify-between gap-4">
         <%= f.file_field :file, accept: "text/csv,.csv", class: "input-file w-auto" %>
