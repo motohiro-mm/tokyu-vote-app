@@ -109,13 +109,13 @@ RSpec.describe "画面の導線", type: :request do
     talk = create(:talk, event: event, description: "1行目\n<script>内容</script>")
     empty = create(:talk, event: event, description: nil)
 
-    get event_talks_path(event)
+    get event_talks_path(event.slug)
     expect(response.body).to include("<p class=\"text-xs break-words text-tokyu-ink-soft\">1行目\n&lt;script&gt;内容&lt;/script&gt;</p>")
     expect(response.body.scan('class="text-xs break-words text-tokyu-ink-soft"').size).to eq 1
 
-    get event_talk_path(event, talk)
+    get event_talk_path(event.slug, talk)
     expect(response.body).to include("<p class=\"whitespace-pre-wrap break-words\">1行目\n&lt;script&gt;内容&lt;/script&gt;</p>")
-    get event_talk_path(event, empty)
+    get event_talk_path(event.slug, empty)
     expect(response.body).not_to include('class="whitespace-pre-wrap break-words"')
   end
 
@@ -125,15 +125,15 @@ RSpec.describe "画面の導線", type: :request do
     invalid = create(:talk, event: event)
     invalid.update_column(:slide_url, "javascript:alert(1)")
 
-    get event_talks_path(event)
+    get event_talks_path(event.slug)
     expect(response.body).to include('href="https://example.com/slides?a=1&amp;b=2"', 'target="_blank"', 'rel="noopener noreferrer"')
     expect(response.body.scan(">発表資料</a>").size).to eq 1
     expect(response.body).not_to include("javascript:alert(1)")
 
-    get event_talk_path(event, talk)
+    get event_talk_path(event.slug, talk)
     expect(response.body).to include('href="https://example.com/slides?a=1&amp;b=2"', 'target="_blank"', 'rel="noopener noreferrer"', ">発表資料</a>")
     [ empty, invalid ].each do |item|
-      get event_talk_path(event, item)
+      get event_talk_path(event.slug, item)
       expect(response.body).not_to include(">発表資料</a>", "javascript:alert(1)")
     end
   end

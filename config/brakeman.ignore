@@ -3,13 +3,13 @@
     {
       "warning_type": "Cross-Site Scripting",
       "warning_code": 4,
-      "fingerprint": "338da82a1e288fea6041f7ca2e791d704d60913b389916e6aa56079a8cdd281b",
+      "fingerprint": "fcaa3eadcaa1f32081158e4716098e89f6edc533811fc729e98373d922739050",
       "check_name": "LinkToHref",
       "message": "Potentially unsafe model attribute in `link_to` href",
       "file": "app/views/talks/show.html.erb",
       "line": 11,
       "link": "https://brakemanscanner.org/docs/warning_types/link_to_href",
-      "code": "link_to(\"\\u767A\\u8868\\u8CC7\\u6599\", Event.find(params[:event_id]).talks.votable.find(params[:id]).safe_slide_url, :target => \"_blank\", :rel => \"noopener noreferrer\", :class => \"text-link\")",
+      "code": "link_to(\"\\u767A\\u8868\\u8CC7\\u6599\", Event.find_by!(:slug => request.path_parameters[:event_slug]).talks.votable.find(params[:id]).safe_slide_url, :target => \"_blank\", :rel => \"noopener noreferrer\", :class => \"text-link\")",
       "render_path": [
         {
           "type": "controller",
@@ -27,7 +27,7 @@
         "type": "template",
         "template": "talks/show"
       },
-      "user_input": "Event.find(params[:event_id]).talks.votable.find(params[:id]).safe_slide_url",
+      "user_input": "Event.find_by!(:slug => request.path_parameters[:event_slug]).talks.votable.find(params[:id]).safe_slide_url",
       "confidence": "Weak",
       "cwe_id": [
         79
