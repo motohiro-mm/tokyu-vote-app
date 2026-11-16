@@ -5,12 +5,41 @@
 </p>
 
 <div class="card mb-6">
+  <h2 class="section-title mb-2">開催情報</h2>
+
+  <dl class="space-y-2 text-sm">
+    <div>
+      <dt class="font-bold"><%= Event.human_attribute_name(:held_on) %></dt>
+      <dd><%= @event.held_on ? l(@event.held_on, format: :long) : "未設定" %></dd>
+    </div>
+    <div>
+      <dt class="font-bold">公開URL</dt>
+      <dd>
+        <% if @event.slug.present? %>
+          <%= link_to event_url(slug: @event.slug), event_path(slug: @event.slug), class: "underline" %>
+        <% else %>
+          未設定（編集画面でスラッグを設定してください）
+        <% end %>
+      </dd>
+    </div>
+  </dl>
+</div>
+
+<div class="card mb-6">
   <h2 class="section-title mb-2"><%= Event.human_attribute_name(:status) %></h2>
   <p class="mb-4 text-sm text-tokyu-ink-soft">
     現在: <%= @event.status_label %>
   </p>
 
-  <%= form_with model: [ :admin, @event ], method: :patch, class: "flex flex-wrap items-center gap-4" do |f| %>
+  <% if @event.errors.any? %>
+    <ul class="alert-error mb-4">
+      <% @event.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+    </ul>
+  <% end %>
+
+  <%= form_with model: [ :admin, @event ], method: :patch, html: { id: "event_status" }, class: "flex flex-wrap items-center gap-4" do |f| %>
     <%= f.select :status,
                  Event.statuses.keys.map { |status| [ Event.status_label(status), status ] },
                  {},

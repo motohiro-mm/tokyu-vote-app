@@ -8,16 +8,120 @@ RSpec.describe "イベント管理", type: :request do
     sign_in(admin)
 
     expect {
-      post admin_events_path, params: { event: { title: "TokyuRuby会議99" } }
+      post admin_events_path, params: { event: { title: "TokyuRuby会議99", held_on: "2026-10-18", slug: " Tokyu-99 " } }
     }.to change(Event, :count).by(1)
     expect(response).to redirect_to admin_event_path(Event.last)
     expect(Event.last).to be_preparing
+    expect(Event.last.held_on).to eq Date.new(2026, 10, 18)
+    expect(Event.last.slug).to eq "tokyu-99"
+  end
+
+  it "開催日とスラッグが無いと作成できない" do
+    sign_in(admin)
+
+    expect {
+      post admin_events_path, params: { event: { title: "TokyuRuby会議99", held_on: "", slug: "" } }
+    }.not_to change(Event, :count)
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(response.body).to include("開催日を入力してください", "スラッグを入力してください")
+  end
+
+  it "スラッグ未設定のイベントに開催日とスラッグを設定できる" do
+    sign_in(admin)
+    event.update_columns(slug: nil)
+
+    patch admin_event_path(event), params: {
+      event: { title: "TokyuRuby会議17", held_on: "2026-11-01", slug: "Tokyu-17" }
+    }
+
+    expect(response).to redirect_to(admin_event_path(event))
+    event.reload
+    expect(event.title).to eq "TokyuRuby会議17"
+    expect(event.held_on).to eq Date.new(2026, 11, 1)
+    expect(event.slug).to eq "tokyu-17"
+  end
+
+  it "小文字化したスラッグが重複すると更新できない" do
+    create(:event, slug: "tokyu-17")
+    sign_in(admin)
+    event.update_columns(slug: nil)
+
+    patch admin_event_path(event), params: {
+      event: { title: event.title, held_on: "2026-10-18", slug: "Tokyu-17" }
+    }
+
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(response.body).to include("イベントを編集", "スラッグはすでに存在します")
+    expect(response.parsed_body.at_css('input[name="event[held_on]"]')["value"]).to eq "2026-10-18"
+    expect(event.reload.slug).to be_nil
+  end
+
+  it "詳細画面に開催日と公開URLと編集リンクを表示する" do
+    sign_in(admin)
+
+    get admin_event_path(event)
+
+    page = response.parsed_body
+    expect(page.at_css("a[href='#{edit_admin_event_path(event)}']")).to be_present
+    expect(page.at_css("a[href='#{event_path(slug: event.slug)}']").text).to eq event_url(slug: event.slug)
+    expect(page.css("dd").map(&:text)).to include(I18n.l(event.held_on, format: :long))
+    expect(page.at_css('input[name="event[held_on]"]')).to be_nil
+    expect(page.at_css('input[name="event[slug]"]')).to be_nil
+  end
+
+  it "設定済みのスラッグは編集画面で変更できない" do
+    sign_in(admin)
+
+    get edit_admin_event_path(event)
+
+    expect(response.parsed_body.at_css('input[name="event[slug]"][disabled]')["value"]).to eq event.slug
+    expect(response.body).to include("設定後は変更できません")
+  end
+
+  it "未設定のスラッグは管理画面で入力できる" do
+    sign_in(admin)
+    event.update_columns(slug: nil)
+
+    get edit_admin_event_path(event)
+
+    expect(response.parsed_body.at_css('input[name="event[slug]"]')["disabled"]).to be_nil
+    expect(response.body).to include("英大文字は小文字に変換されます", "/events/17")
+  end
+
+  it "設定済みのスラッグを直接変更・削除できない" do
+    sign_in(admin)
+    event.update_columns(slug: "17")
+
+    [ "18", "" ].each do |slug|
+      patch admin_event_path(event), params: { event: { title: "変更後", held_on: "2026-11-01", slug: slug } }
+
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response.body).to include("イベントを編集", "スラッグは一度設定すると変更できません")
+      expect(response.parsed_body.at_css('input[name="event[slug]"][disabled]')["value"]).to eq "17"
+      expect(event.reload.slug).to eq "17"
+    end
+  end
+
+  it "スラッグを変えずにタイトルと開催日を更新できる" do
+    sign_in(admin)
+    event.update_columns(slug: "17")
+
+    patch admin_event_path(event), params: { event: { title: "変更後", held_on: "2026-11-01", slug: "17" } }
+
+    expect(response).to redirect_to(admin_event_path(event))
+    expect(event.reload.attributes.values_at("slug", "title", "held_on")).to eq [ "17", "変更後", Date.new(2026, 11, 1) ]
+
+    patch admin_event_path(event), params: { event: { title: "フォームから更新", held_on: "2026-11-02" } }
+
+    expect(response).to redirect_to(admin_event_path(event))
+    expect(event.reload.slug).to eq "17"
+    expect(event.title).to eq "フォームから更新"
   end
 
   it "タイトルが空なら作成できず、フォームに戻す" do
     sign_in(admin)
 
-    post admin_events_path, params: { event: { title: "" } }
+    post admin_events_path, params: { event: { title: "", held_on: "2026-10-18", slug: "99" } }
 
     expect(response).to have_http_status(:unprocessable_entity)
     expect(response.body).to include("タイトルを入力してください")
@@ -74,6 +178,11 @@ RSpec.describe "イベント管理", type: :request do
 
   it "管理者はステータスを変更できる" do
     sign_in(admin)
+    event.update_columns(slug: nil, held_on: nil)
+
+    get admin_event_path(event)
+
+    expect(response.body).to include("未設定（編集画面でスラッグを設定してください）")
 
     patch admin_event_path(event), params: { event: { status: "open" } }
 
@@ -86,6 +195,7 @@ RSpec.describe "イベント管理", type: :request do
     patch admin_event_path(event), params: { event: { status: "archived" } }
 
     expect(response).to have_http_status(:unprocessable_entity)
+    expect(response.parsed_body.at_css(".alert-error")).to be_present
     expect(event.reload).to be_preparing
   end
 
