@@ -29,6 +29,14 @@ RSpec.describe "エントリー", type: :request do
     get event_entry_path(event, entry, category: "food")
     images = Nokogiri::HTML(response.body).css('img[alt="唐揚げ"]')
     expect(images.map { |image| File.basename(image["src"]) }).to eq(names)
+    # 元ファイルには撮影場所などが残っているため、PNG も含めてすべて縮小版の URL で配る
+    expect(images.map { |image| image["src"] }).to all(include("/representations/"))
+    # 縮小版の URL に含まれる ID から元ファイルの URL を組み立てても取得できない
+    signed_id = images.first["src"][%r{/representations/redirect/([^/]+)/}, 1]
+    [ "redirect/", "proxy/", "" ].each do |kind|
+      get "/rails/active_storage/blobs/#{kind}#{signed_id}/entry.heic"
+      expect(response).to have_http_status(:not_found)
+    end
 
     get images.first["src"]
     follow_redirect!

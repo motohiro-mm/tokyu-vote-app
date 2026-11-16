@@ -33,7 +33,7 @@ class CategoryResult
       Target.new(
         title: entry.title,
         name: entry.user.name,
-        images: entry.display_images,
+        images: entry.display_images(:thumbnail),
         comments: comments.fetch(entry.id, [])
       )
     end

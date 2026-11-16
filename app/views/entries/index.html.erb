@@ -24,7 +24,7 @@
   <ul class="mb-8 space-y-4">
     <% @entries.each do |entry| %>
       <li class="card flex items-center gap-4">
-        <% if (image = entry.display_images.first) %>
+        <% if (image = entry.display_images(:thumbnail).first) %>
           <%= image_tag image, alt: "", loading: "lazy", class: "size-16 shrink-0 rounded-xl border-2 border-tokyu-ink object-cover" %>
         <% end %>
         <div class="min-w-0 flex-1">

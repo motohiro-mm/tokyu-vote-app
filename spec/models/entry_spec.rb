@@ -58,6 +58,26 @@ RSpec.describe Entry do
     expect(entry.errors[:images]).to include("は5枚まで登録できます")
   end
 
+  it "表示用の画像は撮影場所などのメタデータを消した縮小版にし、HEIF だけ JPEG に変換する" do
+    entry = create(:entry)
+    entry.images.attach(
+      { io: file_fixture("entry.heic").open, filename: "entry.heic" },
+      { io: Rails.root.join("public/icon.png").open, filename: "icon.png" }
+    )
+
+    display = entry.display_images.map { |image| image.variation.transformations }
+    expect(display).to eq([
+      { resize_to_limit: [ 1600, 1600 ], saver: { strip: true }, format: :jpeg },
+      { resize_to_limit: [ 1600, 1600 ], saver: { strip: true }, format: "png" }
+    ])
+
+    thumbnails = entry.display_images(:thumbnail).map { |image| image.variation.transformations }
+    expect(thumbnails).to eq([
+      { resize_to_fill: [ 128, 128 ], saver: { strip: true }, format: :jpeg },
+      { resize_to_fill: [ 128, 128 ], saver: { strip: true }, format: "png" }
+    ])
+  end
+
   it "画像は任意" do
     expect(build(:entry)).to be_valid
   end
