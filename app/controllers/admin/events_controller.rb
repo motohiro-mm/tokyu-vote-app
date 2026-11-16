@@ -20,13 +20,12 @@ class Admin::EventsController < Admin::BaseController
   end
 
   def show
-    @talks = talks
-    @rankings = rankings if @event.counting_started?
+    load_show
   end
 
   def edit; end
 
-  # 詳細画面のステータス変更と編集画面のタイトル変更は、同じ PATCH で届く。
+  # 詳細画面のステータス変更と編集画面の開催情報の更新は、同じ PATCH で届く。
   # 送られてきた項目で振り分け、片方のフォームでもう片方の項目を変えられないようにする
   def update
     status_change? ? change_status : update_details
@@ -46,8 +45,12 @@ class Admin::EventsController < Admin::BaseController
     Category.order(:id).flat_map { |category| CategoryResult.new(@event, category).rankings }
   end
 
+  def vote_counts
+    Category.order(:id).map { |category| [ category.label, CategoryResult.new(@event, category).vote_count ] }
+  end
+
   def event_params
-    params.expect(event: [ :title ])
+    params.expect(event: [ :title, :held_on, :slug ])
   end
 
   def status_param
@@ -62,17 +65,26 @@ class Admin::EventsController < Admin::BaseController
     if @event.update(status_param)
       redirect_to admin_event_path(@event), notice: "#{Event.human_attribute_name(:status)}を変更しました。"
     else
-      @talks = talks
-      @rankings = rankings if @event.counting_started?
+      # 保存できなかったステータスのまま表示を切り替えると、公開中のうちに集計が見えてしまうため、保存済みの値に戻す。
+      # エラーメッセージは errors に残る
+      @event.restore_attributes([ :status ])
+      load_show
       render :show, status: :unprocessable_entity
     end
   end
 
   def update_details
-    if @event.update(event_params)
+    @event.assign_attributes(event_params)
+    if @event.save(context: :edition)
       redirect_to admin_event_path(@event), notice: "#{Event.model_name.human}を更新しました。"
     else
       render :edit, status: :unprocessable_entity
     end
+  end
+
+  def load_show
+    @talks = talks
+    @vote_counts = vote_counts if @event.open?
+    @rankings = rankings if @event.counting_started?
   end
 end

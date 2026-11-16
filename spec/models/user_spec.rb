@@ -44,4 +44,21 @@ RSpec.describe User do
       expect(user.authenticated?("anything")).to be false
     end
   end
+
+  describe "#revoke_admin_by" do
+    let(:actor) { create(:user, :admin) }
+    let(:target) { create(:user, :admin) }
+
+    it "実行者が管理者なら解除する" do
+      expect(target.revoke_admin_by(actor)).to be true
+      expect(target.reload).not_to be_admin
+    end
+
+    it "実行者が先に解除されていたら解除しない（互いを同時に解除して 0 人になるのを防ぐ）" do
+      described_class.find(actor.id).update!(admin: false)
+
+      expect(target.revoke_admin_by(actor)).to be false
+      expect(target.reload).to be_admin
+    end
+  end
 end

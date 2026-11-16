@@ -20,6 +20,11 @@ class CategoryResult
     ]
   end
 
+  # 公開中に管理者が集まり具合だけを確かめるための合計。誰に何票入ったかは途中経過で投票が偏るため出さない
+  def vote_count
+    (category.talk? ? TalkVote.in_event(event) : Vote.in_category(event, category)).count
+  end
+
   def targets
     (category.talk? ? talk_targets : entry_targets).select { |target| target.comments.any? }
   end

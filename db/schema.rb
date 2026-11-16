@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_29_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_13_040320) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -64,6 +64,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_29_120000) do
     t.integer "status", default: 0, null: false
     t.string "title", null: false
     t.datetime "updated_at", null: false
+    t.date "held_on"
+    t.string "slug"
+    t.index ["slug"], name: "index_events_on_slug", unique: true
   end
 
   create_table "talk_votes", force: :cascade do |t|
@@ -83,6 +86,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_29_120000) do
     t.string "title", null: false
     t.datetime "updated_at", null: false
     t.string "user_name", null: false
+    t.text "description"
+    t.string "slide_url"
     t.index ["event_id", "status"], name: "index_talks_on_event_id_and_status"
   end
 

@@ -27,7 +27,11 @@ namespace :demo do
       end
     end
 
-    event = Event.find_or_create_by!(title: "TokyuRuby会議デモ") { |e| e.status = :open }
+    event = Event.find_or_create_by!(title: "TokyuRuby会議デモ") do |e|
+      e.status = :open
+      e.slug = "demo"
+      e.held_on = Date.new(2026, 10, 18)
+    end
 
     food = Category.find_by!(category_name: :food)
     drink = Category.find_by!(category_name: :drink)
@@ -43,6 +47,8 @@ namespace :demo do
     [ "Rubyの話", "SQLiteの話", "Kamalの話", "Hotwireの話" ].each_with_index do |title, i|
       event.talks.find_or_create_by!(title: title) do |talk|
         talk.user_name = "とうだんしゃ#{i + 1}"
+        talk.description = "#{title}について紹介します。"
+        talk.slide_url = "https://example.com/slides/#{i + 1}"
       end
     end
 
@@ -66,7 +72,11 @@ namespace :demo do
     # 持ち込みは 4 人に絞り、同じ人が複数持ち込むことで単品王と合算王の顔ぶれが変わるようにする
     cooks = voters.first(4)
 
-    event = Event.find_or_create_by!(title: "デモイベント") { |e| e.status = :closed }
+    event = Event.find_or_create_by!(title: "デモイベント") do |e|
+      e.status = :closed
+      e.slug = "demo-results"
+      e.held_on = Date.new(2026, 10, 18)
+    end
     event.update!(status: :closed) unless event.closed?
 
     food = Category.find_by!(category_name: :food)
@@ -163,7 +173,7 @@ namespace :demo do
     end
 
     puts "できました: #{event.title}（#{event.status_label}）"
-    puts "ログイン画面 #{demo_base_url}/login から #{admin.name} を選ぶと管理画面の集計、誰でも #{demo_base_url}/events/#{event.id} から結果を見られます"
+    puts "ログイン画面 #{demo_base_url}/login から #{admin.name} を選ぶと管理画面の集計、誰でも #{demo_base_url}/events/#{event.slug} から結果を見られます"
     puts "静的書き出しは bin/rails export:static"
   end
 end

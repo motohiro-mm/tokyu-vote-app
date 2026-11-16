@@ -3,14 +3,33 @@ module EventScoped
   extend ActiveSupport::Concern
 
   included do
+    skip_before_action :require_login
     before_action :set_event
+    before_action :redirect_finished_event
+    before_action :require_event_login
     before_action :check_event_status
   end
 
   private
 
   def set_event
-    @event = Event.find(params[:event_id])
+    @event = Event.find_by!(slug: request.path_parameters[:event_slug])
+  end
+
+  def redirect_finished_event
+    return unless @event.finished?
+
+    raise ActiveRecord::RecordNotFound unless request.get? || request.head?
+
+    redirect_to request.fullpath.sub(%r{\A/events/}, "/archives/")
+  end
+
+  def require_event_login
+    return if current_user
+
+    path = request.fullpath
+    session[:event_return_to] = path if request.get? && path.bytesize <= 1.kilobyte
+    redirect_to login_path
   end
 
   # 準備中と集計中は中身を見せず、状態を説明する画面で止める
@@ -24,6 +43,6 @@ module EventScoped
   def require_open_event
     return if @event.open?
 
-    redirect_to event_path(@event), alert: "現在は受け付けていません。"
+    redirect_to event_path(@event.slug), alert: "現在は受け付けていません。"
   end
 end

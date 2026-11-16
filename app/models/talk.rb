@@ -12,6 +12,11 @@ class Talk < ApplicationRecord
 
   validates :user_name, presence: true
   validates :title, presence: true
+  before_validation :normalize_slide_url
+
+  validates :description, length: { maximum: 300 }
+  validates :slide_url, length: { maximum: 2048 }
+  validate :slide_url_is_valid
   validate :status_changeable_only_before_voting, if: :status_changed?
 
   def self.status_label(status)
@@ -22,7 +27,24 @@ class Talk < ApplicationRecord
     self.class.status_label(status)
   end
 
+  def safe_slide_url
+    return if slide_url.blank?
+
+    uri = URI.parse(slide_url)
+    slide_url if %w[http https].include?(uri.scheme) && uri.host.present?
+  rescue URI::InvalidURIError
+    nil
+  end
+
   private
+
+  def normalize_slide_url
+    self.slide_url = slide_url&.strip.presence
+  end
+
+  def slide_url_is_valid
+    errors.add(:slide_url, :invalid_url) if slide_url.present? && safe_slide_url.nil?
+  end
 
   # 票が入った後のキャンセルは票の扱いが決まっていないため、投票開始前しか認めない
   def status_changeable_only_before_voting

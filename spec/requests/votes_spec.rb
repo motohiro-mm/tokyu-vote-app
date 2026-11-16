@@ -7,7 +7,7 @@ RSpec.describe "投票", type: :request do
   let(:user) { create(:user) }
 
   def cast(entry, comment: "おいしい")
-    post event_votes_path(event), params: { vote: { entry_id: entry.id, comment: comment } }
+    post event_votes_path(event.slug), params: { vote: { entry_id: entry.id, comment: comment } }
   end
 
   before { sign_in(user) }
@@ -105,7 +105,7 @@ RSpec.describe "投票", type: :request do
       2.times { cast(create(:entry, event: event, category: food)) }
       targets = Array.new(2) { create(:entry, event: event, category: food) }
       payloads = targets.map do |entry|
-        [ event_votes_path(event), { vote: { entry_id: entry.id, comment: "同時" } } ]
+        [ event_votes_path(event.slug), { vote: { entry_id: entry.id, comment: "同時" } } ]
       end
 
       sessions = post_concurrently(payloads)
@@ -119,8 +119,8 @@ RSpec.describe "投票", type: :request do
       entry = create(:entry, event: event, category: food)
 
       sessions = post_concurrently([
-        [ event_votes_path(event), { vote: { entry_id: entry.id, comment: "同時1" } } ],
-        [ event_votes_path(event), { vote: { entry_id: entry.id, comment: "同時2" } } ]
+        [ event_votes_path(event.slug), { vote: { entry_id: entry.id, comment: "同時1" } } ],
+        [ event_votes_path(event.slug), { vote: { entry_id: entry.id, comment: "同時2" } } ]
       ])
 
       expect(Vote.where(user: user, entry: entry).count).to eq(1)
@@ -136,16 +136,16 @@ RSpec.describe "投票", type: :request do
       cast(entry, comment: "取り消すコメント")
       vote = Vote.last
 
-      expect { delete event_vote_path(event, vote) }.to change(Vote, :count).by(-1)
+      expect { delete event_vote_path(event.slug, vote) }.to change(Vote, :count).by(-1)
       expect(Vote.where(comment: "取り消すコメント")).not_to exist
       expect(Vote.remaining_for(user, event, food)).to eq 3
-      expect(response).to redirect_to event_entry_path(event, entry, category: "food")
+      expect(response).to redirect_to event_entry_path(event.slug, entry, category: "food")
       expect(flash[:notice]).to eq "投票を取り消しました。"
     end
 
     it "取り消したあと別のエントリーへ入れ直せる" do
       3.times { cast(create(:entry, event: event, category: food)) }
-      delete event_vote_path(event, Vote.last)
+      delete event_vote_path(event.slug, Vote.last)
 
       expect { cast(entry) }.to change(Vote, :count).by(1)
     end
@@ -153,15 +153,15 @@ RSpec.describe "投票", type: :request do
     it "他人の票は取り消せない" do
       other_vote = create(:vote, entry: entry)
 
-      expect { delete event_vote_path(event, other_vote) }.not_to change(Vote, :count)
+      expect { delete event_vote_path(event.slug, other_vote) }.not_to change(Vote, :count)
       expect(response).to have_http_status(:not_found)
     end
 
     it "別のイベントの票は、そのイベントの URL からは取り消せない" do
-      other_event = create(:event, status: :open)
+      other_event = create(:event, status: :finished)
       vote = create(:vote, user: user, entry: create(:entry, event: other_event, category: food))
 
-      expect { delete event_vote_path(event, vote) }.not_to change(Vote, :count)
+      expect { delete event_vote_path(event.slug, vote) }.not_to change(Vote, :count)
       expect(response).to have_http_status(:not_found)
     end
 
@@ -169,14 +169,15 @@ RSpec.describe "投票", type: :request do
       cast(entry)
       event.counting!
 
-      expect { delete event_vote_path(event, Vote.last) }.not_to change(Vote, :count)
+      expect { delete event_vote_path(event.slug, Vote.last) }.not_to change(Vote, :count)
     end
 
     it "投票済みのエントリー画面に取り消しボタンを出す" do
       cast(entry)
-      get event_entry_path(event, entry, category: "food")
+      get event_entry_path(event.slug, entry, category: "food")
 
-      expect(response.body).to include("投票を取り消す")
+      form = response.parsed_body.at_css("form[action='#{event_vote_path(event.slug, Vote.last)}']")
+      expect(form.text).to include("投票を取り消す")
     end
   end
 end
