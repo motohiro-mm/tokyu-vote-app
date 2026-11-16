@@ -27,4 +27,16 @@ class User < ApplicationRecord
 
     BCrypt::Password.new(session_digest).is_password?(token)
   end
+
+  # 管理者 A と B が同時に互いを外すと、どちらも「実行者は管理者」の確認を通ったあとで更新し、0 人になりうる。
+  # SQLite のトランザクションは Rails 8 から BEGIN IMMEDIATE で始まり書き込みが直列化されるので、
+  # その中で実行者がまだ管理者かを確かめ直す。実行者（≠ 解除対象）が残るので、解除後も 1 人以上残る
+  def revoke_admin_by(actor)
+    self.class.transaction do
+      next false unless self.class.exists?(id: actor.id, admin: true)
+
+      update!(admin: false)
+      true
+    end
+  end
 end
