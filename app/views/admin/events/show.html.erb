@@ -51,6 +51,24 @@
 
 <%= render "admin/talks/list", event: @event, talks: @talks %>
 
+<% if @vote_counts %>
+  <div class="card mb-6">
+    <h2 class="section-title mb-2">投票数</h2>
+    <p class="mb-4 text-sm text-tokyu-ink-soft">
+      部門ごとの合計です。候補ごとの票数は <%= Event.status_label(:counting) %> にすると表示されます。
+    </p>
+
+    <dl id="vote_counts">
+      <% @vote_counts.each do |label, count| %>
+        <div class="flex items-baseline justify-between gap-4 border-b-2 border-tokyu-bone py-2 text-sm last:border-0">
+          <dt class="font-bold"><%= label %></dt>
+          <dd class="font-bold"><%= count %>票</dd>
+        </div>
+      <% end %>
+    </dl>
+  </div>
+<% end %>
+
 <div class="card mb-8">
   <h2 class="section-title mb-2">集計</h2>
   <% if @rankings %>

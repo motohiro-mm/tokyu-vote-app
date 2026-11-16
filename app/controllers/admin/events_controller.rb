@@ -45,6 +45,10 @@ class Admin::EventsController < Admin::BaseController
     Category.order(:id).flat_map { |category| CategoryResult.new(@event, category).rankings }
   end
 
+  def vote_counts
+    Category.order(:id).map { |category| [ category.label, CategoryResult.new(@event, category).vote_count ] }
+  end
+
   def event_params
     params.expect(event: [ :title, :held_on, :slug ])
   end
@@ -61,6 +65,9 @@ class Admin::EventsController < Admin::BaseController
     if @event.update(status_param)
       redirect_to admin_event_path(@event), notice: "#{Event.human_attribute_name(:status)}を変更しました。"
     else
+      # 保存できなかったステータスのまま表示を切り替えると、公開中のうちに集計が見えてしまうため、保存済みの値に戻す。
+      # エラーメッセージは errors に残る
+      @event.restore_attributes([ :status ])
       load_show
       render :show, status: :unprocessable_entity
     end
@@ -77,6 +84,7 @@ class Admin::EventsController < Admin::BaseController
 
   def load_show
     @talks = talks
+    @vote_counts = vote_counts if @event.open?
     @rankings = rankings if @event.counting_started?
   end
 end
