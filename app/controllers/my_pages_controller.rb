@@ -8,7 +8,7 @@ class MyPagesController < ApplicationController
     talk_votes = current_user.talk_votes.includes(talk: :event).order(:id).map do |vote|
       talk = vote.talk
       event = talk.event
-      path = event_talk_path(event, talk) if details_available?(event) && talk.scheduled?
+      path = event_talk_path(event.slug, talk) if details_available?(event) && talk.scheduled?
 
       { event: event, category: I18n.t("enums.category.category_name.talk"), title: talk.title,
         name: talk.user_name, comment: vote.comment, path: path }
@@ -23,13 +23,13 @@ class MyPagesController < ApplicationController
   def entry_item(entry)
     event = entry.event
     category = entry.category
-    path = event_entry_path(event, entry, category: category.category_name) if details_available?(event)
+    path = event_entry_path(event.slug, entry, category: category.category_name) if details_available?(event)
 
     { event: event, category: category.label, title: entry.title, path: path }
   end
 
   def details_available?(event)
-    event.open? || event.results_published?
+    event.slug.present? && (event.open? || event.results_published?)
   end
 
   def group_by_event(items)
