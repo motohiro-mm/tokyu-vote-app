@@ -110,8 +110,8 @@ RSpec.describe "画面の導線", type: :request do
     empty = create(:talk, event: event, description: nil)
 
     get event_talks_path(event.slug)
-    expect(response.body).to include("<p class=\"text-xs break-words text-tokyu-ink-soft\">1行目\n&lt;script&gt;内容&lt;/script&gt;</p>")
-    expect(response.body.scan('class="text-xs break-words text-tokyu-ink-soft"').size).to eq 1
+    expect(response.body).to include("<p class=\"line-clamp-10 text-xs break-words text-tokyu-ink-soft\">1行目\n&lt;script&gt;内容&lt;/script&gt;</p>")
+    expect(response.body.scan('class="line-clamp-10 text-xs break-words text-tokyu-ink-soft"').size).to eq 1
 
     # 余白などの class を変えても壊れないよう、詳細カードの中身で確かめる
     get event_talk_path(event.slug, talk)

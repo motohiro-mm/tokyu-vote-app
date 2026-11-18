@@ -31,7 +31,7 @@
           <p class="mb-2 font-bold break-words"><%= entry.title %></p>
           <p class="mb-2 text-sm text-tokyu-ink-soft last:mb-0"><%= entry.user.name %></p>
           <% if entry.description.present? %>
-            <p class="text-xs break-words text-tokyu-ink-soft"><%= entry.description %></p>
+            <p class="line-clamp-10 text-xs break-words text-tokyu-ink-soft"><%= entry.description %></p>
           <% end %>
         </div>
         <% if entry.user_id == current_user.id %>
