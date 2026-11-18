@@ -35,7 +35,7 @@
           <% end %>
         </div>
         <% if entry.user_id == current_user.id %>
-          <span class="shrink-0 text-sm text-tokyu-ink-soft">自分の作品</span>
+          <span class="badge-muted">自分の作品</span>
         <% elsif @voted_entry_ids.include?(entry.id) %>
           <span class="badge-done">投票済み</span>
         <% else %>
