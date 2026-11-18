@@ -7,9 +7,9 @@
       <li class="card">
         <div class="mb-4">
           <p class="font-bold break-words"><%= target.title %></p>
-          <p class="text-sm text-tokyu-ink-soft"><%= target.name %></p>
+          <p class="mb-2 text-sm text-tokyu-ink-soft last:mb-0"><%= target.name %></p>
           <% if target.images.any? %>
-            <div class="mt-3 flex flex-wrap gap-2">
+            <div class="flex flex-wrap gap-2">
               <% target.images.each do |image| %>
                 <%= image_tag image_src.call(image), alt: target.title, loading: "lazy", class: "size-16 rounded-xl border-2 border-tokyu-ink object-cover" %>
               <% end %>

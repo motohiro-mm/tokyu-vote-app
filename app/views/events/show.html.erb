@@ -1,8 +1,8 @@
 <% content_for :title, @event.title %>
 <div class="mb-8">
-  <h1 class="page-title"><%= @event.title %></h1>
+  <h1 class="page-title mb-2 last:mb-0"><%= @event.title %></h1>
   <% if @event.held_on %>
-    <p class="mt-2 text-center text-sm text-tokyu-ink-soft"><%= l(@event.held_on, format: :long) %></p>
+    <p class="text-center text-sm text-tokyu-ink-soft"><%= l(@event.held_on, format: :long) %></p>
   <% end %>
 </div>
 

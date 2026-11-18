@@ -3,8 +3,8 @@
   <meta name="turbo-cache-control" content="no-cache">
 <% end %>
 
-<h1 class="page-title">マイページ</h1>
-<p class="mt-2 mb-8 text-center text-sm [overflow-wrap:anywhere] text-tokyu-ink-soft"><%= current_user.name %></p>
+<h1 class="page-title mb-2">マイページ</h1>
+<p class="mb-8 text-center text-sm [overflow-wrap:anywhere] text-tokyu-ink-soft"><%= current_user.name %></p>
 
 <% [
   [ "自分の投票", @votes_by_event, "まだ投票していません。" ],
@@ -27,10 +27,10 @@
                     <li class="py-2">
                       <p class="font-bold"><%= link_to_if target[:path], target.fetch(:title), target[:path], class: "text-link" %></p>
                       <% if target[:name] %>
-                        <p class="text-sm text-tokyu-ink-soft"><%= target[:name] %></p>
+                        <p class="mb-2 text-sm text-tokyu-ink-soft last:mb-0"><%= target[:name] %></p>
                       <% end %>
                       <% if target[:comment].present? %>
-                        <div class="mt-2 rounded-lg bg-tokyu-blue-light px-3 py-2">
+                        <div class="rounded-lg bg-tokyu-blue-light px-3 py-2">
                           <p class="mb-1 text-xs font-bold text-tokyu-ink-soft">自分のコメント</p>
                           <p class="text-sm whitespace-pre-wrap"><%= target[:comment] %></p>
                         </div>
