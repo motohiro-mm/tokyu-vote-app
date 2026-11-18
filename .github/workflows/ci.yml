@@ -80,6 +80,9 @@ jobs:
         with:
           bundler-cache: true
 
+      - name: Install libvips and the HEIC decoder for image tests
+        run: sudo apt-get update && sudo apt-get install -y libvips42t64 libheif-plugin-libde265
+
       # SQLite なので DB サーバーの services 定義は不要。
       # storage/ 配下にファイルが作られるだけ。
       # db:test:prepare は schema.rb を要求するが、rails_helper の

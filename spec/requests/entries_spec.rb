@@ -13,17 +13,45 @@ RSpec.describe "エントリー", type: :request do
     }.to change(Entry, :count).by(1)
   end
 
-  it "フォームから投稿した画像を表示できる" do
-    image_path = Rails.root.join("app/assets/images/tokyu-rb-logo.png")
-    image = fixture_file_upload(image_path, "image/png")
-    post event_entries_path(event.slug, category: "food"), params: { entry: { title: "唐揚げ", image: image } }
-
-    expect(response).to redirect_to event_entries_completions_path(event.slug, category: "food")
+  it "画像5枚を登録でき、投票一覧には先頭の画像を、詳細と結果には全画像を表示する" do
+    png = Rails.root.join("public/icon.png")
+    names = %w[entry.heic second.png third.png fourth.png fifth.png]
+    photos = [ fixture_file_upload(names.first, "application/octet-stream") ]
+    photos.concat(names.drop(1).map { |name| Rack::Test::UploadedFile.new(png, "image/png", true, original_filename: name) })
+    post event_entries_path(event.slug, category: "food"), params: { entry: { title: "唐揚げ", images: photos } }
+    expect(response).to redirect_to(event_entries_completions_path(event.slug, category: "food"))
     entry = event.entries.find_by!(title: "唐揚げ")
-    get rails_blob_path(entry.image, only_path: true)
+
+    get event_entries_path(event.slug, category: "food")
+    expect(response.body).to include("/entry.heic")
+    expect(Nokogiri::HTML(response.body).css("main li img").size).to eq(1)
+
+    get event_entry_path(event.slug, entry, category: "food")
+    images = Nokogiri::HTML(response.body).css('img[alt="唐揚げ"]')
+    expect(images.map { |image| File.basename(image["src"]) }).to eq(names)
+    # 元ファイルには撮影場所などが残っているため、PNG も含めてすべて縮小版の URL で配る
+    expect(images.map { |image| image["src"] }).to all(include("/representations/"))
+    # 縮小版の URL に含まれる ID から元ファイルの URL を組み立てても取得できない
+    signed_id = images.first["src"][%r{/representations/redirect/([^/]+)/}, 1]
+    [ "redirect/", "proxy/", "" ].each do |kind|
+      get "/rails/active_storage/blobs/#{kind}#{signed_id}/entry.heic"
+      expect(response).to have_http_status(:not_found)
+    end
+
+    get images.first["src"]
+    follow_redirect!
+    expect(response.media_type).to eq("image/jpeg")
+    expect(response.body.b).to start_with("\xFF\xD8\xFF".b)
+
+    get images[1]["src"]
     follow_redirect!
     expect(response).to have_http_status(:ok)
-    expect(response.body.b).to eq(image_path.binread)
+    expect(response.media_type).to eq("image/png")
+
+    create(:vote, entry: entry, comment: "おいしかった")
+    event.closed!
+    get event_results_path(event.slug, category: "food")
+    expect(response.body).to include(*names.map { |name| "/#{name}" })
   end
 
   it "登録すると登録完了画面へ送る" do
@@ -34,10 +62,24 @@ RSpec.describe "エントリー", type: :request do
     expect(response.body).to include("登録が完了しました")
   end
 
+  it "読み込めないHEICが含まれる場合は登録しない" do
+    png = fixture_file_upload(Rails.root.join("public/icon.png"), "image/png")
+    damaged = Rack::Test::UploadedFile.new(StringIO.new("damaged camera file"), "image/heic", original_filename: "damaged.heic")
+
+    expect {
+      post event_entries_path(event.slug, category: "food"), params: { entry: { title: "唐揚げ", images: [ png, damaged ] } }
+    }.not_to change(Entry, :count)
+
+    expect(response).to have_http_status(:unprocessable_content)
+    expect(response.body).to include("画像に読み込めないファイルが含まれています")
+  end
+
   it "登録フォームの作品名ラベルに何の名前かを添える" do
     get new_event_entry_path(event.slug, category: "food")
 
-    expect(response.body).to include("作品名（食べ物の名前）")
+    expect(response.body).to include("作品名（食べ物の名前）", "1枚5MBまで、最大5枚")
+    input = Nokogiri::HTML(response.body).at_css('input[type="file"][name="entry[images][]"][multiple]')
+    expect(input["accept"]).to include(".heic", ".heif")
   end
 
   it "作品名が空なら登録できず、フォームに戻す" do

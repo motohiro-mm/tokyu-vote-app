@@ -20,7 +20,7 @@ ja:
         category: 部門
         title: 作品名
         description: 説明
-        image: 画像
+        images: 画像
       talk:
         event: イベント
         user_name: 登壇者名
@@ -47,9 +47,11 @@ ja:
           attributes:
             category:
               not_allowed_for_entry: にLT王は指定できません
-            image:
-              invalid_content_type: は JPEG / PNG のみ登録できます
-              too_large: は %{max}MB 以下にしてください
+            images:
+              invalid_content_type: は JPEG / PNG / HEIF（HEIC）のみ登録できます
+              undecodable: に読み込めないファイルが含まれています
+              too_large: は1枚%{max}MB以下にしてください
+              too_many: は%{max}枚まで登録できます
         talk:
           attributes:
             slide_url:

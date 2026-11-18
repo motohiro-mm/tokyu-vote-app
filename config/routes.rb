@@ -52,4 +52,9 @@ Rails.application.routes.draw do
   end
 
   get "up" => "rails/health#show", as: :rails_health_check
+
+  # 元ファイルには撮影場所（GPS）などが残っているため配らない。画面にはメタデータを消した縮小版（representations）だけを出す。
+  # 縮小版の URL に元ファイルの署名付き ID が含まれ、そこから元ファイルの URL を組み立てられてしまうので、ここで塞ぐ。
+  # アプリのルートは Active Storage のルートより先に評価されるため、こちらが優先される
+  get "/rails/active_storage/blobs/*path", to: ->(_env) { [ 404, { "content-type" => "text/plain" }, [ "Not Found" ] ] }
 end
