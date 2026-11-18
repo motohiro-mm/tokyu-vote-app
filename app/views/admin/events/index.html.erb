@@ -14,9 +14,9 @@
     <% @events.each do |event| %>
       <li>
         <%= link_to admin_event_path(event),
-                    class: "card-link flex items-center justify-between" do %>
-          <span class="font-bold"><%= event.title %></span>
-          <span class="text-sm text-tokyu-ink-soft"><%= event.status_label %></span>
+                    class: "card-link flex items-center justify-between gap-4" do %>
+          <span class="min-w-0 font-bold break-words"><%= event.title %></span>
+          <span class="shrink-0 text-sm text-tokyu-ink-soft"><%= event.status_label %></span>
         <% end %>
       </li>
     <% end %>

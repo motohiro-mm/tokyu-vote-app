@@ -10,7 +10,7 @@
 
   <% if @voted_entries.present? %>
     <p class="mb-2 text-sm text-tokyu-ink-soft">あなたが投票したのは以下のエントリーです</p>
-    <ul class="space-y-2 text-sm font-bold">
+    <ul class="space-y-2 text-sm font-bold break-words">
       <% @voted_entries.each do |entry| %>
         <li><%= entry.user.name %> さんの「<%= entry.title %>」</li>
       <% end %>

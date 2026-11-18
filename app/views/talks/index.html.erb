@@ -10,7 +10,7 @@
 
   <% if @voted_talks.present? %>
     <p class="mb-2 text-sm text-tokyu-ink-soft">あなたが投票したのは以下のLTです</p>
-    <ul class="space-y-2 text-sm font-bold">
+    <ul class="space-y-2 text-sm font-bold break-words">
       <% @voted_talks.each do |talk| %>
         <li><%= talk.user_name %> さんの「<%= talk.title %>」</li>
       <% end %>
