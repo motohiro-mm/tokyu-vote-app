@@ -113,10 +113,15 @@ RSpec.describe "画面の導線", type: :request do
     expect(response.body).to include("<p class=\"text-xs break-words text-tokyu-ink-soft\">1行目\n&lt;script&gt;内容&lt;/script&gt;</p>")
     expect(response.body.scan('class="text-xs break-words text-tokyu-ink-soft"').size).to eq 1
 
+    # 余白などの class を変えても壊れないよう、詳細カードの中身で確かめる
     get event_talk_path(event.slug, talk)
-    expect(response.body).to include("<p class=\"mb-4 whitespace-pre-wrap break-words last:mb-0\">1行目\n&lt;script&gt;内容&lt;/script&gt;</p>")
+    card = Nokogiri::HTML(response.body).at_css("main .card")
+    expect(card.css("p").map(&:text)).to include("1行目\n<script>内容</script>")
+    expect(card.at_css("script")).to be_nil
+
     get event_talk_path(event.slug, empty)
-    expect(response.body).not_to include('class="mb-4 whitespace-pre-wrap break-words last:mb-0"')
+    card = Nokogiri::HTML(response.body).at_css("main .card")
+    expect(card.css("p").map(&:text)).to eq([ "「#{empty.title}」", empty.user_name ])
   end
 
   it "発表資料のリンクを一覧と詳細に安全に表示する" do

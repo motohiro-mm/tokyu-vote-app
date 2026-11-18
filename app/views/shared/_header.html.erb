@@ -13,12 +13,13 @@
     </div>
 
     <% if current_user %>
-      <%# スマホ幅で管理者のリンクが増えても1段に収まるよう、文字を小さくする %>
-      <div class="ml-auto flex min-w-0 items-center gap-2 text-xs font-bold whitespace-nowrap sm:gap-4 sm:text-sm">
+      <%# 管理者はスマホ幅でリンクが増えて2段に折り返すので、そのときだけ文字を小さくする %>
+      <div class="ml-auto flex min-w-0 items-center gap-2 font-bold whitespace-nowrap sm:gap-4 <%= current_user.admin? ? "text-xs sm:text-sm" : "text-sm" %>">
         <span class="hidden max-w-36 truncate sm:inline"><%= current_user.name %></span>
-        <%= link_to "マイページ", mypage_path, class: "shrink-0 hover:underline" %>
+        <%# 文字だけだと指で押せる範囲が狭いので、隣のログアウトボタンと同じ高さを持たせる %>
+        <%= link_to "マイページ", mypage_path, class: "inline-flex min-h-10 shrink-0 items-center hover:underline" %>
         <% if current_user.admin? %>
-          <%= link_to "管理画面", admin_events_path, class: "shrink-0 hover:underline" %>
+          <%= link_to "管理画面", admin_events_path, class: "inline-flex min-h-10 shrink-0 items-center hover:underline" %>
         <% end %>
         <%= button_to "ログアウト", logout_path, method: :delete,
                       class: "min-h-10 shrink-0 cursor-pointer rounded-full border-3 border-tokyu-ink bg-white px-3 text-tokyu-ink hover:bg-tokyu-blue-light sm:px-4" %>
