@@ -114,9 +114,9 @@ RSpec.describe "画面の導線", type: :request do
     expect(response.body.scan('class="text-xs break-words text-tokyu-ink-soft"').size).to eq 1
 
     get event_talk_path(event.slug, talk)
-    expect(response.body).to include("<p class=\"whitespace-pre-wrap break-words\">1行目\n&lt;script&gt;内容&lt;/script&gt;</p>")
+    expect(response.body).to include("<p class=\"mb-4 whitespace-pre-wrap break-words last:mb-0\">1行目\n&lt;script&gt;内容&lt;/script&gt;</p>")
     get event_talk_path(event.slug, empty)
-    expect(response.body).not_to include('class="whitespace-pre-wrap break-words"')
+    expect(response.body).not_to include('class="mb-4 whitespace-pre-wrap break-words last:mb-0"')
   end
 
   it "発表資料のリンクを一覧と詳細に安全に表示する" do

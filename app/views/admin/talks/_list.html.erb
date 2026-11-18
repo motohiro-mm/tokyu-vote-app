@@ -13,7 +13,7 @@
         1 行目をヘッダ <code class="rounded bg-white px-2"><%= TalkCsvImport::HEADERS.values.join(",") %></code> にした UTF-8 の CSV（説明・発表資料URL列は任意）
       </p>
       <div class="flex flex-wrap items-center justify-between gap-4">
-        <%= f.file_field :file, accept: "text/csv,.csv", class: "input-file w-auto" %>
+        <%= f.file_field :file, accept: "text/csv,.csv", class: "input-file w-auto max-w-full" %>
         <%= f.submit "登録する", class: "btn-secondary" %>
       </div>
     <% end %>

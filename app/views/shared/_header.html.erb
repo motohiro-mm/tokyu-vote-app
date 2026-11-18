@@ -13,7 +13,8 @@
     </div>
 
     <% if current_user %>
-      <div class="ml-auto flex min-w-0 items-center gap-2 text-sm font-bold whitespace-nowrap sm:gap-4">
+      <%# スマホ幅で管理者のリンクが増えても1段に収まるよう、文字を小さくする %>
+      <div class="ml-auto flex min-w-0 items-center gap-2 text-xs font-bold whitespace-nowrap sm:gap-4 sm:text-sm">
         <span class="hidden max-w-36 truncate sm:inline"><%= current_user.name %></span>
         <%= link_to "マイページ", mypage_path, class: "shrink-0 hover:underline" %>
         <% if current_user.admin? %>
