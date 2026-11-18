@@ -153,3 +153,72 @@ gh api users/<ユーザー名> --jq .id
 ```bash
 bin/kamal app exec -d staging --reuse 'bin/rails "admin:grant[数値 ID]"'
 ```
+
+## データを退避する（zip）
+
+停止前などに、DB と画像を 1 つの zip にまとめて手元へ持ち出す。前提は上記「手元から行う場合」と同じ（`.kamal/secrets.<環境>` と、サーバーへ root で SSH できること）。Docker Desktop は不要。
+
+zip に入るもの（`lib/backup_archive.rb`）:
+
+| zip 内のパス | 中身 |
+|---|---|
+| `db/production.sqlite3` | primary DB（`config/database.yml` の `database`）。SQLite のバックアップ API でコミット済みの状態を複製したもので、稼働中に取っても壊れない |
+| `active_storage/local/...` | Active Storage のファイル（`config/storage.yml` の `local` の `root` からの相対パス）。DB に記録された blob の分だけ入れる |
+
+ログ・`tmp/`・秘密情報（`RAILS_MASTER_KEY` など）は入らない。
+
+### 1. zip を作る
+
+稼働中のコンテナで実行する:
+
+```bash
+bin/kamal app exec -d production --reuse 'bin/rails backup:zip'
+```
+
+アプリを止めた後なら `--reuse` を外す（同じイメージとボリュームで一時コンテナを起動して実行する）:
+
+```bash
+bin/kamal app exec -d production 'bin/rails backup:zip'
+```
+
+既定の出力先は `storage/backups/tokyu-vote-app-<環境>-<日時>.zip`。`storage/` はボリュームなので、コンテナを入れ替えても消えない。出力先を変えるときは引数で渡す（`storage/` 配下以外はコンテナと一緒に消える）:
+
+```bash
+bin/kamal app exec -d production --reuse 'bin/rails "backup:zip[storage/backups/before-shutdown.zip]"'
+```
+
+実行すると作った zip のパス（`/rails/storage/backups/...`）と入れたファイル数が出る。「ファイルが見つからず入れられなかった blob」と出たら、その画像は元から欠けている。
+
+### 2. 手元へコピーする
+
+ボリュームはサーバー上の `/var/lib/docker/volumes/<ボリューム名>/_data` にある。ボリューム名は `config/deploy.<環境>.yml` の `volumes`（production は `tokyu_vote_app_storage`、staging は `tokyu_vote_app_staging_storage`）。
+
+```bash
+scp root@<サーバーの IP>:/var/lib/docker/volumes/tokyu_vote_app_storage/_data/backups/<ファイル名>.zip .
+```
+
+```bash
+unzip -l <ファイル名>.zip
+```
+
+中身を確かめたら、サーバー上の zip は消してよい（アプリを止めた後は `--reuse` を外す）:
+
+```bash
+bin/kamal app exec -d production --reuse 'rm storage/backups/<ファイル名>.zip'
+```
+
+### 3. 手元で戻して確かめる
+
+コピーした zip を development で戻し、DB と画像を確かめる（`lib/backup_restore.rb`）。開発サーバーは止めてから実行する。戻し先は今の primary DB（`storage/development.sqlite3`）と、zip 内の `active_storage/<サービス名>/` に対応する Disk サービスの root（本番の zip は `local` なので `storage/`）。`db/production.sqlite3` という名前のままではなく、手元の primary DB の場所へ置く。
+
+```bash
+bin/rails "backup:restore[<ファイル名>.zip]"
+```
+
+`users` や `events` に行があると上書きせず止まる。捨ててよいときだけ `FORCE=1` を付ける。production（staging を含む）では実行しない（明示的に許可するときだけ `ALLOW_BACKUP_RESTORE=1`）。
+
+```bash
+FORCE=1 bin/rails "backup:restore[<ファイル名>.zip]"
+```
+
+`integrity_check: ok` と Active Storage の件数が出る。ファイルが無い、または checksum が一致しない blob があると件数を出して終了コードは 0 以外になる。`backup:zip` 実行時の件数、欠けていた blob と突き合わせる。
