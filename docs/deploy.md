@@ -8,7 +8,7 @@
 | 環境 | URL | Kamal の destination | 備考 |
 |---|---|---|---|
 | staging | https://stg-tokyu-ranking.3arc.dev | `staging` | Basic 認証と noindex 付き |
-| production | https://vote.gohansummit.com | `production` | 実行に承認が必要 |
+| production | https://tokyu-ranking.3arc.dev | `production` | 実行に承認が必要 |
 
 両環境は同じ VPS に同居し、`config/deploy.<環境>.yml` で service 名とボリューム名を分けている。
 
