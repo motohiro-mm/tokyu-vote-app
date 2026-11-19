@@ -13,7 +13,7 @@
         <% if user == current_user %>
           <span class="shrink-0 text-sm text-tokyu-ink-soft">自分</span>
         <% else %>
-          <%= button_to "解除する", admin_administrator_path(user), method: :delete, class: "btn-secondary shrink-0",
+          <%= button_to "解除する", admin_administrator_path(user), method: :delete, class: "btn-secondary", form_class: "shrink-0",
                       form: { data: { turbo_confirm: "#{user.name} の管理者権限を解除します。よろしいですか？" } } %>
         <% end %>
       </li>

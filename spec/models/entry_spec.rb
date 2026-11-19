@@ -73,8 +73,8 @@ RSpec.describe Entry do
 
     thumbnails = entry.display_images(:thumbnail).map { |image| image.variation.transformations }
     expect(thumbnails).to eq([
-      { resize_to_fill: [ 128, 128 ], saver: { strip: true }, format: :jpeg },
-      { resize_to_fill: [ 128, 128 ], saver: { strip: true }, format: "png" }
+      { resize_to_fill: [ 192, 192 ], saver: { strip: true }, format: :jpeg },
+      { resize_to_fill: [ 192, 192 ], saver: { strip: true }, format: "png" }
     ])
   end
 

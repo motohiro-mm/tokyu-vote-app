@@ -4,8 +4,11 @@
     <div class="flex min-w-0 items-center gap-2">
       <%= link_to root_path, class: "flex shrink-0 items-center gap-2" do %>
         <%= image_tag "tokyu-rb-logo.png", alt: "", class: "size-10 sm:size-12" %>
-        <%# 管理画面のスマホ幅は入りきらないので見た目だけ隠す %>
-        <span class="<%= "sr-only sm:not-sr-only" if admin_screen %> font-display text-lg font-bold sm:text-xl">Tokyu.rb</span>
+        <%# 右側のリンクと並べて入りきらない幅のときだけ、見た目だけ隠す %>
+        <% brand_hidden = "max-[360px]:sr-only" if current_user %>
+        <% brand_hidden = "max-[390px]:sr-only" if current_user&.admin? %>
+        <% brand_hidden = "max-[480px]:sr-only" if admin_screen %>
+        <span class="<%= brand_hidden %> font-display text-lg font-bold sm:text-xl">Tokyu.rb</span>
       <% end %>
       <% if admin_screen %>
         <span class="shrink-0 rounded-full bg-white/20 px-2 py-1 text-xs font-bold">管理画面</span>
@@ -15,7 +18,8 @@
     <% if current_user %>
       <%# 管理者はスマホ幅でリンクが増えて2段に折り返すので、そのときだけ文字を小さくする %>
       <div class="ml-auto flex min-w-0 items-center gap-2 font-bold whitespace-nowrap sm:gap-4 <%= current_user.admin? ? "text-xs sm:text-sm" : "text-sm" %>">
-        <span class="hidden max-w-36 truncate sm:inline"><%= current_user.name %></span>
+        <%# 長い名前だと 640px 付近で入りきらないので、名前は 768px から出す %>
+        <span class="hidden max-w-36 truncate md:inline"><%= current_user.name %></span>
         <%# 文字だけだと指で押せる範囲が狭いので、隣のログアウトボタンと同じ高さを持たせる %>
         <%= link_to "マイページ", mypage_path, class: "inline-flex min-h-10 shrink-0 items-center hover:underline" %>
         <% if current_user.admin? %>

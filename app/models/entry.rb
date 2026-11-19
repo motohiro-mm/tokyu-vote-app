@@ -6,8 +6,8 @@ class Entry < ApplicationRecord
 
   IMAGE_SIZES = {
     display: { resize_to_limit: [ 1600, 1600 ] },
-    # 表示は 64px だが、高解像度の画面でぼやけないよう倍の大きさで作る
-    thumbnail: { resize_to_fill: [ 128, 128 ] }
+    # 一覧の表示は 96px だが、高解像度の画面でぼやけないよう倍の大きさで作る
+    thumbnail: { resize_to_fill: [ 192, 192 ] }
   }.freeze
 
   belongs_to :user
