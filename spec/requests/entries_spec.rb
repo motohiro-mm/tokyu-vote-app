@@ -54,6 +54,37 @@ RSpec.describe "エントリー", type: :request do
     expect(response.body).to include(*names.map { |name| "/#{name}" })
   end
 
+  it "サムネに選んだ画像を先頭にして登録し、投票一覧に表示する" do
+    png = Rails.root.join("public/icon.png")
+    names = %w[first.png second.png third.png]
+    photos = names.map { |name| Rack::Test::UploadedFile.new(png, "image/png", true, original_filename: name) }
+
+    post event_entries_path(event.slug, category: "food"),
+         params: { entry: { title: "唐揚げ", images: photos }, thumbnail_index: "2" }
+
+    entry = event.entries.find_by!(title: "唐揚げ")
+    get event_entry_path(event.slug, entry, category: "food")
+    images = Nokogiri::HTML(response.body).css('img[alt="唐揚げ"]')
+    expect(images.map { |image| File.basename(image["src"]) }).to eq(%w[third.png first.png second.png])
+
+    get event_entries_path(event.slug, category: "food")
+    expect(Nokogiri::HTML(response.body).at_css("main li img")["src"]).to end_with("/third.png")
+  end
+
+  it "サムネの指定が画像の範囲外なら選んだ順のまま登録する" do
+    png = Rails.root.join("public/icon.png")
+    names = %w[first.png second.png]
+    photos = names.map { |name| Rack::Test::UploadedFile.new(png, "image/png", true, original_filename: name) }
+
+    post event_entries_path(event.slug, category: "food"),
+         params: { entry: { title: "唐揚げ", images: photos }, thumbnail_index: "5" }
+
+    entry = event.entries.find_by!(title: "唐揚げ")
+    get event_entry_path(event.slug, entry, category: "food")
+    images = Nokogiri::HTML(response.body).css('img[alt="唐揚げ"]')
+    expect(images.map { |image| File.basename(image["src"]) }).to eq(names)
+  end
+
   it "登録すると登録完了画面へ送る" do
     post event_entries_path(event.slug, category: "food"), params: { entry: { title: "唐揚げ" } }
 

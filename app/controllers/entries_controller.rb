@@ -29,6 +29,7 @@ class EntriesController < ApplicationController
 
   def create
     attributes = entry_params
+    attributes[:images] = thumbnail_first(attributes[:images]) if attributes[:images]
     @entry = @event.entries.build(attributes.merge(category: @category, user: current_user))
 
     if @entry.valid? && image_uploads_valid?(attributes[:images]) && @entry.save
@@ -42,6 +43,14 @@ class EntriesController < ApplicationController
   def completions; end
 
   private
+
+  # 投票一覧は先頭の画像をサムネにし、添付は渡した順に保存されるため、選ばれた画像を先頭に移す
+  def thumbnail_first(images)
+    index = params[:thumbnail_index].to_i
+    return images unless index.between?(1, images.size - 1)
+
+    images.dup.tap { |list| list.unshift(list.delete_at(index)) }
+  end
 
   def image_uploads_valid?(images)
     uploads = Array(images).grep(ActionDispatch::Http::UploadedFile)

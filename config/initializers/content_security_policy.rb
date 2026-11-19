@@ -15,7 +15,8 @@ Rails.application.configure do
     policy.default_src :self
     # Google Fonts（CSS は googleapis、フォント本体は gstatic から読み込む）
     policy.font_src    :self, "https://fonts.gstatic.com"
-    policy.img_src     :self, :data
+    # blob: は登録フォームで選んだ画像を送信前にプレビューするため
+    policy.img_src     :self, :data, :blob
     policy.object_src  :none
     policy.script_src  :self
     policy.style_src   :self, "https://fonts.googleapis.com"
