@@ -39,14 +39,15 @@
         <% end %>
         <div class="flex justify-end">
           <%# 投票はできなくても、写真や説明を見返したり投票を取り消したりするために、バッジから詳細へ行けるようにする %>
-          <% if entry.user_id == current_user.id %>
-            <%= link_to "自分の作品", event_entry_path(@event.slug, entry, category: @category.category_name), class: "badge-muted" %>
-          <% elsif @voted_entry_ids.include?(entry.id) %>
-            <%= link_to "投票済み", event_entry_path(@event.slug, entry, category: @category.category_name), class: "badge-done" %>
-          <% else %>
-            <%= link_to "選択する", event_entry_path(@event.slug, entry, category: @category.category_name),
-                        class: "btn-primary shrink-0" %>
-          <% end %>
+          <% label, link_class =
+               if entry.user_id == current_user.id
+                 [ "自分の作品", "badge-muted" ]
+               elsif @voted_entry_ids.include?(entry.id)
+                 [ "投票済み", "badge-done" ]
+               else
+                 [ "選択する", "btn-primary shrink-0" ]
+               end %>
+          <%= link_to label, event_entry_path(@event.slug, entry, category: @category.category_name), class: link_class %>
         </div>
       </li>
     <% end %>

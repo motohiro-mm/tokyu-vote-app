@@ -1,5 +1,7 @@
-<% content_for :title, "投票する" %>
-<h1 class="page-title mb-6">投票する</h1>
+<%# 一覧の「自分の作品」バッジから見返しに来る画面なので、自分の作品では投票の見出しを出さない %>
+<% heading = @entry.user_id == current_user.id ? "自分の作品" : "投票する" %>
+<% content_for :title, heading %>
+<h1 class="page-title mb-6"><%= heading %></h1>
 
 <div class="card mb-6">
   <% images = @entry.display_images %>
