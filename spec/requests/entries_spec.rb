@@ -71,6 +71,13 @@ RSpec.describe "エントリー", type: :request do
     expect(Nokogiri::HTML(response.body).at_css("main li img")["src"]).to end_with("/third.png")
   end
 
+  it "登録画面のサムネ選択に、選ぶ目的と選ばなかったときの扱いを説明する" do
+    get new_event_entry_path(event.slug, category: "food")
+    fieldset = Nokogiri::HTML(response.body).at_css('fieldset[data-thumbnail-picker-target="fieldset"]')
+    hint = fieldset.at_css("##{fieldset['aria-describedby']}")
+    expect(hint.text.strip).to eq("投票ページの一覧で最初に表示する1枚を選んでください（選ばなければ1枚目）")
+  end
+
   it "サムネの指定が画像の範囲外なら選んだ順のまま登録する" do
     png = Rails.root.join("public/icon.png")
     names = %w[first.png second.png]
