@@ -67,9 +67,11 @@ RSpec.describe "エントリー", type: :request do
     end
     # 一覧と結果は小さいサムネイルを並べるので、拡大用には別の大きい写真を渡す
     expect_zoom_to_display_image = lambda do |button, name|
-      expect(button["data-lightbox-src-param"]).to include("/representations/").and(end_with("/#{name}"))
-      expect(URI(button["data-lightbox-src-param"]).path).not_to eq(URI(button.at_css("img")["src"]).path)
-      expect(button["data-lightbox-alt-param"]).to eq("唐揚げ")
+      expect(button["data-lightbox-src"]).to include("/representations/").and(end_with("/#{name}"))
+      expect(URI(button["data-lightbox-src"]).path).not_to eq(URI(button.at_css("img")["src"]).path)
+      expect(button["data-lightbox-alt"]).to eq("唐揚げ")
+      # ボタンの読み上げ名は中の写真の alt より優先されるので、どの写真か分かるよう作品名を入れる
+      expect(button["aria-label"]).to eq("「唐揚げ」の写真を拡大する")
     end
 
     # 一覧は先頭の写真だけを出す
@@ -79,7 +81,7 @@ RSpec.describe "エントリー", type: :request do
     buttons = zoom_buttons.call(event_entry_path(event.slug, entry, category: "food"))
     expect(buttons.size).to eq(2)
     expect(buttons.map(&:parent).uniq.sole["class"]).to include("grid-cols-3")
-    buttons.each { |button| expect(URI(button["data-lightbox-src-param"]).path).to eq(URI(button.at_css("img")["src"]).path) }
+    buttons.each { |button| expect(URI(button["data-lightbox-src"]).path).to eq(URI(button.at_css("img")["src"]).path) }
     expect(Nokogiri::HTML(response.body).at_css('dialog[data-lightbox-target="dialog"] img[data-lightbox-target="image"]')).to be_present
 
     # 結果は先頭を大きく、2枚目以降を小さく並べるが、どちらも拡大できる
@@ -98,6 +100,17 @@ RSpec.describe "エントリー", type: :request do
     button = Nokogiri::HTML(response.body).css('main button[data-action="lightbox#open"]').sole
     expect(button.ancestors(".grid-cols-3")).to be_empty
     expect(button["class"]).to include("w-full")
+  end
+
+  it "拡大表示に渡す作品名は、Stimulus の params（値を JSON として読み直す）を使わず文字列のまま渡す" do
+    png = fixture_file_upload(Rails.root.join("public/icon.png"), "image/png")
+    post event_entries_path(event.slug, category: "food"), params: { entry: { title: "null", images: [ png ] } }
+
+    get event_entries_path(event.slug, category: "food")
+
+    button = Nokogiri::HTML(response.body).css('main button[data-action="lightbox#open"]').sole
+    expect(button["data-lightbox-alt"]).to eq("null")
+    expect(button.keys.grep(/-param\z/)).to be_empty
   end
 
   it "登録すると登録完了画面へ送る" do
