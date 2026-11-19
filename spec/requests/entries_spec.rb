@@ -54,6 +54,44 @@ RSpec.describe "エントリー", type: :request do
     expect(response.body).to include(*names.map { |name| "/#{name}" })
   end
 
+  it "サムネに選んだ画像を先頭にして登録し、投票一覧に表示する" do
+    png = Rails.root.join("public/icon.png")
+    names = %w[first.png second.png third.png]
+    photos = names.map { |name| Rack::Test::UploadedFile.new(png, "image/png", true, original_filename: name) }
+
+    post event_entries_path(event.slug, category: "food"),
+         params: { entry: { title: "唐揚げ", images: photos }, thumbnail_index: "2" }
+
+    entry = event.entries.find_by!(title: "唐揚げ")
+    get event_entry_path(event.slug, entry, category: "food")
+    images = Nokogiri::HTML(response.body).css('img[alt="唐揚げ"]')
+    expect(images.map { |image| File.basename(image["src"]) }).to eq(%w[third.png first.png second.png])
+
+    get event_entries_path(event.slug, category: "food")
+    expect(Nokogiri::HTML(response.body).at_css("main li img")["src"]).to end_with("/third.png")
+  end
+
+  it "登録画面のサムネ選択に、選ぶ目的とほかの画像の表示先を説明する" do
+    get new_event_entry_path(event.slug, category: "food")
+    fieldset = Nokogiri::HTML(response.body).at_css('fieldset[data-thumbnail-picker-target="fieldset"]')
+    hint = fieldset.at_css("##{fieldset['aria-describedby']}")
+    expect(hint.text.strip).to eq("投票ページの一覧に表示する1枚を選んでください。ほかの画像は詳細画面で表示します。")
+  end
+
+  it "サムネの指定が画像の範囲外なら選んだ順のまま登録する" do
+    png = Rails.root.join("public/icon.png")
+    names = %w[first.png second.png]
+    photos = names.map { |name| Rack::Test::UploadedFile.new(png, "image/png", true, original_filename: name) }
+
+    post event_entries_path(event.slug, category: "food"),
+         params: { entry: { title: "唐揚げ", images: photos }, thumbnail_index: "5" }
+
+    entry = event.entries.find_by!(title: "唐揚げ")
+    get event_entry_path(event.slug, entry, category: "food")
+    images = Nokogiri::HTML(response.body).css('img[alt="唐揚げ"]')
+    expect(images.map { |image| File.basename(image["src"]) }).to eq(names)
+  end
+
   it "一覧・詳細・結果の写真は、押すと大きい写真を拡大表示するボタンにする" do
     photos = %w[first.png second.png].map do |name|
       Rack::Test::UploadedFile.new(Rails.root.join("public/icon.png"), "image/png", true, original_filename: name)

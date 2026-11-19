@@ -33,14 +33,31 @@
     <%= f.text_area :description, rows: 5, class: "input" %>
   </div>
 
-  <div>
+  <div data-controller="thumbnail-picker">
     <%= f.label :images, "画像【任意】", class: "label" %>
     <span id="entry-images-hint" class="mb-2 block text-xs text-tokyu-ink-soft">
       JPEG / PNG / HEIF（HEIC）、1枚<%= Entry::IMAGE_MAX_SIZE / 1.megabyte %>MBまで、最大<%= Entry::IMAGE_MAX_COUNT %>枚
     </span>
     <%= f.file_field :images, multiple: true, include_hidden: false, class: "input-file",
                      accept: (Entry::IMAGE_CONTENT_TYPES + %w[.heic .heif]).join(","),
-                     aria: { describedby: "entry-images-hint" } %>
+                     aria: { describedby: "entry-images-hint" },
+                     data: { thumbnail_picker_target: "input", action: "change->thumbnail-picker#render" } %>
+
+    <%# ラジオボタンだけでは何を選ぶのか伝わらないため、選ぶ目的とほかの画像の表示先を書く %>
+    <fieldset class="mt-4" hidden aria-describedby="entry-thumbnail-hint" data-thumbnail-picker-target="fieldset">
+      <legend class="label">一覧に表示する画像</legend>
+      <span id="entry-thumbnail-hint" class="mb-2 block text-xs text-tokyu-ink-soft">
+        投票ページの一覧に表示する1枚を選んでください。ほかの画像は詳細画面で表示します。
+      </span>
+      <div class="grid grid-cols-3 gap-3 sm:grid-cols-5" data-thumbnail-picker-target="options"></div>
+    </fieldset>
+    <template data-thumbnail-picker-target="template">
+      <label class="flex cursor-pointer flex-col items-center gap-1 rounded-xl border-3 border-tokyu-ink bg-white p-2 has-checked:bg-tokyu-blue-light">
+        <img alt="" class="aspect-square w-full rounded-lg object-cover">
+        <span data-name class="w-full truncate text-center text-xs text-tokyu-ink-soft"></span>
+        <input type="radio" name="thumbnail_index" class="size-5 accent-tokyu-blue">
+      </label>
+    </template>
   </div>
 
   <div class="mx-auto grid max-w-sm grid-cols-2 gap-4">
