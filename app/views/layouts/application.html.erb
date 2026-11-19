@@ -31,7 +31,11 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="flex min-h-screen flex-col bg-dots font-sans text-tokyu-ink">
+  <%# 写真の拡大表示（shared/_zoomable_image）はどの画面からでも開けるよう body に置く。
+        画面を移動する前に閉じておかないと、開いたままの状態が Turbo のキャッシュに残る %>
+  <body class="flex min-h-screen flex-col bg-dots font-sans text-tokyu-ink"
+        data-controller="lightbox"
+        data-action="turbo:before-cache@document->lightbox#close">
     <%# 本番と見分けがつかないと投票の取り違えが起きるため、staging 環境では必ず出す %>
     <% if staging? %>
       <div class="bg-red-600 py-1 text-center text-sm text-white">
@@ -51,5 +55,17 @@
       <span class="mr-2">/</span>
       <%= link_to "プライバシーポリシー", privacy_path, class: "hover:underline" %>
     </footer>
+
+    <%# 会場ではスマホで片手で見るため、×ボタンだけでなく画面のどこを押しても閉じる %>
+    <dialog class="m-auto bg-transparent p-0 backdrop:bg-tokyu-ink/85"
+            aria-label="拡大した写真"
+            data-lightbox-target="dialog"
+            data-action="click->lightbox#close close->lightbox#clear">
+      <button type="button" aria-label="閉じる"
+              class="fixed top-4 right-4 flex size-12 cursor-pointer items-center justify-center rounded-full border-3 border-tokyu-ink bg-white text-2xl font-extrabold text-tokyu-ink shadow-sticker focus:outline-none focus-visible:ring-4 focus-visible:ring-tokyu-blue/40">
+        ×
+      </button>
+      <img alt="" class="max-h-[85dvh] max-w-[92vw] rounded-xl border-3 border-white object-contain" data-lightbox-target="image">
+    </dialog>
   </body>
 </html>

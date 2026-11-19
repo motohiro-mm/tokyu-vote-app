@@ -54,6 +54,40 @@ RSpec.describe "エントリー", type: :request do
     expect(response.body).to include(*names.map { |name| "/#{name}" })
   end
 
+  it "一覧・詳細・結果の写真は、押すと大きい写真を拡大表示するボタンにする" do
+    photos = %w[first.png second.png].map do |name|
+      Rack::Test::UploadedFile.new(Rails.root.join("public/icon.png"), "image/png", true, original_filename: name)
+    end
+    post event_entries_path(event.slug, category: "food"), params: { entry: { title: "唐揚げ", images: photos } }
+    entry = event.entries.find_by!(title: "唐揚げ")
+    create(:vote, entry: entry, comment: "おいしかった")
+    zoom_buttons = lambda do |path|
+      get path
+      Nokogiri::HTML(response.body).css('main button[data-action="lightbox#open"]')
+    end
+    # 一覧と結果は小さいサムネイルを並べるので、拡大用には別の大きい写真を渡す
+    expect_zoom_to_display_image = lambda do |button, name|
+      expect(button["data-lightbox-src-param"]).to include("/representations/").and(end_with("/#{name}"))
+      expect(URI(button["data-lightbox-src-param"]).path).not_to eq(URI(button.at_css("img")["src"]).path)
+      expect(button["data-lightbox-alt-param"]).to eq("唐揚げ")
+    end
+
+    # 一覧は先頭の写真だけを出す
+    expect_zoom_to_display_image.call(zoom_buttons.call(event_entries_path(event.slug, category: "food")).sole, "first.png")
+
+    # 詳細は全部の写真を表示しており、表示している写真そのものを拡大する
+    buttons = zoom_buttons.call(event_entry_path(event.slug, entry, category: "food"))
+    expect(buttons.size).to eq(2)
+    buttons.each { |button| expect(URI(button["data-lightbox-src-param"]).path).to eq(URI(button.at_css("img")["src"]).path) }
+    expect(Nokogiri::HTML(response.body).at_css('dialog[data-lightbox-target="dialog"] img[data-lightbox-target="image"]')).to be_present
+
+    # 結果は先頭を大きく、2枚目以降を小さく並べるが、どちらも拡大できる
+    event.closed!
+    buttons = zoom_buttons.call(event_results_path(event.slug, category: "food"))
+    expect(buttons.size).to eq(2)
+    buttons.zip(%w[first.png second.png]).each { |button, name| expect_zoom_to_display_image.call(button, name) }
+  end
+
   it "登録すると登録完了画面へ送る" do
     post event_entries_path(event.slug, category: "food"), params: { entry: { title: "唐揚げ" } }
 

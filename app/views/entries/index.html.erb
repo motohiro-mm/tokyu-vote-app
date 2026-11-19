@@ -26,7 +26,8 @@
       <li class="card">
         <div class="mb-4 flex items-center gap-4">
           <% if (image = entry.display_images(:thumbnail).first) %>
-            <%= image_tag image, alt: "", loading: "lazy", class: "size-24 shrink-0 rounded-xl border-2 border-tokyu-ink object-cover" %>
+            <%= render "shared/zoomable_image", src: image, full_src: url_for(entry.display_images.first), alt: "", full_alt: entry.title,
+                                                image_class: "size-24 rounded-xl border-2 border-tokyu-ink object-cover" %>
           <% end %>
           <div class="min-w-0 flex-1">
             <p class="mb-2 font-bold break-words"><%= entry.title %></p>

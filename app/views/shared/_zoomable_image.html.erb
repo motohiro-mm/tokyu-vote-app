@@ -1,0 +1,9 @@
+<%# 押すとレイアウトの拡大表示（lightbox_controller）で full_src を開く。src は小さい表示用、full_src は拡大用の URL。
+    一覧のサムネイルは横に名前があるので alt を空にするが、拡大したときは写真だけになるため full_alt で名前を渡す %>
+<button type="button" class="<%= class_names("shrink-0 cursor-zoom-in rounded-xl focus:outline-none focus-visible:ring-4 focus-visible:ring-tokyu-blue/40", local_assigns[:button_class]) %>"
+        aria-label="写真を拡大する"
+        data-action="lightbox#open"
+        data-lightbox-src-param="<%= full_src %>"
+        data-lightbox-alt-param="<%= local_assigns.fetch(:full_alt, alt) %>">
+  <%= image_tag src, alt: alt, loading: "lazy", class: image_class %>
+</button>
