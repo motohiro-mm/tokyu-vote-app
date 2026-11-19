@@ -8,10 +8,13 @@ RSpec.describe "画面の導線", type: :request do
 
   before { sign_in(user) }
 
-  # 一覧の中で、そのエントリーの詳細へ向かうリンクの文言
-  def entry_link_texts(entry)
-    path = event_entry_path(event.slug, entry, category: "food")
+  # 一覧の中で、その候補の詳細（path）へ向かうリンクの文言
+  def link_texts_to(path)
     Nokogiri::HTML(response.body).css("main a[href='#{path}']").map { |link| link.text.strip }
+  end
+
+  def entry_path_of(entry)
+    event_entry_path(event.slug, entry, category: entry.category.category_name)
   end
 
   it "投票の部門選択にはLT王を並べ、talks へ送る" do
@@ -64,8 +67,8 @@ RSpec.describe "画面の導線", type: :request do
     get event_entries_path(event.slug, category: "food")
 
     expect(response.body).to include("自分の作品")
-    expect(entry_link_texts(own)).to eq([ "自分の作品" ])
-    expect(entry_link_texts(other)).to eq([ "選択する" ])
+    expect(link_texts_to(entry_path_of(own))).to eq([ "自分の作品" ])
+    expect(link_texts_to(entry_path_of(other))).to eq([ "選択する" ])
   end
 
   it "自分のエントリーの詳細では投票フォームを出さない" do
@@ -75,6 +78,7 @@ RSpec.describe "画面の導線", type: :request do
 
     expect(response.body).to include("自分のエントリーには投票できません")
     expect(response.body).not_to include("投票する（残り")
+    expect(Nokogiri::HTML(response.body).at_css("main h1").text).to eq("自分の作品")
   end
 
   it "投票済みのエントリーには選択するではなく、詳細へ行ける投票済みバッジを出す" do
@@ -85,8 +89,8 @@ RSpec.describe "画面の導線", type: :request do
     get event_entries_path(event.slug, category: "food")
 
     expect(response.body).to include("投票済み")
-    expect(entry_link_texts(voted)).to eq([ "投票済み" ])
-    expect(entry_link_texts(other)).to eq([ "選択する" ])
+    expect(link_texts_to(entry_path_of(voted))).to eq([ "投票済み" ])
+    expect(link_texts_to(entry_path_of(other))).to eq([ "選択する" ])
   end
 
   it "投票済みのエントリーの詳細では投票フォームを出さない" do
@@ -106,9 +110,8 @@ RSpec.describe "画面の導線", type: :request do
 
     get event_talks_path(event.slug)
 
-    link_texts = ->(talk) { Nokogiri::HTML(response.body).css("main a[href='#{event_talk_path(event.slug, talk)}']").map { |link| link.text.strip } }
-    expect(link_texts.call(voted)).to eq([ "投票済み" ])
-    expect(link_texts.call(other)).to eq([ "選択する" ])
+    expect(link_texts_to(event_talk_path(event.slug, voted))).to eq([ "投票済み" ])
+    expect(link_texts_to(event_talk_path(event.slug, other))).to eq([ "選択する" ])
   end
 
   it "LTの説明を一覧と詳細にエスケープして表示し、空欄なら表示しない" do
