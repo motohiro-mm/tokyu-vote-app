@@ -57,15 +57,18 @@
     </footer>
 
     <%# 会場ではスマホで片手で見るため、×ボタンだけでなく画面のどこを押しても閉じる %>
-    <dialog class="m-auto bg-transparent p-0 backdrop:bg-tokyu-ink/85"
+    <%# ブラウザ標準の dialog は最大幅が画面より少し狭く、横長の写真の右端が切れるため外す。大きさは写真の max-w / max-h で抑える %>
+    <dialog class="m-auto max-h-none max-w-none overflow-visible bg-transparent p-0 backdrop:bg-tokyu-ink/85"
             aria-label="拡大した写真"
             data-lightbox-target="dialog"
             data-action="click->lightbox#close close->lightbox#clear">
+      <%# 画面の角だと写真から離れて見つけにくいので、写真の右上のすぐ外に置く（写真に重ねると写真が隠れる）。
+          <dialog> は写真の大きさに合わせて縮むので、dialog を基準に置けば写真の角になる %>
       <button type="button" aria-label="閉じる"
-              class="fixed top-4 right-4 flex size-12 cursor-pointer items-center justify-center rounded-full border-3 border-tokyu-ink bg-white text-2xl font-extrabold text-tokyu-ink shadow-sticker focus:outline-none focus-visible:ring-4 focus-visible:ring-tokyu-blue/40">
+              class="absolute right-0 bottom-full mb-2 flex size-12 cursor-pointer items-center justify-center rounded-full border-3 border-tokyu-ink bg-white text-2xl font-extrabold text-tokyu-ink shadow-sticker focus:outline-none focus-visible:ring-4 focus-visible:ring-tokyu-blue/40">
         ×
       </button>
-      <img alt="" class="max-h-[85dvh] max-w-[92vw] rounded-xl border-3 border-white object-contain" data-lightbox-target="image">
+      <img alt="" class="max-h-[80dvh] max-w-[92vw] rounded-xl border-3 border-white object-contain" data-lightbox-target="image">
     </dialog>
   </body>
 </html>
