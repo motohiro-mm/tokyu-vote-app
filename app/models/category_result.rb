@@ -2,6 +2,8 @@
 class CategoryResult
   # 結果画面に並べる投票対象。Entry と Talk で持っている項目が違うため揃えて渡す
   Target = Data.define(:title, :name, :images, :comments)
+  # 結果画面では小さく並べ、押したら大きい写真で拡大表示するため、両方の大きさを組にして渡す
+  Image = Data.define(:thumbnail, :display)
 
   attr_reader :event, :category
 
@@ -38,7 +40,7 @@ class CategoryResult
       Target.new(
         title: entry.title,
         name: entry.user.name,
-        images: entry.display_images(:thumbnail),
+        images: entry.display_images(:thumbnail).zip(entry.display_images).map { |thumbnail, display| Image.new(thumbnail:, display:) },
         comments: comments.fetch(entry.id, [])
       )
     end
