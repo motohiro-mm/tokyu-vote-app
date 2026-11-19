@@ -8,6 +8,12 @@ RSpec.describe "画面の導線", type: :request do
 
   before { sign_in(user) }
 
+  # 一覧の中で、そのエントリーの詳細へ向かうリンクの文言
+  def entry_link_texts(entry)
+    path = event_entry_path(event.slug, entry, category: "food")
+    Nokogiri::HTML(response.body).css("main a[href='#{path}']").map { |link| link.text.strip }
+  end
+
   it "投票の部門選択にはLT王を並べ、talks へ送る" do
     get event_votes_categories_path(event.slug)
 
@@ -51,15 +57,15 @@ RSpec.describe "画面の導線", type: :request do
     expect(response.body).to include("あなたが投票したのは以下のエントリーです").and include("唐揚げ")
   end
 
-  it "自分のエントリーには選択するを出さない" do
+  it "自分のエントリーには選択するではなく、詳細へ行ける自分の作品バッジを出す" do
     own = create(:entry, event: event, category: food, user: user, title: "唐揚げ")
     other = create(:entry, event: event, category: food, title: "ポテトサラダ")
 
     get event_entries_path(event.slug, category: "food")
 
     expect(response.body).to include("自分の作品")
-    expect(response.body).not_to include(event_entry_path(event.slug, own, category: "food"))
-    expect(response.body).to include(event_entry_path(event.slug, other, category: "food"))
+    expect(entry_link_texts(own)).to eq([ "自分の作品" ])
+    expect(entry_link_texts(other)).to eq([ "選択する" ])
   end
 
   it "自分のエントリーの詳細では投票フォームを出さない" do
@@ -71,7 +77,7 @@ RSpec.describe "画面の導線", type: :request do
     expect(response.body).not_to include("投票する（残り")
   end
 
-  it "投票済みのエントリーには選択するを出さない" do
+  it "投票済みのエントリーには選択するではなく、詳細へ行ける投票済みバッジを出す" do
     voted = create(:entry, event: event, category: food, title: "唐揚げ")
     other = create(:entry, event: event, category: food, title: "ポテトサラダ")
     post event_votes_path(event.slug), params: { vote: { entry_id: voted.id } }
@@ -79,8 +85,8 @@ RSpec.describe "画面の導線", type: :request do
     get event_entries_path(event.slug, category: "food")
 
     expect(response.body).to include("投票済み")
-    expect(response.body).not_to include(event_entry_path(event.slug, voted, category: "food"))
-    expect(response.body).to include(event_entry_path(event.slug, other, category: "food"))
+    expect(entry_link_texts(voted)).to eq([ "投票済み" ])
+    expect(entry_link_texts(other)).to eq([ "選択する" ])
   end
 
   it "投票済みのエントリーの詳細では投票フォームを出さない" do
@@ -93,16 +99,16 @@ RSpec.describe "画面の導線", type: :request do
     expect(response.body).not_to include("投票する（残り")
   end
 
-  it "投票済みのLTには選択するを出さない" do
+  it "投票済みのLTには選択するではなく、詳細へ行ける投票済みバッジを出す" do
     voted = create(:talk, event: event)
     other = create(:talk, event: event)
     post event_talk_votes_path(event.slug), params: { talk_vote: { talk_id: voted.id } }
 
     get event_talks_path(event.slug)
 
-    expect(response.body).to include("投票済み")
-    expect(response.body).not_to include(event_talk_path(event.slug, voted))
-    expect(response.body).to include(event_talk_path(event.slug, other))
+    link_texts = ->(talk) { Nokogiri::HTML(response.body).css("main a[href='#{event_talk_path(event.slug, talk)}']").map { |link| link.text.strip } }
+    expect(link_texts.call(voted)).to eq([ "投票済み" ])
+    expect(link_texts.call(other)).to eq([ "選択する" ])
   end
 
   it "LTの説明を一覧と詳細にエスケープして表示し、空欄なら表示しない" do

@@ -72,12 +72,12 @@
   .input-file {
     @apply block w-full text-sm text-tokyu-ink-soft file:mr-4 file:cursor-pointer file:rounded-full file:border-3 file:border-tokyu-ink file:bg-white file:px-4 file:py-2 file:text-sm file:font-extrabold file:text-tokyu-ink hover:file:bg-tokyu-blue-light;
   }
-  /* 自分の作品など、選べないことを示すバッジ */
+  /* 自分の作品・投票済みなど、投票できないことを示すバッジ。押すと詳細へ行けるので押せることが分かる反応をつける */
   .badge-muted {
-    @apply shrink-0 rounded-full border-2 border-tokyu-ink-soft bg-tokyu-bone px-4 py-2 text-sm font-extrabold text-tokyu-ink-soft;
+    @apply shrink-0 rounded-full border-2 border-tokyu-ink-soft bg-tokyu-bone px-4 py-2 text-sm font-extrabold text-tokyu-ink-soft hover:brightness-95;
   }
   .badge-done {
-    @apply shrink-0 rounded-full border-2 border-tokyu-pink-dark bg-tokyu-pink-light px-4 py-2 text-sm font-extrabold text-tokyu-pink-dark;
+    @apply shrink-0 rounded-full border-2 border-tokyu-pink-dark bg-tokyu-pink-light px-4 py-2 text-sm font-extrabold text-tokyu-pink-dark hover:brightness-95;
   }
   .alert-error {
     @apply rounded-xl border-3 border-red-700 bg-red-50 px-4 py-2 text-sm text-red-800;
