@@ -35,7 +35,8 @@
           <% end %>
         </div>
         <% if @voted_talk_ids.include?(talk.id) %>
-          <span class="badge-done">投票済み</span>
+          <%# 投票を取り消すボタンは詳細にしかないため、バッジから詳細へ行けるようにする %>
+          <%= link_to "投票済み", event_talk_path(@event.slug, talk), class: "badge-done" %>
         <% else %>
           <%= link_to "選択する", event_talk_path(@event.slug, talk),
                       class: "btn-primary shrink-0" %>

@@ -38,10 +38,11 @@
           <p class="mb-4 line-clamp-10 text-xs break-words text-tokyu-ink-soft"><%= entry.description %></p>
         <% end %>
         <div class="flex justify-end">
+          <%# 投票はできなくても、写真や説明を見返したり投票を取り消したりするために、バッジから詳細へ行けるようにする %>
           <% if entry.user_id == current_user.id %>
-            <span class="badge-muted">自分の作品</span>
+            <%= link_to "自分の作品", event_entry_path(@event.slug, entry, category: @category.category_name), class: "badge-muted" %>
           <% elsif @voted_entry_ids.include?(entry.id) %>
-            <span class="badge-done">投票済み</span>
+            <%= link_to "投票済み", event_entry_path(@event.slug, entry, category: @category.category_name), class: "badge-done" %>
           <% else %>
             <%= link_to "選択する", event_entry_path(@event.slug, entry, category: @category.category_name),
                         class: "btn-primary shrink-0" %>
