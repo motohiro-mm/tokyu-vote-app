@@ -75,9 +75,10 @@ RSpec.describe "エントリー", type: :request do
     # 一覧は先頭の写真だけを出す
     expect_zoom_to_display_image.call(zoom_buttons.call(event_entries_path(event.slug, category: "food")).sole, "first.png")
 
-    # 詳細は全部の写真を表示しており、表示している写真そのものを拡大する
+    # 詳細は全部の写真を横に並べ、表示している写真そのものを拡大する
     buttons = zoom_buttons.call(event_entry_path(event.slug, entry, category: "food"))
     expect(buttons.size).to eq(2)
+    expect(buttons.map(&:parent).uniq.sole["class"]).to include("grid-cols-3")
     buttons.each { |button| expect(URI(button["data-lightbox-src-param"]).path).to eq(URI(button.at_css("img")["src"]).path) }
     expect(Nokogiri::HTML(response.body).at_css('dialog[data-lightbox-target="dialog"] img[data-lightbox-target="image"]')).to be_present
 
@@ -86,6 +87,17 @@ RSpec.describe "エントリー", type: :request do
     buttons = zoom_buttons.call(event_results_path(event.slug, category: "food"))
     expect(buttons.size).to eq(2)
     buttons.zip(%w[first.png second.png]).each { |button, name| expect_zoom_to_display_image.call(button, name) }
+  end
+
+  it "詳細の写真が1枚だけなら、横に並べず横幅いっぱいに出す" do
+    png = fixture_file_upload(Rails.root.join("public/icon.png"), "image/png")
+    post event_entries_path(event.slug, category: "food"), params: { entry: { title: "唐揚げ", images: [ png ] } }
+
+    get event_entry_path(event.slug, event.entries.find_by!(title: "唐揚げ"), category: "food")
+
+    button = Nokogiri::HTML(response.body).css('main button[data-action="lightbox#open"]').sole
+    expect(button.ancestors(".grid-cols-3")).to be_empty
+    expect(button["class"]).to include("w-full")
   end
 
   it "登録すると登録完了画面へ送る" do
