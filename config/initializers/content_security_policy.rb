@@ -28,7 +28,4 @@ Rails.application.configure do
   config.content_security_policy_nonce_generator = ->(_request) { SecureRandom.base64(16) }
   # Turbo は進捗バーの <style> に csp-nonce の meta から nonce を付けるので、style-src も nonce で許可する
   config.content_security_policy_nonce_directives = %w[script-src style-src]
-
-  # まずは違反を報告するだけで止めない。staging で画面を一通り確認してから enforce に切り替える
-  config.content_security_policy_report_only = true
 end
