@@ -61,6 +61,23 @@ RSpec.describe CategoryResult do
     expect(targets.first.comments).to eq([ "よかった" ])
   end
 
+  describe "#rankings" do
+    it "単品王の行には写真のある作品の1枚目のサムネイルを添え、写真の無い作品と合算王には添えない" do
+      with_image = create(:entry, event: event, category: food)
+      with_image.images.attach([ "first.jpg", "second.jpg" ].map { |name| { io: StringIO.new("dummy"), filename: name, content_type: "image/jpeg" } })
+      create_list(:vote, 2, entry: with_image)
+      create(:vote, entry: create(:entry, event: event, category: food))
+
+      rankings = described_class.new(event, food).rankings.to_h
+      thumbnails = rankings.fetch("飯王（単品王）").map(&:thumbnail)
+
+      expect(thumbnails.first.blob.filename.to_s).to eq "first.jpg"
+      expect(thumbnails.first.variation.transformations).to include(resize_to_fill: [ 192, 192 ])
+      expect(thumbnails.last).to be_nil
+      expect(rankings.fetch("飯王（合算王）").map(&:thumbnail)).to all(be_nil)
+    end
+  end
+
   describe "#placements" do
     it "単品王はその作品の順位を、合算王は持ち込んだ人の順位を返す" do
       user = create(:user)

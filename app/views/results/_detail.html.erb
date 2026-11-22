@@ -1,0 +1,41 @@
+<%# 作品とLTで結果の詳細の見た目を揃えるため、対象のカード以外を共通にする %>
+<% content_for :title, "#{category.label}の結果" %>
+<p class="mb-2 text-center text-sm text-tokyu-ink-soft"><%= event.title %></p>
+<h1 class="page-title mb-6"><%= category.label %>の結果</h1>
+
+<div class="card mb-6">
+  <%# Entries::ResultsController などの名前空間から呼ぶと entries/entries/_entry を探すため、モデルの部分テンプレートを名指しする %>
+  <%= render partial: target.to_partial_path, object: target %>
+</div>
+
+<% if placements.any? %>
+  <div class="card mb-6">
+    <h2 class="section-title mb-4">順位</h2>
+    <dl>
+      <% placements.each do |title, row| %>
+        <div class="flex items-baseline gap-4 border-b-2 border-tokyu-bone py-2 text-sm last:border-0">
+          <dt class="min-w-0 flex-1 font-bold break-words"><%= title %></dt>
+          <dd class="shrink-0 font-display text-base font-bold text-tokyu-pink-dark"><%= row.rank %>位</dd>
+          <dd class="shrink-0 font-bold"><%= row.vote_count %>票</dd>
+        </div>
+      <% end %>
+    </dl>
+  </div>
+<% end %>
+
+<h2 class="section-title mb-4">コメント</h2>
+<% if comments.empty? %>
+  <p class="mb-8 text-sm text-tokyu-ink-soft">コメントはありませんでした。</p>
+<% else %>
+  <ul class="card mb-8 space-y-2">
+    <% comments.each do |comment| %>
+      <li class="whitespace-pre-wrap break-words rounded-xl bg-tokyu-blue-light px-4 py-2 text-sm"><%= comment %></li>
+    <% end %>
+  </ul>
+<% end %>
+
+<div class="text-center">
+
+  <%= link_to "結果に戻る", event_results_path(event.slug, category: category.category_name), class: "btn-secondary" %>
+
+</div>

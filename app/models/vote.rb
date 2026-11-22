@@ -19,9 +19,8 @@ class Vote < ApplicationRecord
   def self.ranking_by_entry(event, category)
     counts = in_category(event, category).group(:entry_id).count
 
-    ranked(Entry.where(id: counts.keys).includes(:user).with_attached_images.map { |entry|
-      { id: entry.id, target_id: entry.id, name: entry.user.name, title: entry.title, vote_count: counts.fetch(entry.id),
-        thumbnail: entry.display_images(:thumbnail).first }
+    ranked(Entry.where(id: counts.keys).includes(:user).map { |entry|
+      { id: entry.id, target_id: entry.id, name: entry.user.name, title: entry.title, vote_count: counts.fetch(entry.id) }
     })
   end
 

@@ -1,4 +1,4 @@
-<%# 静的書き出しでは画像の置き場所が変わるため、画像の URL は呼び出し側から image_src で受け取る %>
+<% targets = result.targets %>
 <% if targets.empty? %>
   <p class="mb-8 text-sm text-tokyu-ink-soft">コメントはありませんでした。</p>
 <% else %>
@@ -8,11 +8,11 @@
         <%# 主役はコメントなので、写真はランキングと同じ 56px にして見分けがつけば十分とする %>
         <div class="mb-4 flex items-center gap-4">
           <% if (image = target.image) %>
-            <%= render "shared/zoomable_image", src: image_src.call(image.thumbnail), full_src: image_src.call(image.display), alt: target.title,
+            <%= render "shared/zoomable_image", src: image.thumbnail, full_src: url_for(image.display), alt: target.title,
                                                 image_class: "size-14 rounded-lg border-2 border-tokyu-ink object-cover" %>
           <% end %>
           <div class="min-w-0 flex-1">
-            <p class="mb-2 break-words"><%= link_to target.title, target_path.call(target.id), class: "text-link" %></p>
+            <p class="mb-2 break-words"><%= link_to target.title, target_result_path(result, target.id), class: "text-link" %></p>
             <p class="text-sm break-words text-tokyu-ink-soft"><%= target.name %></p>
           </div>
         </div>

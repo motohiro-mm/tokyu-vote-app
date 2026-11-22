@@ -1,4 +1,4 @@
-# 管理画面・参加者向けの結果画面・静的書き出しで同じ内容を出すため、1イベント × 1部門の結果をここで組み立てる。
+# 管理画面・参加者向けの結果画面・投票対象ごとの結果で同じ内容を出すため、1イベント × 1部門の結果をここで組み立てる。
 class CategoryResult
   # 結果画面に並べる投票対象。Entry と Talk で持っている項目が違うため揃えて渡す
   Target = Data.define(:id, :title, :name, :image, :comments)
@@ -13,13 +13,15 @@ class CategoryResult
   end
 
   def rankings
-    # LT王は登壇者を users と紐づけていないため合算王を出せず、単品王と書き分ける必要もない
-    return [ [ category.label, TalkVote.ranking(event) ] ] if category.talk?
-
-    [
-      [ "#{category.label}（単品王）", Vote.ranking_by_entry(event, category) ],
-      [ "#{category.label}（合算王）", Vote.ranking_by_user(event, category) ]
-    ]
+    @rankings ||= if category.talk?
+      # LT王は登壇者を users と紐づけていないため合算王を出せず、単品王と書き分ける必要もない
+      [ [ category.label, TalkVote.ranking(event) ] ]
+    else
+      [
+        [ "#{category.label}（単品王）", with_thumbnails(Vote.ranking_by_entry(event, category)) ],
+        [ "#{category.label}（合算王）", Vote.ranking_by_user(event, category) ]
+      ]
+    end
   end
 
   # 公開中に管理者が集まり具合だけを確かめるための合計。誰に何票入ったかは途中経過で投票が偏るため出さない
@@ -45,6 +47,12 @@ class CategoryResult
   end
 
   private
+
+  # 単品王は作品を見分けやすいよう1枚目の写真を小さく添える。投票の集計には写真が要らないため、ここで足す
+  def with_thumbnails(rows)
+    entries = event.entries.where(id: rows.map(&:target_id)).with_attached_images.index_by(&:id)
+    rows.map { |row| row.with(thumbnail: entries.fetch(row.target_id).display_images(:thumbnail).first) }
+  end
 
   def entry_targets
     comments = comments_by(Vote.in_category(event, category), :entry_id)

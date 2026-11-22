@@ -16,21 +16,30 @@ RSpec.describe "結果画面", type: :request do
     expect(response.body).to include("飯王（単品王）", "飯王（合算王）", "唐揚げ", "おいしかった")
   end
 
-  it "ランキングとコメントの作品名から結果の詳細画面へ行ける" do
+  it "ランキングとコメントの作品名から、その作品の結果へ行ける" do
     entry = create(:entry, event: event, category: food, title: "唐揚げ")
     other = create(:entry, event: event, category: food, user: entry.user, title: "ポテトサラダ")
     create(:vote, entry: entry, comment: "おいしかった")
     create(:vote, entry: other)
-    detail_path = ERB::Util.html_escape(event_result_path(event.slug, entry, category: "food"))
 
     get event_results_path(event.slug, category: "food")
 
-    # 単品王・合算王・コメントの3か所から同じ詳細画面へリンクする
-    expect(response.body.scan(%(href="#{detail_path}")).size).to eq 3
-    expect(response.body).to include(ERB::Util.html_escape(event_result_path(event.slug, other, category: "food")))
+    # 単品王・合算王・コメントの3か所から同じ画面へリンクする
+    expect(response.body.scan(%(href="#{event_entry_result_path(event.slug, entry)}")).size).to eq 3
+    expect(response.body).to include(event_entry_result_path(event.slug, other))
   end
 
-  describe "結果の詳細画面" do
+  it "LT王のランキングとコメントから、そのLTの結果へ行ける" do
+    create(:category, category_name: :talk)
+    talk = create(:talk, event: event, title: "Ruby の話")
+    create(:talk_vote, talk: talk, comment: "よかった")
+
+    get event_results_path(event.slug, category: "talk")
+
+    expect(response.body.scan(%(href="#{event_talk_result_path(event.slug, talk)}")).size).to eq 2
+  end
+
+  describe "作品ごとの結果" do
     it "作品と入った順位、その作品へのコメントを出し、結果一覧へ戻れる" do
       entry = create(:entry, event: event, category: food, title: "唐揚げ", description: "祖母のレシピ")
       other = create(:entry, event: event, category: food, title: "ポテトサラダ")
@@ -38,50 +47,60 @@ RSpec.describe "結果画面", type: :request do
       create(:vote, entry: entry)
       create(:vote, entry: other, comment: "ほかの作品へのコメント")
 
-      get event_result_path(event.slug, entry, category: "food")
+      get event_entry_result_path(event.slug, entry)
 
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include("唐揚げ", "祖母のレシピ", "飯王（単品王）", "飯王（合算王）", "1位", "2票", "おいしかった")
+      expect(response.body).to include("飯王の結果", "唐揚げ", "祖母のレシピ", "飯王（単品王）", "飯王（合算王）", "1位", "2票", "おいしかった")
       expect(response.body).not_to include("ほかの作品へのコメント", "投票する")
-      expect(response.body).to include(event_results_path(event.slug, category: "food"))
+      expect(response.body).to include(ERB::Util.html_escape(event_results_path(event.slug, category: "food")))
     end
 
     it "3位までに入らなかった作品は順位を出さない" do
       entry = create(:entry, event: event, category: food, title: "唐揚げ")
 
-      get event_result_path(event.slug, entry, category: "food")
+      get event_entry_result_path(event.slug, entry)
 
       expect(response.body).not_to include("順位")
       expect(response.body).to include("コメントはありませんでした。")
     end
 
-    it "LT王はLTの順位とコメントを出す" do
-      create(:category, category_name: :talk)
-      talk = create(:talk, event: event, title: "Ruby の話")
-      create(:talk_vote, talk: talk, comment: "よかった")
+    it "ほかのイベントの作品は 404 にする" do
+      entry = create(:entry, event: create(:event, status: :closed), category: food)
 
-      get event_result_path(event.slug, talk, category: "talk")
-
-      expect(response.body).to include("Ruby の話", "LT王", "1位", "よかった")
-      expect(response.body).not_to include("合算王")
-    end
-
-    it "部門の違う作品は 404 にする" do
-      drink = create(:category, category_name: :drink)
-      entry = create(:entry, event: event, category: drink)
-
-      get event_result_path(event.slug, entry, category: "food")
+      get event_entry_result_path(event.slug, entry)
 
       expect(response).to have_http_status(:not_found)
     end
 
-    it "公開中は詳細も見せない" do
+    it "公開中は見せない" do
       entry = create(:entry, event: event, category: food)
       event.open!
 
-      get event_result_path(event.slug, entry, category: "food")
+      get event_entry_result_path(event.slug, entry)
 
       expect(response).to redirect_to event_path(event.slug)
+    end
+  end
+
+  describe "LTごとの結果" do
+    before { create(:category, category_name: :talk) }
+
+    it "LTの順位とコメントを出す" do
+      talk = create(:talk, event: event, title: "Ruby の話")
+      create(:talk_vote, talk: talk, comment: "よかった")
+
+      get event_talk_result_path(event.slug, talk)
+
+      expect(response.body).to include("LT王の結果", "Ruby の話", "LT王", "1位", "よかった")
+      expect(response.body).not_to include("合算王")
+    end
+
+    it "キャンセルされたLTは 404 にする" do
+      talk = create(:talk, event: event, status: :canceled)
+
+      get event_talk_result_path(event.slug, talk)
+
+      expect(response).to have_http_status(:not_found)
     end
   end
 

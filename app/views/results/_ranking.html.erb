@@ -1,5 +1,5 @@
-<%# 管理画面の集計は参加者向けの詳細画面へ送る必要がないため、target_path を渡されたときだけリンクにする %>
-<% target_path = local_assigns[:target_path] %>
+<%# 管理画面の集計は参加者向けの詳細画面へ送る必要がないため、result を渡されたときだけ投票対象ごとの結果へリンクする %>
+<% result = local_assigns[:result] %>
 <%# 写真のある作品が1つでもあれば、写真の無い行も同じ幅を空けて作品名の位置を揃える %>
 <% show_thumbnails = rows.any?(&:thumbnail) %>
 <section>
@@ -24,8 +24,8 @@
           <span class="min-w-0 flex-1 break-words">
             <%# 合算王は個々の作品ではなく人を並べるため作品名を持たない %>
             <% if row.title.present? %>
-              <% if target_path %>
-                <%= link_to row.title, target_path.call(row.target_id), class: "text-link block" %>
+              <% if result %>
+                <%= link_to row.title, target_result_path(result, row.target_id), class: "text-link block" %>
               <% else %>
                 <span class="block font-bold"><%= row.title %></span>
               <% end %>
@@ -34,8 +34,8 @@
               <span class="block font-bold"><%= row.name %></span>
               <% if row.entries.any? %>
                 <span class="block text-tokyu-ink-soft">
-                  <% if target_path %>
-                    <%= safe_join(row.entries.map { |entry| link_to(entry.title, target_path.call(entry.id), class: "text-link font-normal") }, "・") %>
+                  <% if result %>
+                    <%= safe_join(row.entries.map { |entry| link_to(entry.title, target_result_path(result, entry.id), class: "text-link font-normal") }, "・") %>
                   <% else %>
                     <%= row.entries.map(&:title).join("・") %>
                   <% end %>
