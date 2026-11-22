@@ -20,7 +20,7 @@ class Vote < ApplicationRecord
     counts = in_category(event, category).group(:entry_id).count
 
     ranked(Entry.where(id: counts.keys).includes(:user).map { |entry|
-      { id: entry.id, target_id: entry.id, name: entry.user.name, title: entry.title, vote_count: counts.fetch(entry.id) }
+      { id: entry.id, target: entry, name: entry.user.name, title: entry.title, vote_count: counts.fetch(entry.id) }
     })
   end
 

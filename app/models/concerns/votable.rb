@@ -7,11 +7,15 @@ module Votable
 
   TOP_RANKS = 3
 
-  # 結果画面から投票対象の詳細画面へ行けるよう、単品王は対象の id を、合算王は持ち込んだ作品の id と名前を持たせる
-  # thumbnail は画面で単品王の作品の1枚目を小さく添えるためのもので、ここでは入れない（CategoryResult が入れる）
-  RankingRow = Data.define(:rank, :target_id, :name, :title, :vote_count, :entries, :thumbnail) do
-    def initialize(target_id: nil, entries: [], thumbnail: nil, **rest)
+  # target は順位を付けた作品・LT そのもの（単品王・LT王）。読み込み済みのレコードを渡し、画面側で写真などを足すときに読み直さずに済むようにする。
+  # 合算王は人を並べるため target は nil で、代わりに持ち込んだ作品の id と名前を entries に持つ
+  RankingRow = Data.define(:rank, :target, :name, :title, :vote_count, :entries) do
+    def initialize(target: nil, entries: [], **rest)
       super
+    end
+
+    def target_id
+      target&.id
     end
   end
   RankedEntry = Data.define(:id, :title)
@@ -41,7 +45,7 @@ module Votable
         previous_count = source[:vote_count]
         next if rank > TOP_RANKS
 
-        RankingRow.new(rank: rank, target_id: source[:target_id], name: source[:name], title: source[:title],
+        RankingRow.new(rank: rank, target: source[:target], name: source[:name], title: source[:title],
                        vote_count: source[:vote_count], entries: source.fetch(:entries, []))
       end
     end
