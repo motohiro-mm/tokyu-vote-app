@@ -15,7 +15,7 @@ class CategoryResult
   end
 
   def rankings
-    # LT王は登壇者を users と紐づけていないため合算王を出せない
+    # LT王は登壇者を users と紐づけていないため合算王を出せず、見出しも単品王と書き分けない
     @rankings ||= category.talk? ? [ target_ranking ] : [ target_ranking, user_ranking ]
   end
 
@@ -46,19 +46,18 @@ class CategoryResult
   # 作品・LT そのものに付けた順位（単品王・LT王）。投票対象ごとの結果で出す順位はこれだけ
   def target_ranking
     @target_ranking ||= if category.talk?
-      # LT王は合算王が無いため、単品王と書き分ける必要もない
-      [ category.label, items(TalkVote.ranking(event)) ]
+      [ category.label, ranking_items(TalkVote.ranking(event)) ]
     else
-      [ "#{category.label}（単品王）", items(Vote.ranking_by_entry(event, category), thumbnails: true) ]
+      [ "#{category.label}（単品王）", ranking_items(Vote.ranking_by_entry(event, category), thumbnails: true) ]
     end
   end
 
   def user_ranking
-    [ "#{category.label}（合算王）", items(Vote.ranking_by_user(event, category)) ]
+    [ "#{category.label}（合算王）", ranking_items(Vote.ranking_by_user(event, category)) ]
   end
 
   # 単品王は作品を見分けやすいよう1枚目の写真を小さく添える。投票の集計には写真が要らないため、画面に出す行を作るここで足す
-  def items(rows, thumbnails: false)
+  def ranking_items(rows, thumbnails: false)
     # 集計で読み込んだ作品に写真だけを追加で読み込み、作品を読み直さない
     ActiveRecord::Associations::Preloader.new(records: rows.map(&:target), associations: { images_attachments: :blob }).call if thumbnails
 
