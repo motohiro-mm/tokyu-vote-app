@@ -56,7 +56,7 @@ namespace :demo do
     puts "ログイン画面 #{demo_base_url}/login から #{admin.name} を選ぶと管理画面に入れます（demo ユーザーで入れるのは development のみ）"
   end
 
-  desc "投票と集計を終えて結果を公開済みのイベントを作成する（結果発表の画面と静的書き出しの確認用）"
+  desc "投票と集計を終えて結果を公開済みのイベントを作成する（結果発表の画面の確認用）"
   task results: :environment do
     abort "development か検証環境（APP_ENV_LABEL=staging）でのみ実行できます" unless demo_data_allowed?
 
@@ -174,6 +174,5 @@ namespace :demo do
 
     puts "できました: #{event.title}（#{event.status_label}）"
     puts "ログイン画面 #{demo_base_url}/login から #{admin.name} を選ぶと管理画面の集計、誰でも #{demo_base_url}/events/#{event.slug} から結果を見られます"
-    puts "静的書き出しは bin/rails export:static"
   end
 end
