@@ -7,7 +7,7 @@ class Entries::ResultsController < ApplicationController
     @entry = @event.entries.includes(:category, :user).with_attached_images.find(params[:entry_id])
     @category = @entry.category
     result = CategoryResult.new(@event, @category)
-    @placements = result.placements(@entry.id)
+    @placement = result.placement(@entry.id)
     @comments = result.comments_for(@entry.id)
   end
 end

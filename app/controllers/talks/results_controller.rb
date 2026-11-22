@@ -7,7 +7,7 @@ class Talks::ResultsController < ApplicationController
     @talk = @event.talks.votable.find(params[:talk_id])
     @category = Category.find_by_name!(:talk)
     result = CategoryResult.new(@event, @category)
-    @placements = result.placements(@talk.id)
+    @placement = result.placement(@talk.id)
     @comments = result.comments_for(@talk.id)
   end
 end

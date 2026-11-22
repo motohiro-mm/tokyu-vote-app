@@ -33,17 +33,12 @@ class CategoryResult
     (category.talk? ? talk_targets : entry_targets).select { |target| target.comments.any? }
   end
 
-  # 投票対象ごとの結果で、その作品が入った順位を部門の見出しごとに出す。
-  # 順位に入っていない作品の票数と順位は出さない方針のため、単品王（LT王）に入っていなければ何も返さない。
-  # 合算王は持ち込んだ人の順位なので、単品王に入った作品の画面ではあわせて出す
-  def placements(target_id)
-    _title, own_rows = rankings.first
-    return [] unless own_rows.any? { |row| row.target_id == target_id }
-
-    rankings.filter_map do |title, rows|
-      row = rows.find { |r| r.target_id == target_id || r.entries.any? { |entry| entry.id == target_id } }
-      [ title, row ] if row
-    end
+  # 投票対象ごとの結果で、その作品自身の順位（単品王・LT王）を見出しと組で返す。
+  # 合算王は持ち込んだ人の順位で作品の順位ではないため出さない。順位に入っていない作品の票数と順位も出さない方針のため nil を返す
+  def placement(target_id)
+    title, rows = rankings.first
+    row = rows.find { |r| r.target_id == target_id }
+    [ title, row ] if row
   end
 
   def comments_for(target_id)

@@ -78,39 +78,45 @@ RSpec.describe CategoryResult do
     end
   end
 
-  describe "#placements" do
-    it "単品王はその作品の順位を、合算王は持ち込んだ人の順位を返す" do
+  describe "#placement" do
+    it "単品王でのその作品の順位と票数を返し、合算王の順位は返さない" do
       user = create(:user)
       entry = create(:entry, event: event, category: food, user: user)
-      other = create(:entry, event: event, category: food, user: user)
-      rival = create(:entry, event: event, category: food)
       create_list(:vote, 2, entry: entry)
-      create_list(:vote, 2, entry: other)
-      create_list(:vote, 3, entry: rival)
+      create_list(:vote, 2, entry: create(:entry, event: event, category: food, user: user))
+      create_list(:vote, 3, entry: create(:entry, event: event, category: food))
 
-      placements = described_class.new(event, food).placements(entry.id).to_h { |title, row| [ title, [ row.rank, row.vote_count ] ] }
+      title, row = described_class.new(event, food).placement(entry.id)
 
-      expect(placements).to eq("飯王（単品王）" => [ 2, 2 ], "飯王（合算王）" => [ 1, 4 ])
+      expect([ title, row.rank, row.vote_count ]).to eq [ "飯王（単品王）", 2, 2 ]
     end
 
-    it "単品王に入らなかった作品は、持ち込んだ人が合算王に入っていても空にする" do
+    it "LT王はそのLTの順位と票数を返す" do
+      talk = create(:talk, event: event)
+      create_list(:talk_vote, 2, talk: talk)
+
+      title, row = described_class.new(event, talk_category).placement(talk.id)
+
+      expect([ title, row.rank, row.vote_count ]).to eq [ "LT王", 1, 2 ]
+    end
+
+    it "単品王に入らなかった作品は、持ち込んだ人が合算王に入っていても nil にする" do
       user = create(:user)
-      ranked = create(:entry, event: event, category: food, user: user)
       unranked = create(:entry, event: event, category: food, user: user)
-      create_list(:vote, 5, entry: ranked)
+      create_list(:vote, 5, entry: create(:entry, event: event, category: food, user: user))
       3.times { create_list(:vote, 3, entry: create(:entry, event: event, category: food)) }
       create(:vote, entry: unranked)
 
       result = described_class.new(event, food)
 
       expect(result.rankings.to_h.fetch("飯王（合算王）").first.entries.map(&:id)).to include(unranked.id)
-      expect(result.placements(unranked.id)).to be_empty
+      expect(result.placement(unranked.id)).to be_nil
     end
 
-    it "票の無い作品は空にする" do
+    it "票の無い作品は nil にする" do
       entry = create(:entry, event: event, category: food)
 
-      expect(described_class.new(event, food).placements(entry.id)).to be_empty
+      expect(described_class.new(event, food).placement(entry.id)).to be_nil
     end
   end
 

@@ -50,8 +50,9 @@ RSpec.describe "結果画面", type: :request do
       get event_entry_result_path(event.slug, entry)
 
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include("飯王の結果", "唐揚げ", "祖母のレシピ", "飯王（単品王）", "飯王（合算王）", "1位", "2票", "おいしかった")
-      expect(response.body).not_to include("ほかの作品へのコメント", "投票する")
+      expect(response.body).to include("飯王の結果", "唐揚げ", "祖母のレシピ", "飯王（単品王）", "1位", "2票", "おいしかった")
+      # 合算王は持ち込んだ人の順位なので、作品の結果には出さない
+      expect(response.body).not_to include("合算王", "ほかの作品へのコメント", "投票する")
       expect(response.body).to include(ERB::Util.html_escape(event_results_path(event.slug, category: "food")))
     end
 
