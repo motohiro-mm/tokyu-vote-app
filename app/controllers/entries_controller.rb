@@ -29,10 +29,13 @@ class EntriesController < ApplicationController
 
   def create
     attributes = entry_params
-    attributes[:images] = thumbnail_first(attributes[:images]) if attributes[:images]
-    @entry = @event.entries.build(attributes.merge(category: @category, user: current_user))
+    images = Array(attributes.delete(:images))
+    # Active Storage は文字列を既存の blob の signed_id として添付する。縮小版の URL に含まれる ID を送れば
+    # 他人の写真を自分のエントリーに付けられてしまうため、アップロードされたファイルだけを渡す
+    uploads = thumbnail_first(images.grep(ActionDispatch::Http::UploadedFile))
+    @entry = @event.entries.build(attributes.merge(images: uploads, category: @category, user: current_user))
 
-    if @entry.valid? && image_uploads_valid?(attributes[:images]) && @entry.save
+    if @entry.valid? && image_uploads_valid?(images) && @entry.save
       redirect_to event_entries_completions_path(@event.slug, category: @category.category_name)
     else
       @my_entries = my_entries
@@ -52,9 +55,10 @@ class EntriesController < ApplicationController
     images.dup.tap { |list| list.unshift(list.delete_at(index)) }
   end
 
+  # フォームはファイルしか送らない（include_hidden: false）ので、ファイル以外が混ざっていれば読み込めないものとして断る
   def image_uploads_valid?(images)
-    uploads = Array(images).grep(ActionDispatch::Http::UploadedFile)
-    return true if uploads.all? { |upload| ImageProcessing::Vips.valid_image?(upload) }
+    uploads = images.grep(ActionDispatch::Http::UploadedFile)
+    return true if uploads.size == images.size && uploads.all? { |upload| ImageProcessing::Vips.valid_image?(upload) }
 
     @entry.errors.add(:images, :undecodable)
     false

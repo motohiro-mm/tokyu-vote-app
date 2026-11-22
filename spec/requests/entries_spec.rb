@@ -170,6 +170,24 @@ RSpec.describe "エントリー", type: :request do
     expect(response.body).to include("画像に読み込めないファイルが含まれています")
   end
 
+  it "縮小版の URL に含まれる他人の画像の ID を送っても、自分のエントリーに添付しない" do
+    png = fixture_file_upload(Rails.root.join("public/icon.png"), "image/png")
+    post event_entries_path(event.slug, category: "food"), params: { entry: { title: "唐揚げ", images: [ png ] } }
+    entry = event.entries.find_by!(title: "唐揚げ")
+
+    sign_in(create(:user))
+    get event_entry_path(event.slug, entry, category: "food")
+    src = Nokogiri::HTML(response.body).css('img[alt="唐揚げ"]').sole["src"]
+    signed_id = src[%r{/representations/redirect/([^/]+)/}, 1]
+
+    expect {
+      post event_entries_path(event.slug, category: "food"), params: { entry: { title: "盗用", images: [ signed_id ] } }
+    }.not_to change(ActiveStorage::Attachment, :count)
+
+    expect(response).to have_http_status(:unprocessable_content)
+    expect(event.entries.find_by(title: "盗用")).to be_nil
+  end
+
   it "登録フォームの作品名ラベルに何の名前かを添える" do
     get new_event_entry_path(event.slug, category: "food")
 
