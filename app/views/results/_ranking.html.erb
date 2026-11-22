@@ -1,3 +1,7 @@
+<%# 管理画面の集計は参加者向けの詳細画面へ送る必要がないため、result を渡されたときだけ投票対象ごとの結果へリンクする %>
+<% result = local_assigns[:result] %>
+<%# 写真のある作品が1つでもあれば、写真の無い行も同じ幅を空けて作品名の位置を揃える %>
+<% show_thumbnails = rows.any?(&:thumbnail) %>
 <section>
   <h3 class="mb-2 text-sm font-extrabold"><%= title %></h3>
 
@@ -6,17 +10,36 @@
   <% else %>
     <ol>
       <% rows.each do |row| %>
-        <li class="flex items-baseline gap-4 border-b-2 border-tokyu-bone py-2 text-sm last:border-0">
-          <span class="w-10 shrink-0 font-display text-base font-bold text-tokyu-pink-dark"><%= row.rank %>位</span>
+        <li class="flex items-baseline gap-2 border-b-2 border-tokyu-bone py-2 text-sm last:border-0 sm:gap-4">
+          <%# 順位は3位までなので「3位」が収まる幅で足りる。スマホでは作品名の幅を確保するため順位の欄と隙間を詰める %>
+          <span class="w-7 shrink-0 font-display text-base font-bold text-tokyu-pink-dark sm:w-10"><%= row.rank %>位</span>
+          <%# 料理の見分けがつく大きさとして 56px にする（行は文字2行より少し高くなる） %>
+          <% if show_thumbnails %>
+            <% if row.thumbnail %>
+              <%= image_tag row.thumbnail, alt: "", loading: "lazy", class: "size-14 shrink-0 self-center rounded-lg border-2 border-tokyu-ink object-cover" %>
+            <% else %>
+              <span class="size-14 shrink-0 self-center"></span>
+            <% end %>
+          <% end %>
           <span class="min-w-0 flex-1 break-words">
             <%# 合算王は個々の作品ではなく人を並べるため作品名を持たない %>
             <% if row.title.present? %>
-              <span class="block font-bold"><%= row.title %></span>
+              <% if result %>
+                <%= link_to row.title, target_result_path(result, row.target_id), class: "text-link block" %>
+              <% else %>
+                <span class="block font-bold"><%= row.title %></span>
+              <% end %>
               <span class="block text-tokyu-ink-soft"><%= row.name %></span>
             <% else %>
               <span class="block font-bold"><%= row.name %></span>
-              <% if row.entry_titles.any? %>
-                <span class="block text-tokyu-ink-soft"><%= row.entry_titles.join("・") %></span>
+              <% if row.entries.any? %>
+                <span class="block text-tokyu-ink-soft">
+                  <% if result %>
+                    <%= safe_join(row.entries.map { |entry| link_to(entry.title, target_result_path(result, entry.id), class: "text-link font-normal") }, "・") %>
+                  <% else %>
+                    <%= row.entries.map(&:title).join("・") %>
+                  <% end %>
+                </span>
               <% end %>
             <% end %>
           </span>

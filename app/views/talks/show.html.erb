@@ -2,14 +2,7 @@
 <h1 class="page-title mb-6">投票する</h1>
 
 <div class="card mb-6">
-  <p class="mb-2 text-lg font-bold break-words">「<%= @talk.title %>」</p>
-  <p class="mb-4 text-tokyu-ink-soft last:mb-0"><%= @talk.user_name %></p>
-  <% if @talk.description.present? %>
-    <p class="mb-4 whitespace-pre-wrap break-words last:mb-0"><%= @talk.description %></p>
-  <% end %>
-  <% if (slide_url = @talk.safe_slide_url) %>
-    <%= link_to "発表資料", slide_url, target: "_blank", rel: "noopener noreferrer", class: "text-link" %>
-  <% end %>
+  <%= render @talk %>
 </div>
 
 <div class="card mb-8">

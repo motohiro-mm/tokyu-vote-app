@@ -1,29 +1,21 @@
-<%# 静的書き出しでは画像の置き場所が変わるため、画像の URL は呼び出し側から image_src で受け取る %>
+<% targets = result.targets %>
 <% if targets.empty? %>
   <p class="mb-8 text-sm text-tokyu-ink-soft">コメントはありませんでした。</p>
 <% else %>
   <ul class="mb-8 space-y-4">
     <% targets.each do |target| %>
       <li class="card">
+        <%# 主役はコメントなので、写真はランキングと同じ 56px にして見分けがつけば十分とする %>
         <div class="mb-4 flex items-center gap-4">
-          <% if (image = target.images.first) %>
-            <%= render "shared/zoomable_image", src: image_src.call(image.thumbnail), full_src: image_src.call(image.display), alt: target.title,
-                                                image_class: "size-24 rounded-xl border-2 border-tokyu-ink object-cover" %>
+          <% if (image = target.image) %>
+            <%= render "shared/zoomable_image", src: image.thumbnail, full_src: url_for(image.display), alt: target.title,
+                                                image_class: "size-14 rounded-lg border-2 border-tokyu-ink object-cover" %>
           <% end %>
           <div class="min-w-0 flex-1">
-            <p class="mb-2 font-bold break-words"><%= target.title %></p>
+            <p class="mb-2 break-words"><%= link_to target.title, target_result_path(result, target.id), class: "text-link" %></p>
             <p class="text-sm break-words text-tokyu-ink-soft"><%= target.name %></p>
           </div>
         </div>
-        <% if target.images.size > 1 %>
-          <div class="mb-4 flex flex-wrap gap-2">
-            <% target.images.drop(1).each do |image| %>
-              <%= render "shared/zoomable_image", src: image_src.call(image.thumbnail), full_src: image_src.call(image.display), alt: target.title,
-                                                  image_class: "size-16 rounded-xl border-2 border-tokyu-ink object-cover" %>
-            <% end %>
-          </div>
-        <% end %>
-
         <ul class="space-y-2">
           <% target.comments.each do |comment| %>
             <li class="whitespace-pre-wrap break-words rounded-xl bg-tokyu-blue-light px-4 py-2 text-sm"><%= comment %></li>

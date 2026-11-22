@@ -16,6 +16,141 @@ RSpec.describe "結果画面", type: :request do
     expect(response.body).to include("飯王（単品王）", "飯王（合算王）", "唐揚げ", "おいしかった")
   end
 
+  it "ランキングとコメントの作品名から、その作品の結果へ行ける" do
+    entry = create(:entry, event: event, category: food, title: "唐揚げ")
+    other = create(:entry, event: event, category: food, user: entry.user, title: "ポテトサラダ")
+    create(:vote, entry: entry, comment: "おいしかった")
+    create(:vote, entry: other)
+
+    get event_results_path(event.slug, category: "food")
+
+    # 単品王・合算王・コメントの3か所から同じ画面へリンクする
+    expect(response.body.scan(%(href="#{event_entry_result_path(event.slug, entry)}")).size).to eq 3
+    expect(response.body).to include(event_entry_result_path(event.slug, other))
+  end
+
+  it "LT王のランキングとコメントから、そのLTの結果へ行ける" do
+    create(:category, category_name: :talk)
+    talk = create(:talk, event: event, title: "Ruby の話")
+    create(:talk_vote, talk: talk, comment: "よかった")
+
+    get event_results_path(event.slug, category: "talk")
+
+    expect(response.body.scan(%(href="#{event_talk_result_path(event.slug, talk)}")).size).to eq 2
+  end
+
+  describe "作品ごとの結果" do
+    it "作品と入った順位、その作品へのコメントを出し、結果一覧へ戻れる" do
+      entry = create(:entry, event: event, category: food, title: "唐揚げ", description: "祖母のレシピ")
+      other = create(:entry, event: event, category: food, title: "ポテトサラダ")
+      create(:vote, entry: entry, comment: "おいしかった")
+      create(:vote, entry: entry)
+      create(:vote, entry: other, comment: "ほかの作品へのコメント")
+
+      get event_entry_result_path(event.slug, entry)
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include("飯王の結果", "唐揚げ", "祖母のレシピ", "飯王（単品王）", "1位", "2票", "おいしかった")
+      # 合算王は持ち込んだ人の順位なので、作品の結果には出さない
+      expect(response.body).not_to include("合算王", "ほかの作品へのコメント", "投票する")
+      expect(response.body).to include(ERB::Util.html_escape(event_results_path(event.slug, category: "food")))
+    end
+
+    it "3位までに入らなかった作品は、持ち込んだ人が合算王に入っていても順位と票数を出さない" do
+      user = create(:user)
+      create_list(:vote, 5, entry: create(:entry, event: event, category: food, user: user))
+      entry = create(:entry, event: event, category: food, user: user, title: "唐揚げ")
+      create(:vote, entry: entry)
+      3.times { create_list(:vote, 3, entry: create(:entry, event: event, category: food)) }
+
+      get event_entry_result_path(event.slug, entry)
+
+      # 持ち込んだ人は合算王で1位（6票）だが、この作品の画面には出さない
+      expect(response.body).to include("唐揚げ")
+      expect(response.body).not_to include("順位", "合算王", "1位", "6票")
+      expect(response.body).to include("コメントはありませんでした。")
+    end
+
+    it "投票者の名前は出さない" do
+      entry = create(:entry, event: event, category: food)
+      create(:vote, user: create(:user, name: "ないしょのひと"), entry: entry, comment: "おいしかった")
+
+      get event_entry_result_path(event.slug, entry)
+
+      expect(response.body).to include("おいしかった")
+      expect(response.body).not_to include("ないしょのひと")
+    end
+
+    it "集計中は見せない" do
+      entry = create(:entry, event: event, category: food)
+      event.counting!
+
+      get event_entry_result_path(event.slug, entry)
+
+      expect(response).to have_http_status(:forbidden)
+    end
+
+    it "ほかのイベントの作品は 404 にする" do
+      entry = create(:entry, event: create(:event, status: :closed), category: food)
+
+      get event_entry_result_path(event.slug, entry)
+
+      expect(response).to have_http_status(:not_found)
+    end
+
+    it "公開中は見せない" do
+      entry = create(:entry, event: event, category: food)
+      event.open!
+
+      get event_entry_result_path(event.slug, entry)
+
+      expect(response).to redirect_to event_path(event.slug)
+    end
+  end
+
+  describe "LTごとの結果" do
+    before { create(:category, category_name: :talk) }
+
+    it "LTの順位とコメントを出す" do
+      talk = create(:talk, event: event, title: "Ruby の話")
+      create(:talk_vote, talk: talk, comment: "よかった")
+
+      get event_talk_result_path(event.slug, talk)
+
+      expect(response.body).to include("LT王の結果", "Ruby の話", "LT王", "1位", "よかった")
+      expect(response.body).not_to include("合算王")
+    end
+
+    it "3位までに入らなかったLTは順位と票数を出さない" do
+      talk = create(:talk, event: event, title: "Ruby の話")
+      create(:talk_vote, talk: talk)
+      3.times { create_list(:talk_vote, 2, talk: create(:talk, event: event)) }
+
+      get event_talk_result_path(event.slug, talk)
+
+      expect(response.body).to include("Ruby の話")
+      expect(response.body).not_to include("順位", "1票")
+    end
+
+    it "投票者の名前は出さない" do
+      talk = create(:talk, event: event)
+      create(:talk_vote, user: create(:user, name: "ないしょのひと"), talk: talk, comment: "よかった")
+
+      get event_talk_result_path(event.slug, talk)
+
+      expect(response.body).to include("よかった")
+      expect(response.body).not_to include("ないしょのひと")
+    end
+
+    it "キャンセルされたLTは 404 にする" do
+      talk = create(:talk, event: event, status: :canceled)
+
+      get event_talk_result_path(event.slug, talk)
+
+      expect(response).to have_http_status(:not_found)
+    end
+  end
+
   it "終了したイベントの結果はアーカイブへ送る" do
     event.finished!
     create(:entry, event: event, category: food, title: "唐揚げ")

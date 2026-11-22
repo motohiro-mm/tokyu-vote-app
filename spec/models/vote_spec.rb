@@ -148,7 +148,7 @@ RSpec.describe Vote do
 
       expect(rows.map(&:name).first).to eq "もとひろ"
       expect(rows.map(&:vote_count)).to eq [ 4, 3 ]
-      expect(rows.first.entry_titles).to eq [ "唐揚げ", "ポテトサラダ" ]
+      expect(rows.first.entries.map(&:title)).to eq [ "唐揚げ", "ポテトサラダ" ]
     end
 
     it "部門をまたいでは合算しない" do

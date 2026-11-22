@@ -18,6 +18,18 @@ RSpec.describe "スラッグで指定したイベントへのアクセス", type
     ]
   end
 
+  it "結果公開中でも、作品ごと・LTごとの結果はログイン前ならログイン画面へ送る" do
+    event = create(:event, status: :closed)
+    entry = create(:entry, event: event, category: Category.find_by_name!(:food))
+    talk = create(:talk, event: event)
+
+    [ event_entry_result_path(event.slug, entry), event_talk_result_path(event.slug, talk) ].each do |path|
+      get path
+
+      expect(response).to redirect_to(login_path), path
+    end
+  end
+
   it "終了したイベントはログイン前にアーカイブへ送る" do
     event = create(:event, status: :finished, slug: "16")
 

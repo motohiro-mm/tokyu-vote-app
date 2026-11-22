@@ -13,7 +13,7 @@ RSpec.describe "エントリー", type: :request do
     }.to change(Entry, :count).by(1)
   end
 
-  it "画像5枚を登録でき、投票一覧には先頭の画像を、詳細と結果には全画像を表示する" do
+  it "画像5枚を登録でき、投票一覧と結果には先頭の画像を、詳細には全画像を表示する" do
     png = Rails.root.join("public/icon.png")
     names = %w[entry.heic second.png third.png fourth.png fifth.png]
     photos = [ fixture_file_upload(names.first, "application/octet-stream") ]
@@ -51,7 +51,8 @@ RSpec.describe "エントリー", type: :request do
     create(:vote, entry: entry, comment: "おいしかった")
     event.closed!
     get event_results_path(event.slug, category: "food")
-    expect(response.body).to include(*names.map { |name| "/#{name}" })
+    expect(response.body).to include("/entry.heic")
+    expect(response.body).not_to include(*names.drop(1).map { |name| "/#{name}" })
   end
 
   it "サムネに選んだ画像を先頭にして登録し、投票一覧に表示する" do
@@ -122,11 +123,9 @@ RSpec.describe "エントリー", type: :request do
     buttons.each { |button| expect(URI(button["data-lightbox-src"]).path).to eq(URI(button.at_css("img")["src"]).path) }
     expect(Nokogiri::HTML(response.body).at_css('dialog[data-lightbox-target="dialog"] img[data-lightbox-target="image"]')).to be_present
 
-    # 結果は先頭を大きく、2枚目以降を小さく並べるが、どちらも拡大できる
+    # 結果のコメント欄は先頭の写真だけを出す（ランキングのサムネイルは小さいので拡大しない）
     event.closed!
-    buttons = zoom_buttons.call(event_results_path(event.slug, category: "food"))
-    expect(buttons.size).to eq(2)
-    buttons.zip(%w[first.png second.png]).each { |button, name| expect_zoom_to_display_image.call(button, name) }
+    expect_zoom_to_display_image.call(zoom_buttons.call(event_results_path(event.slug, category: "food")).sole, "first.png")
   end
 
   it "詳細の写真が1枚だけなら、横に並べず横幅いっぱいに出す" do

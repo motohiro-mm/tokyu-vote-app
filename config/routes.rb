@@ -26,9 +26,14 @@ Rails.application.routes.draw do
     get "votes/completions", to: "votes#completions"
     get "talk_votes/completions", to: "talk_votes#completions"
 
-    resources :entries, only: [ :index, :show, :new, :create ]
+    # 結果の詳細は投票対象ごとに1つなので、対象の下に単数リソースとして置く
+    resources :entries, only: [ :index, :show, :new, :create ] do
+      resource :result, only: :show, module: :entries
+    end
     resources :votes, only: [ :create, :destroy ]
-    resources :talks, only: [ :index, :show ]
+    resources :talks, only: [ :index, :show ] do
+      resource :result, only: :show, module: :talks
+    end
     resources :talk_votes, only: [ :create, :destroy ]
     resources :results, only: [ :index ]
   end
