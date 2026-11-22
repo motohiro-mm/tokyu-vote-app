@@ -71,6 +71,25 @@ RSpec.describe "結果画面", type: :request do
       expect(response.body).to include("コメントはありませんでした。")
     end
 
+    it "投票者の名前は出さない" do
+      entry = create(:entry, event: event, category: food)
+      create(:vote, user: create(:user, name: "ないしょのひと"), entry: entry, comment: "おいしかった")
+
+      get event_entry_result_path(event.slug, entry)
+
+      expect(response.body).to include("おいしかった")
+      expect(response.body).not_to include("ないしょのひと")
+    end
+
+    it "集計中は見せない" do
+      entry = create(:entry, event: event, category: food)
+      event.counting!
+
+      get event_entry_result_path(event.slug, entry)
+
+      expect(response).to have_http_status(:forbidden)
+    end
+
     it "ほかのイベントの作品は 404 にする" do
       entry = create(:entry, event: create(:event, status: :closed), category: food)
 
@@ -100,6 +119,27 @@ RSpec.describe "結果画面", type: :request do
 
       expect(response.body).to include("LT王の結果", "Ruby の話", "LT王", "1位", "よかった")
       expect(response.body).not_to include("合算王")
+    end
+
+    it "3位までに入らなかったLTは順位と票数を出さない" do
+      talk = create(:talk, event: event, title: "Ruby の話")
+      create(:talk_vote, talk: talk)
+      3.times { create_list(:talk_vote, 2, talk: create(:talk, event: event)) }
+
+      get event_talk_result_path(event.slug, talk)
+
+      expect(response.body).to include("Ruby の話")
+      expect(response.body).not_to include("順位", "1票")
+    end
+
+    it "投票者の名前は出さない" do
+      talk = create(:talk, event: event)
+      create(:talk_vote, user: create(:user, name: "ないしょのひと"), talk: talk, comment: "よかった")
+
+      get event_talk_result_path(event.slug, talk)
+
+      expect(response.body).to include("よかった")
+      expect(response.body).not_to include("ないしょのひと")
     end
 
     it "キャンセルされたLTは 404 にする" do
