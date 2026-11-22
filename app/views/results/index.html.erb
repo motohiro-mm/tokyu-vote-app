@@ -2,7 +2,8 @@
 <p class="mb-2 text-center text-sm text-tokyu-ink-soft"><%= @event.title %><% if @event.held_on %>（<%= l(@event.held_on, format: :long) %>）<% end %></p>
 <h1 class="page-title mb-6"><%= @category.label %>の結果</h1>
 
-<%= render "results/result", result: @result, image_src: ->(image) { url_for(image) } %>
+<% target_path = ->(id) { event_result_path(@event.slug, id, category: @category.category_name) } %>
+<%= render "results/result", result: @result, image_src: ->(image) { url_for(image) }, target_path: target_path %>
 
 <div class="text-center">
 

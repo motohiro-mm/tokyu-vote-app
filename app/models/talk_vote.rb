@@ -16,7 +16,7 @@ class TalkVote < ApplicationRecord
     counts = in_event(event).group(:talk_id).count
 
     ranked(Talk.where(id: counts.keys).map { |talk|
-      { id: talk.id, name: talk.user_name, title: talk.title, vote_count: counts.fetch(talk.id) }
+      { id: talk.id, target_id: talk.id, name: talk.user_name, title: talk.title, vote_count: counts.fetch(talk.id) }
     })
   end
 

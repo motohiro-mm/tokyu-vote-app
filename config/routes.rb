@@ -30,7 +30,7 @@ Rails.application.routes.draw do
     resources :votes, only: [ :create, :destroy ]
     resources :talks, only: [ :index, :show ]
     resources :talk_votes, only: [ :create, :destroy ]
-    resources :results, only: [ :index ]
+    resources :results, only: [ :index, :show ]
   end
 
   # 終了済みの回の旧URLもアーカイブへ渡す。それ以外の未定義パスは404。

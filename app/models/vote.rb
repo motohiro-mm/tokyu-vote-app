@@ -19,18 +19,20 @@ class Vote < ApplicationRecord
   def self.ranking_by_entry(event, category)
     counts = in_category(event, category).group(:entry_id).count
 
-    ranked(Entry.where(id: counts.keys).includes(:user).map { |entry|
-      { id: entry.id, name: entry.user.name, title: entry.title, vote_count: counts.fetch(entry.id) }
+    ranked(Entry.where(id: counts.keys).includes(:user).with_attached_images.map { |entry|
+      { id: entry.id, target_id: entry.id, name: entry.user.name, title: entry.title, vote_count: counts.fetch(entry.id),
+        thumbnail: entry.display_images(:thumbnail).first }
     })
   end
 
   def self.ranking_by_user(event, category)
     counts = in_category(event, category).group("entries.user_id").count
-    titles = in_category(event, category).order("entries.id").distinct.pluck("entries.user_id", "entries.title")
-                                         .group_by(&:first).transform_values { |pairs| pairs.map(&:last) }
+    entries = in_category(event, category).order("entries.id").distinct.pluck("entries.user_id", "entries.id", "entries.title")
+                                          .group_by(&:first)
+                                          .transform_values { |rows| rows.map { |_user_id, id, title| RankedEntry.new(id:, title:) } }
 
     ranked(User.where(id: counts.keys).map { |user|
-      { id: user.id, name: user.name, title: nil, vote_count: counts.fetch(user.id), entry_titles: titles.fetch(user.id) }
+      { id: user.id, name: user.name, title: nil, vote_count: counts.fetch(user.id), entries: entries.fetch(user.id) }
     })
   end
 

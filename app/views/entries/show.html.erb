@@ -4,25 +4,7 @@
 <h1 class="page-title mb-6"><%= heading %></h1>
 
 <div class="card mb-6">
-  <% images = @entry.display_images %>
-  <%# 縦に並べると写真が多いエントリーで説明と投票欄が遠くなるため、2枚以上は正方形で横に並べ、押したら写真全体を拡大して見せる。
-      1枚だけのときは小さくする理由がないので横幅いっぱいに出す %>
-  <% if images.size == 1 %>
-    <%= render "shared/zoomable_image", src: images.first, full_src: url_for(images.first), alt: @entry.title,
-                                        button_class: "mb-4 block w-full", image_class: "w-full rounded-xl border-2 border-tokyu-ink object-cover" %>
-  <% elsif images.any? %>
-    <div class="mb-4 grid grid-cols-3 gap-2">
-      <% images.each do |image| %>
-        <%= render "shared/zoomable_image", src: image, full_src: url_for(image), alt: @entry.title,
-                                            button_class: "block", image_class: "aspect-square w-full rounded-xl border-2 border-tokyu-ink object-cover" %>
-      <% end %>
-    </div>
-  <% end %>
-  <p class="mb-2 text-lg font-bold break-words">「<%= @entry.title %>」</p>
-  <p class="mb-4 text-tokyu-ink-soft last:mb-0"><%= @entry.user.name %></p>
-  <% if @entry.description.present? %>
-    <p class="whitespace-pre-wrap break-words"><%= @entry.description %></p>
-  <% end %>
+  <%= render "entries/summary", entry: @entry %>
 </div>
 
 <div class="card mb-8">

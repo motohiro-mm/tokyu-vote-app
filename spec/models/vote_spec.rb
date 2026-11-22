@@ -93,6 +93,19 @@ RSpec.describe Vote do
       expect(rows.map(&:vote_count)).to eq [ 3, 2, 1 ]
     end
 
+    it "写真のある作品は1枚目のサムネイルを添え、写真の無い作品は nil にする" do
+      with_image = create(:entry, event: event, category: category)
+      with_image.images.attach([ "first.jpg", "second.jpg" ].map { |name| { io: StringIO.new("dummy"), filename: name, content_type: "image/jpeg" } })
+      vote_for(with_image, 2)
+      vote_for(create(:entry, event: event, category: category), 1)
+
+      thumbnails = described_class.ranking_by_entry(event, category).map(&:thumbnail)
+
+      expect(thumbnails.first.blob.filename.to_s).to eq "first.jpg"
+      expect(thumbnails.first.variation.transformations).to include(resize_to_fill: [ 192, 192 ])
+      expect(thumbnails.last).to be_nil
+    end
+
     it "同票は同順位にし、次の順位をその分だけ飛ばす" do
       vote_for(create(:entry, event: event, category: category), 2)
       vote_for(create(:entry, event: event, category: category), 2)
@@ -148,7 +161,7 @@ RSpec.describe Vote do
 
       expect(rows.map(&:name).first).to eq "もとひろ"
       expect(rows.map(&:vote_count)).to eq [ 4, 3 ]
-      expect(rows.first.entry_titles).to eq [ "唐揚げ", "ポテトサラダ" ]
+      expect(rows.first.entries.map(&:title)).to eq [ "唐揚げ", "ポテトサラダ" ]
     end
 
     it "部門をまたいでは合算しない" do
