@@ -93,6 +93,20 @@ RSpec.describe CategoryResult do
       expect(placements).to eq("飯王（単品王）" => [ 2, 2 ], "飯王（合算王）" => [ 1, 4 ])
     end
 
+    it "単品王に入らなかった作品は、持ち込んだ人が合算王に入っていても空にする" do
+      user = create(:user)
+      ranked = create(:entry, event: event, category: food, user: user)
+      unranked = create(:entry, event: event, category: food, user: user)
+      create_list(:vote, 5, entry: ranked)
+      3.times { create_list(:vote, 3, entry: create(:entry, event: event, category: food)) }
+      create(:vote, entry: unranked)
+
+      result = described_class.new(event, food)
+
+      expect(result.rankings.to_h.fetch("飯王（合算王）").first.entries.map(&:id)).to include(unranked.id)
+      expect(result.placements(unranked.id)).to be_empty
+    end
+
     it "票の無い作品は空にする" do
       entry = create(:entry, event: event, category: food)
 

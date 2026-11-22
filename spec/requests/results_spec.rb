@@ -55,12 +55,18 @@ RSpec.describe "結果画面", type: :request do
       expect(response.body).to include(ERB::Util.html_escape(event_results_path(event.slug, category: "food")))
     end
 
-    it "3位までに入らなかった作品は順位を出さない" do
-      entry = create(:entry, event: event, category: food, title: "唐揚げ")
+    it "3位までに入らなかった作品は、持ち込んだ人が合算王に入っていても順位と票数を出さない" do
+      user = create(:user)
+      create_list(:vote, 5, entry: create(:entry, event: event, category: food, user: user))
+      entry = create(:entry, event: event, category: food, user: user, title: "唐揚げ")
+      create(:vote, entry: entry)
+      3.times { create_list(:vote, 3, entry: create(:entry, event: event, category: food)) }
 
       get event_entry_result_path(event.slug, entry)
 
-      expect(response.body).not_to include("順位")
+      # 持ち込んだ人は合算王で1位（6票）だが、この作品の画面には出さない
+      expect(response.body).to include("唐揚げ")
+      expect(response.body).not_to include("順位", "合算王", "1位", "6票")
       expect(response.body).to include("コメントはありませんでした。")
     end
 
